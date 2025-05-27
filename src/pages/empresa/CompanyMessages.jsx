@@ -19,48 +19,58 @@ export default function CompanyMessages() {
 
   const handleSend = () => {
     if (!newMessage.trim()) return;
-
     setMessages([...messages, { id: messages.length + 1, text: newMessage, sender: "company" }]);
     setNewMessage("");
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   return (
     <div className="flex min-h-screen bg-[#fdf0df]">
       <SidebarCompany />
 
-      <main className="flex-1 p-8 flex flex-col">
-        <h1 className="text-3xl font-bold text-[#2e2e2e] mb-6">💬 Conversación con adoptador</h1>
-
-        <div className="flex flex-col flex-1 bg-white rounded-xl shadow-md p-6 overflow-hidden">
-    
-          <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+      <main className="flex-1 p-6 flex flex-col">
+        <div className="flex flex-col bg-white rounded-2xl shadow-md flex-1 overflow-hidden">
+          {/* Mensajes */}
+          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-3">
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`max-w-sm px-4 py-2 rounded-lg ${
-                  msg.sender === "company"
-                    ? "bg-orange-100 text-right self-end"
-                    : "bg-gray-100 self-start"
+                className={`flex ${
+                  msg.sender === "company" ? "justify-end" : "justify-start"
                 }`}
               >
-                <p className="text-sm text-gray-800">{msg.text}</p>
+                <div
+                  className={`px-5 py-3 max-w-[65%] text-sm rounded-2xl whitespace-pre-wrap break-words shadow-sm ${
+                    msg.sender === "company"
+                      ? "bg-orange-200 text-right rounded-br-none"
+                      : "bg-gray-200 text-left rounded-bl-none"
+                  }`}
+                >
+                  {msg.text}
+                </div>
               </div>
             ))}
             <div ref={messagesEndRef} />
           </div>
 
-          
-          <div className="mt-4 flex items-center gap-2">
-            <input
-              type="text"
-              placeholder="Escribe tu mensaje..."
+          {/* Input abajo */}
+          <div className="border-t px-4 py-3 bg-white flex items-center gap-2">
+            <textarea
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300"
+              onKeyDown={handleKeyDown}
+              placeholder="Escribe tu mensaje..."
+              className="flex-1 resize-none p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 h-12"
             />
             <button
               onClick={handleSend}
-              className="bg-[#f77534] text-white px-4 py-2 rounded-lg hover:bg-orange-500 transition font-semibold"
+              className="bg-[#f77534] text-white px-5 py-2 rounded-lg hover:bg-orange-500 transition font-semibold"
             >
               Enviar
             </button>

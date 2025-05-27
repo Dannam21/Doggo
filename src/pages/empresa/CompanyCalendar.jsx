@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css"; // 👈 Importa los estilos
+import "react-calendar/dist/Calendar.css";
 import SidebarCompany from "../../components/SidebarCompany";
 
 export default function CompanyCalendar() {
@@ -21,53 +21,64 @@ export default function CompanyCalendar() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#fdf0df]">
+    <div className="flex min-h-screen bg-[#fdf0df] font-sans">
       <SidebarCompany />
 
       <main className="flex-1 p-10">
-        <h1 className="text-3xl font-bold text-[#2e2e2e] mb-8">📅 Calendario de Citas</h1>
+        <h1 className="text-4xl font-bold text-[#2e2e2e] mb-10 flex items-center gap-3">
+          Calendario de Citas
+        </h1>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 gap-10">
           {/* Calendario */}
-          <div className="bg-white p-6 rounded-xl shadow-md">
+          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
             <Calendar
               onChange={setSelectedDate}
               value={selectedDate}
-              className="w-full"
+              className="w-full rounded-xl overflow-hidden"
+              tileClassName={({ date, view }) => {
+                const key = date.toDateString();
+                if (events[key]) return "bg-orange-100 text-orange-800 font-semibold";
+              }}
             />
-            <p className="mt-4 text-sm text-gray-600">
-              Día seleccionado: <strong>{selectedDate.toDateString()}</strong>
+            <p className="mt-4 text-gray-700 text-center">
+              Día seleccionado: <span className="font-medium">{selectedDate.toDateString()}</span>
             </p>
           </div>
 
-          {/*evento */}
-          <div className="bg-white p-6 rounded-xl shadow-md">
-            <h2 className="text-xl font-semibold mb-4">➕ Agregar Cita</h2>
+          {/* Evento */}
+          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+            <h2 className="text-2xl font-semibold mb-6 text-gray-800">➕ Agregar Cita</h2>
             <input
               type="text"
               value={newEvent}
               onChange={(e) => setNewEvent(e.target.value)}
               placeholder="Ej. Visita de adopción a las 4pm"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 mb-4"
+              className="w-full p-3 border border-gray-300 rounded-xl mb-4 focus:ring-2 focus:ring-orange-400"
             />
             <button
               onClick={handleAddEvent}
-              className="bg-[#f77534] text-white px-4 py-2 rounded-lg hover:bg-orange-500 transition"
+              className="w-full bg-orange-500 text-white py-3 rounded-xl hover:bg-orange-600 transition font-semibold"
             >
               Guardar cita
             </button>
 
             {/* Lista de eventos */}
-            <div className="mt-6">
-              <h3 className="font-semibold mb-2">📌 Citas del {selectedDate.toDateString()}</h3>
-              <ul className="list-disc list-inside text-gray-700">
-                {(events[selectedDate.toDateString()] || []).map((ev, idx) => (
-                  <li key={idx}>{ev}</li>
-                ))}
-                {!(events[selectedDate.toDateString()] || []).length && (
-                  <p className="text-sm text-gray-400">Sin citas para este día</p>
-                )}
-              </ul>
+            <div className="mt-8">
+              <h3 className="text-lg font-bold mb-3 text-gray-700">
+                📌 Citas del {selectedDate.toDateString()}
+              </h3>
+              {(events[selectedDate.toDateString()] || []).length > 0 ? (
+                <ul className="space-y-2 text-gray-800">
+                  {events[selectedDate.toDateString()].map((ev, idx) => (
+                    <li key={idx} className="bg-orange-100 px-4 py-2 rounded-lg shadow-sm">
+                      {ev}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-400">Sin citas para este día</p>
+              )}
             </div>
           </div>
         </div>

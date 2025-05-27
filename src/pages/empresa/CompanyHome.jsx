@@ -3,7 +3,7 @@ import SidebarCompany from "../../components/SidebarCompany";
 
 export default function CompanyHome() {
   return (
-    <div className="flex min-h-screen bg-[#FFF9E3]">
+    <div className="flex min-h-screen bg-[#fdf0df]">
       <SidebarCompany />
       <div className="flex-1 p-8">
         <h1 className="text-3xl font-bold mb-8">¡Bienvenido, Nombre empresa!</h1>
