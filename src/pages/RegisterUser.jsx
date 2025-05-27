@@ -7,8 +7,7 @@ const RegisterUser = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Aquí podrías agregar lógica de validación o API
-    navigate('/cuestionario'); // Cambia esta ruta según necesites
+    navigate('/cuestionario'); 
   };
 
   return (

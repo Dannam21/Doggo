@@ -9,7 +9,6 @@ export default function AddDoggoForm() {
         <p className="text-gray-500 text-sm mt-1">Sube una imagen del doggo</p>
       </div>
 
-      {/* Formulario */}
       <form className="space-y-5">
         <div>
           <label className="block text-sm font-semibold mb-1">Nombre</label>

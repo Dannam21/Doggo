@@ -91,7 +91,7 @@ export default function SidebarCompany() {
       <div className="px-6 py-4">
         <div
           role="button"
-          onClick={() => navigate("/logout")}
+          onClick={() => navigate("/home")}
           className="flex items-center gap-2 text-black hover:font-semibold cursor-pointer"
         >
           <FaSignOutAlt /> Cerrar sesión
