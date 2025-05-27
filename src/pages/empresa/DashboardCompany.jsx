@@ -1,73 +1,56 @@
-import { useState } from 'react'
+import SidebarCompany from "../../components/SidebarCompany";
+import AddDoggoForm from "../../components/AddDoggoForm";
+import { useState } from "react";
 
 const dummyDogs = [
   {
     id: 1,
-    name: 'Luna',
-    age: '2 años',
-    size: 'Mediano',
-    image: 'https://placedog.net/400/300?id=1',
+    name: "Luna",
+    age: "2 años",
+    size: "Mediano",
+    image: "https://placedog.net/400/300?id=1",
   },
   {
     id: 2,
-    name: 'Rocky',
-    age: '1 año',
-    size: 'Grande',
-    image: 'https://placedog.net/400/300?id=2',
+    name: "Rocky",
+    age: "1 año",
+    size: "Grande",
+    image: "https://placedog.net/400/300?id=2",
   },
-]
+];
 
-function DashboardCompany() {
-  const [dogs, setDogs] = useState(dummyDogs)
+export default function DashboardCompany() {
+  const [dogs] = useState(dummyDogs);
 
   return (
-    <main className="p-6 bg-orange-50 min-h-screen flex flex-col items-center">
-    <div className="p-6 bg-orange-50 min-h-screen">
-      <h2 className="text-3xl font-bold mb-4">📋 Panel de Empresa</h2>
+    <div className="flex min-h-screen bg-[#fdf0df]">
+      <SidebarCompany />
 
-      <h3 className="text-xl font-semibold mb-2">🐕 Perritos Registrados:</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        {dogs.map(dog => (
-          <div key={dog.id} className="bg-white rounded shadow p-4">
-            <img src={dog.image} alt={dog.name} className="w-full h-40 object-cover rounded mb-2" />
-            <h4 className="text-lg font-bold">{dog.name}</h4>
-            <p>{dog.age} — {dog.size}</p>
+      <main className="flex-1 px-10 py-10 space-y-10">
+        <h1 className="text-3xl font-extrabold text-[#2e2e2e]">🐶 Añadir Doggos</h1>
+
+        {/* Perritos Registrados */}
+        <section>
+          <h2 className="text-xl font-semibold mb-4">🐾 Perritos Registrados</h2>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {dogs.map((dog) => (
+              <div key={dog.id} className="bg-white rounded-lg shadow hover:shadow-md transition">
+                <img src={dog.image} alt={dog.name} className="w-full h-40 object-cover rounded-t-lg" />
+                <div className="p-4">
+                  <h4 className="text-lg font-bold">{dog.name}</h4>
+                  <p className="text-sm text-gray-600">{dog.age} — {dog.size}</p>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </section>
 
-      <h3 className="text-xl font-semibold mb-2">➕ Registrar Nuevo Perrito</h3>
-      <form className="bg-white p-4 rounded shadow max-w-md space-y-4">
-        <input
-          type="text"
-          placeholder="Nombre"
-          className="w-full p-2 border rounded"
-        />
-        <input
-          type="text"
-          placeholder="Edad"
-          className="w-full p-2 border rounded"
-        />
-        <input
-          type="text"
-          placeholder="Tamaño"
-          className="w-full p-2 border rounded"
-        />
-        <input
-          type="url"
-          placeholder="URL de la imagen"
-          className="w-full p-2 border rounded"
-        />
-        <button
-          type="button"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Registrar
-        </button>
-      </form>
+        {/* Formulario */}
+        <section>
+          <h2 className="text-xl font-semibold mb-4">➕ Registrar Nuevo Doggo</h2>
+          <AddDoggoForm />
+        </section>
+      </main>
     </div>
-    </main>
-  )
+  );
 }
-
-export default DashboardCompany

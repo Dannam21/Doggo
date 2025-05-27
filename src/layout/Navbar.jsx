@@ -1,25 +1,23 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { UserContext } from '../context/UserContext'; // Importar el contexto
+import { UserContext } from '../context/UserContext';
 import LogoDoggo from "../assets/doggo-logo.png";
 
 const Navbar = () => {
-  const { user, setUser } = useContext(UserContext); // Usar el contexto
+  const { user, setUser } = useContext(UserContext); 
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    setUser(null); // Limpiar el usuario del contexto
-    navigate('/home'); // Redirigir al usuario a la página de inicio
+    setUser(null); 
+    navigate('/home'); 
   };
 
   return (
     <nav className="flex justify-between items-center p-4 bg-[#fff6eb] shadow-md sticky top-0 z-50">
-      {/* Logo + texto */}
       <Link to="/home" className="flex items-center gap-3 font-bold text-xl ">
-        <img src={LogoDoggo} alt="Doggo logo" className="h-8 w-auto" />        
+        <img src={LogoDoggo} alt="Doggo logo" className="h-12 w-auto" />        
       </Link>
 
-      {/* Enlaces */}
       <div className="space-x-4 font-semibold">
         {user ? (
           <>

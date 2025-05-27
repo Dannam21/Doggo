@@ -68,6 +68,10 @@ button:focus-visible {
     background-color: #f77534;
     /* font-size: 1.2em; */
   }
+
+  button-company{
+    background-color: #FAFAF5;
+  }
 }
 
 

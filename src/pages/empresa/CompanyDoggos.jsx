@@ -1,0 +1,35 @@
+import { FaThumbsUp } from "react-icons/fa"
+import { FaHome } from "react-icons/fa"
+import SidebarCompany from "../../components/SidebarCompany"
+
+const CompanyDoggos = () => {
+  return (
+     <div className="flex h-screen">  
+<SidebarCompany/>
+       
+          <div className="flex-1 bg-[#FFF1DC] p-8">
+            <div className="flex items-center gap-2 mb-6 text-xl font-semibold">
+              <FaHome />
+              ¡Bienvenido! 
+            </div>
+    
+            <div className="space-y-4 max-w-xl">
+              <button className="flex items-center gap-2 px-4 py-3 bg-[#FCFCFA] text-black rounded shadow text-left w-full hover:bg-[#f6f6f6]">
+                <FaThumbsUp className="text-[#2e2e2e]" /> Añadir Doggos
+              </button>
+              <button className="px-4 py-3 bg-[#FCFCFA] text-black rounded shadow text-left w-full hover:bg-[#f6f6f6]">
+                Listado de Doggos
+              </button>
+              <button className="px-4 py-3 bg-[#FCFCFA] text-black rounded shadow text-left w-full hover:bg-[#f6f6f6]">
+                Editar Doggos
+              </button>
+              <button className="px-4 py-3 bg-[#FCFCFA] text-black rounded shadow text-left w-full hover:bg-[#f6f6f6]">
+                Ver historial de doggo
+              </button>
+            </div>
+          </div>
+        </div>
+  )
+}
+
+export default CompanyDoggos
