@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
@@ -7,16 +6,15 @@ import Navbar from "../layout/Navbar";
 const Login = () => {
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
-
   const [form, setForm] = useState({
     email: "",
     password: "",
-    role: "user", // "user" para adoptante, "company" para albergue
+    role: "user", // "user" = adoptante, "company" = albergue
   });
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
     setError("");
   };
 
@@ -24,52 +22,63 @@ const Login = () => {
     e.preventDefault();
     setError("");
 
-    // Elegimos endpoint según rol
+    // Decide which endpoint to hit
     const endpoint =
       form.role === "user"
         ? "http://localhost:8000/login/adoptante"
         : "http://localhost:8000/login/albergue";
 
-    // Payload siempre: { correo, contrasena }
     const payload = {
       correo: form.email,
       contrasena: form.password,
     };
 
     try {
+      // 1) Log in
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       if (!res.ok) {
-        const errJson = await res.json();
-        throw new Error(errJson.detail || "Credenciales inválidas");
+        const errData = await res.json();
+        throw new Error(errData.detail || "Credenciales inválidas");
       }
-
       const data = await res.json();
-      // data = { access_token, token_type, [albergue_id] }
+      const token = data.access_token;
 
-      // Construimos el objeto usuario a guardar en el contexto
       if (form.role === "user") {
-        // Para adoptante no hay albergue_id
-        setUser({
-          name: "Adoptante", // puedes personalizar según tu lógica
-          email: form.email,
-          token: data.access_token,
-          // no incluimos albergue_id aquí
+        // 2) Fetch adoptante profile to get nombre + apellido
+        const profileRes = await fetch("http://localhost:8000/adoptante/me", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         });
-        navigate("/dashboard/user"); // o a donde quieras
-      } else {
-        // Si es empresa/refugio, el backend devuelve también albergue_id
+        if (!profileRes.ok) {
+          const errProf = await profileRes.json();
+          throw new Error(errProf.detail || "No se pudo obtener perfil");
+        }
+        const perfil = await profileRes.json();
+        // perfil = { id, nombre, apellido, dni, correo, telefono, etiquetas: [...] }
+
+        // 3) Store full name and token in context
         setUser({
-          name: "Albergue", // opcionalmente podrías pedirle al backend el nombre real
+          name: `${perfil.nombre} ${perfil.apellido}`,
+          email: perfil.correo,
+          token,
+          albergue_id: null, // not an albergue
+        });
+        navigate("/home");
+      } else {
+        // Albergue login: data.albergue_id is returned already
+        setUser({
+          name: form.email,           // if you later fetch "/albergue/me" you can replace this
           email: form.email,
-          token: data.access_token,
+          token,
           albergue_id: data.albergue_id,
         });
-        navigate("/company/adddoggo"); // la ruta donde esté Adddoggo.jsx
+        navigate("/company/home");
       }
     } catch (err) {
       setError(err.message);
@@ -93,13 +102,18 @@ const Login = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Correo electrónico
               </label>
               <input
                 name="email"
                 type="email"
+                id="email"
                 value={form.email}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
@@ -108,13 +122,18 @@ const Login = () => {
               />
             </div>
 
+            {/* password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Contraseña
               </label>
               <input
                 name="password"
                 type="password"
+                id="password"
                 value={form.password}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
@@ -123,12 +142,17 @@ const Login = () => {
               />
             </div>
 
+            {/* role */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="role"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Tipo de cuenta
               </label>
               <select
                 name="role"
+                id="role"
                 value={form.role}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
@@ -148,33 +172,21 @@ const Login = () => {
 
           <p className="mt-4 text-sm text-center text-gray-600">
             ¿No tienes cuenta?{" "}
-            {form.role === "user" ? (
-              <>
-                <a href="/register/user" className="text-orange-500 hover:underline">
-                  Registrarme como usuario
-                </a>{" "}
-                |{" "}
-                <a
-                  href="/register/company"
-                  className="text-orange-500 hover:underline ml-2"
-                >
-                  como empresa
-                </a>
-              </>
-            ) : (
-              <>
-                <a href="/register/company" className="text-orange-500 hover:underline">
-                  Registrarme como empresa
-                </a>{" "}
-                |{" "}
-                <a
-                  href="/register/user"
-                  className="text-orange-500 hover:underline ml-2"
-                >
-                  como usuario
-                </a>
-              </>
-            )}
+            <span className="block mt-1">
+              <a
+                href="/register/user"
+                className="text-orange-500 hover:underline"
+              >
+                Registrarme como usuario
+              </a>{" "}
+              |{" "}
+              <a
+                href="/register/company"
+                className="text-orange-500 hover:underline ml-2"
+              >
+                como empresa
+              </a>
+            </span>
           </p>
         </div>
       </div>

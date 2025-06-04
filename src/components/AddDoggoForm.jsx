@@ -7,6 +7,10 @@ export default function AddDoggoForm({ onDogCreated }) {
   const token = user?.token;
   const albergueId = user?.albergue_id;
 
+  // Mostrar token y albergueId en consola
+  console.log("Token en AddDoggoForm:", token);
+  console.log("Albergue ID en AddDoggoForm:", albergueId);
+
   const [formData, setFormData] = useState({
     nombre: "",
     edad: "",
@@ -53,6 +57,9 @@ export default function AddDoggoForm({ onDogCreated }) {
     setError("");
 
     // Validaciones mínimas
+    console.log("Token en handleSubmit:", token);
+    console.log("Albergue ID en handleSubmit:", albergueId);
+
     if (!token || !albergueId) {
       setError("Debes iniciar sesión como albergue para registrar mascotas.");
       return;
