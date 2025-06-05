@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../../layout/Navbar";
 import { UserContext } from "../../context/UserContext";
 
-const Questionnaire = () => {
+const Questionnaire2 = () => {
   const navigate = useNavigate();
   const { user, setUser } = useContext(UserContext);
 
@@ -630,4 +630,4 @@ const Questionnaire = () => {
   );
 };
 
-export default Questionnaire;
+export default Questionnaire2;

@@ -7,7 +7,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import CompanyDoggos from "./pages/empresa/CompanyDoggos";
 import User from "./pages/usuario/DashboardUser";
-import Questionnaire from "./pages/cuestionario/Questionnaire";
+import Questionnaire2 from "./pages/cuestionario/Questionnaire2";
 import RegisterUser from './pages/RegisterUser';
 import RegisterCompany from './pages/RegisterCompany';
 import CompanyDashboard from "./pages/empresa/CompanyDashboard";
@@ -46,7 +46,7 @@ function App() {
 
             {/* User */}
           <Route path="/dashboard/user" element={<User />} />
-          <Route path="/cuestionario2" element={<Questionnaire />} />
+          <Route path="/cuestionario2" element={<Questionnaire2 />} />
 
         </Routes>
       </Router>
