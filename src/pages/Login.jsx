@@ -14,7 +14,7 @@ const Login = () => {
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     setError("");
   };
 
@@ -22,7 +22,6 @@ const Login = () => {
     e.preventDefault();
     setError("");
 
-    // Decide which endpoint to hit
     const endpoint =
       form.role === "user"
         ? "http://localhost:8000/login/adoptante"
@@ -34,7 +33,6 @@ const Login = () => {
     };
 
     try {
-      // 1) Log in
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -47,8 +45,11 @@ const Login = () => {
       const data = await res.json();
       const token = data.access_token;
 
+      // **Guardar token en localStorage** para que persista entre recargas
+      localStorage.setItem("token", token);
+
       if (form.role === "user") {
-        // 2) Fetch adoptante profile to get nombre + apellido
+        // --- Perfil de adoptante ---
         const profileRes = await fetch("http://localhost:8000/adoptante/me", {
           headers: {
             "Content-Type": "application/json",
@@ -57,26 +58,34 @@ const Login = () => {
         });
         if (!profileRes.ok) {
           const errProf = await profileRes.json();
-          throw new Error(errProf.detail || "No se pudo obtener perfil");
+          throw new Error(errProf.detail || "No se pudo obtener perfil de adoptante");
         }
         const perfil = await profileRes.json();
-        // perfil = { id, nombre, apellido, dni, correo, telefono, etiquetas: [...] }
-
-        // 3) Store full name and token in context
         setUser({
           name: `${perfil.nombre} ${perfil.apellido}`,
           email: perfil.correo,
           token,
-          albergue_id: null, // not an albergue
+          albergue_id: null,
         });
         navigate("/home");
       } else {
-        // Albergue login: data.albergue_id is returned already
+        // --- Perfil de albergue ---
+        const profileRes = await fetch("http://localhost:8000/albergue/me", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!profileRes.ok) {
+          const errProf = await profileRes.json();
+          throw new Error(errProf.detail || "No se pudo obtener perfil de albergue");
+        }
+        const perfilAlbergue = await profileRes.json();
         setUser({
-          name: form.email,           // if you later fetch "/albergue/me" you can replace this
-          email: form.email,
+          name: perfilAlbergue.nombre,
+          email: perfilAlbergue.correo,
           token,
-          albergue_id: data.albergue_id,
+          albergue_id: perfilAlbergue.id,
         });
         navigate("/company/home");
       }

@@ -11,7 +11,6 @@ export default function DashboardCompany() {
       <main className="flex-1 px-10 py-10 space-y-10">
         <h1 className="text-3xl font-extrabold text-[#2e2e2e]">🐶 Añadir Doggos</h1>
 
-        {/* Perritos Registrados */}
         <section>
           <h2 className="text-xl font-semibold mb-4">🐾 Perritos Registrados</h2>
 

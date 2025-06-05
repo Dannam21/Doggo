@@ -22,35 +22,18 @@ export default function Adddoggo() {
         if (!res.ok) throw new Error("Error al cargar mascotas");
         return res.json();
       })
-      .then(async (data) => {
-        const enriched = await Promise.all(
-          data.map(async (m) => {
-            let imageUrl = "";
-            try {
-              const imgRes = await fetch(
-                `http://localhost:8000/imagenes/${m.imagen_id}`,
-                {
-                  method: "HEAD",
-                  headers: { Authorization: `Bearer ${token}` },
-                }
-              );
-              if (imgRes.ok) {
-                imageUrl = `http://localhost:8000/imagenes/${m.imagen_id}`;
-              }
-            } catch {}
-            return {
-              id: m.id,
-              nombre: m.nombre,
-              edad: m.edad,
-              especie: m.especie,
-              imageUrl,
-              etiquetas: m.etiquetas || [],
-            };
-          })
-        );
+      .then((data) => {
+        const enriched = data.map((m) => ({
+          id: m.id,
+          nombre: m.nombre,
+          edad: m.edad,
+          especie: m.especie,
+          imageUrl: `http://localhost:8000/imagenes/${m.imagen_id}`,
+          etiquetas: m.etiquetas || [],
+        }));
         setDogs(enriched);
       })
-      .catch((err) => console.error(err.message));
+      .catch((err) => console.error("Fetch mascotas:", err.message));
   }, [token, albergueId]);
 
   const handleNewDog = (createdDog) => {
@@ -73,11 +56,7 @@ export default function Adddoggo() {
                 className="bg-white rounded-lg shadow hover:shadow-md transition"
               >
                 <img
-                  src={
-                    dog.imageUrl
-                      ? dog.imageUrl
-                      : "https://via.placeholder.com/400x300"
-                  }
+                  src={dog.imageUrl}
                   alt={dog.nombre}
                   className="w-full h-40 object-cover rounded-t-lg"
                 />

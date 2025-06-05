@@ -1,53 +1,123 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { UserProvider } from "./context/UserContext";
+import ProtectedRoute from "./routes/ProtectedRoute"; // Asegúrate de que la ruta sea correcta
+
 // Pages
 import Home from "./pages/Home";
-import Footer from "./components/Footer";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import RegisterUser from "./pages/RegisterUser";
+import RegisterCompany from "./pages/RegisterCompany";
+
+// Páginas de empresa
 import CompanyDoggos from "./pages/empresa/CompanyDoggos";
+import CompanyHome from "./pages/empresa/CompanyHome";
+import CompanyCalendar from "./pages/empresa/CompanyCalendar";
+import CompanyStatistics from "./pages/empresa/CompanyStatistics";
+import CompanyMessages from "./pages/empresa/CompanyMessages";
+import DashboardCompany from "./pages/empresa/DashboardCompany";
+import Adddoggo from "./pages/empresa/Adddoggo";
+
+// Páginas de usuario
 import User from "./pages/usuario/DashboardUser";
 import Questionnaire from "./pages/cuestionario/Questionnaire";
-import RegisterUser from './pages/RegisterUser';
-import RegisterCompany from './pages/RegisterCompany';
-import CompanyDashboard from "./pages/empresa/CompanyDashboard";
-import DashboardCompany from "./pages/empresa/DashboardCompany";
-import CompanyHome from "./pages/empresa/CompanyHome";
-import CompanyStatistics from "./pages/empresa/CompanyStatistics";
-import CompanyCalendar from "./pages/empresa/CompanyCalendar";
-import CompanyMessages from "./pages/empresa/CompanyMessages";
-import Adddoggo from "./pages/empresa/Adddoggo";
 
 function App() {
   return (
     <UserProvider>
       <Router>
         <Routes>
-            {/* Web */}
+          {/* RUTAS PÚBLICAS */}
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/login" element={<Login />} />
 
-            {/* Register */}
+          {/* Registro */}
           <Route path="/register" element={<Register />} />
           <Route path="/register/user" element={<RegisterUser />} />
           <Route path="/register/company" element={<RegisterCompany />} />
 
-            {/* Company */}
-          <Route path="/company/doggos" element={<CompanyDoggos/>} />
-          <Route path="/company/home" element={<CompanyHome/>} />
-          <Route path="/company/calendar" element={<CompanyCalendar/>} />
-          <Route path="/company/statistics" element={<CompanyStatistics/>} />
-          <Route path="/company/messages" element={<CompanyMessages/>} />
-          <Route path="/company/aa" element={<CompanyHome/>} />
-          <Route path="/company/cambiar" element={<DashboardCompany/>} />
-          <Route path="/company/doggoform" element={<DashboardCompany/>} />
-          <Route path="/company/adddoggo" element={<Adddoggo/>} />
+          <Route
+            path="/company/doggos"
+            element={
+              <ProtectedRoute>
+                <CompanyDoggos />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/company/home"
+            element={
+              <ProtectedRoute>
+                <CompanyHome />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/company/calendar"
+            element={
+              <ProtectedRoute>
+                <CompanyCalendar />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/company/statistics"
+            element={
+              <ProtectedRoute>
+                <CompanyStatistics />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/company/messages"
+            element={
+              <ProtectedRoute>
+                <CompanyMessages />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/company/cambiar"
+            element={
+              <ProtectedRoute>
+                <DashboardCompany />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/company/doggoform"
+            element={
+              <ProtectedRoute>
+                <DashboardCompany />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/company/adddoggo"
+            element={
+              <ProtectedRoute>
+                <Adddoggo />
+              </ProtectedRoute>
+            }
+          />
 
-            {/* User */}
-          <Route path="/dashboard/user" element={<User />} />
-          <Route path="/cuestionario" element={<Questionnaire />} />
-
+          <Route
+            path="/dashboard/user"
+            element={
+              <ProtectedRoute>
+                <User />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cuestionario"
+            element={
+              <ProtectedRoute>
+                <Questionnaire />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Router>
     </UserProvider>
