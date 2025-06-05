@@ -46,7 +46,7 @@ function App() {
 
             {/* User */}
           <Route path="/dashboard/user" element={<User />} />
-          <Route path="/cuestionario" element={<Questionnaire />} />
+          <Route path="/cuestionario2" element={<Questionnaire />} />
 
         </Routes>
       </Router>
