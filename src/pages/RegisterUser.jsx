@@ -36,7 +36,6 @@ const RegisterUser = () => {
       return;
     }
 
-    // Guardamos los datos básicos en el contexto, sin token
     setUser({
       nombre: form.nombre,
       apellido: form.apellido,

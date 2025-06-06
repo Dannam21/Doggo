@@ -7,7 +7,6 @@ const Questionnaire = () => {
   const navigate = useNavigate();
   const { user, setUser } = useContext(UserContext);
 
-  // Ahora sólo redirige si user es totalmente nulo (sin datos preliminares)
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">

@@ -1,4 +1,3 @@
-// src/pages/usuario/DashboardUser.jsx
 import { useState, useEffect } from "react";
 import Navbar from "../../layout/Navbar";
 
@@ -27,7 +26,7 @@ function DashboardUser() {
       })
       .then((perfil) => {
         setAdoptanteId(perfil.id);
-
+        console.log("Perfil de adoptante:", perfil);
         return fetch(`http://localhost:8000/recomendaciones/${perfil.id}`, {
           headers: {
             Authorization: `Bearer ${token}`,

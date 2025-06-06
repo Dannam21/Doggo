@@ -36,6 +36,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/register/user" element={<RegisterUser />} />
           <Route path="/register/company" element={<RegisterCompany />} />
+          <Route path="/cuestionario" element={ <Questionnaire />}/>
 
           <Route
             path="/company/doggos"
@@ -110,14 +111,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/cuestionario"
-            element={
-              <ProtectedRoute>
-                <Questionnaire />
-              </ProtectedRoute>
-            }
-          />
+          
         </Routes>
       </Router>
     </UserProvider>
