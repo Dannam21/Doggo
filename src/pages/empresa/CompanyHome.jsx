@@ -1,30 +1,12 @@
-import React, { useContext, useEffect } from "react";
+import React from "react";
 import SidebarCompany from "../../components/SidebarCompany";
-import { UserContext } from "../../context/UserContext";  // Asegúrate de que el path sea correcto
 
 export default function CompanyHome() {
-  const { user } = useContext(UserContext);  // Obtener el usuario del contexto
-
-  useEffect(() => {
-    // Imprimir en la consola cuando los valores se estén pasando correctamente
-    console.log("Token recibido:", user.token);
-    console.log("Albergue ID recibido:", user.albergueId);
-  }, [user.token, user.albergueId]);  // Ejecutar cada vez que el token o albergueId cambien
-
   return (
     <div className="flex min-h-screen bg-[#fdf0df]">
       <SidebarCompany />
       <div className="flex-1 p-8">
-        <h1 className="text-3xl font-bold mb-8">¡Bienvenido, {user.email}!</h1>
-
-        {/* Mostrar el mensaje de confirmación en la UI */}
-        {/* <p className="text-green-600 font-bold mb-4">
-          Token y Albergue ID están siendo pasados correctamente:
-        </p>
-        <div className="bg-white p-4 rounded shadow mb-6">
-          <p><strong>Token:</strong> {user.token}</p>
-          <p><strong>Albergue ID:</strong> {user.albergueId}</p>
-        </div> */}
+        <h1 className="text-3xl font-bold mb-8">¡Bienvenido, Nombre empresa!</h1>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
           <div className="bg-white p-6 rounded shadow text-center">
@@ -49,6 +31,7 @@ export default function CompanyHome() {
           </div>
         </div>
 
+        
         <h2 className="text-xl font-semibold mb-4">Acciones rápidas</h2>
         <div className="flex flex-wrap gap-4 mb-10">
           <button className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition">Añadir doggo</button>
@@ -56,6 +39,7 @@ export default function CompanyHome() {
           <button className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition">Editar perfil</button>
           <button className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition">Revisar mensajes</button>
         </div>
+
 
         <div className="grid md:grid-cols-2 gap-6">
           <div className="bg-white p-6 rounded shadow">
