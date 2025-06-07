@@ -1,26 +1,50 @@
 import SidebarCompany from "../../components/SidebarCompany";
 import AddDoggoForm from "../../components/AddDoggoForm";
-import { useState } from "react";
-
-const dummyDogs = [
-  {
-    id: 1,
-    name: "Luna",
-    age: "2 años",
-    size: "Mediano",
-    image: "https://placedog.net/400/300?id=1",
-  },
-  {
-    id: 2,
-    name: "Rocky",
-    age: "1 año",
-    size: "Grande",
-    image: "https://placedog.net/400/300?id=2",
-  },
-];
+import { useState, useContext, useEffect, useCallback } from "react";
+import { UserContext } from "../../context/UserContext";
 
 export default function DashboardCompany() {
-  const [dogs] = useState(dummyDogs);
+  const [dogs, setDogs] = useState([]);
+  const { user } = useContext(UserContext);
+
+  const fetchDogs = useCallback(async () => {
+    if (!user.albergueId) return;
+
+    try {
+      const response = await fetch(`http://localhost:8000/mascotas/albergue/${user.albergueId}`, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al obtener mascotas");
+      }
+
+      const data = await response.json();
+
+      const formattedDogs = data.map((dog) => ({
+        id: dog.id,
+        name: dog.nombre,
+        age: `${dog.edad} años`,
+        size: dog.tamano || "Tamaño desconocido",
+        image: `http://localhost:8000/imagenes/${dog.imagen_id}`,
+      }));
+
+      setDogs(formattedDogs);
+    } catch (error) {
+      console.error("Error cargando mascotas:", error);
+    }
+  }, [user.token, user.albergueId]);
+
+  useEffect(() => {
+    fetchDogs();
+  }, [fetchDogs]);
+
+  const handleDogAdded = () => {
+    fetchDogs(); // Actualiza la lista de perros
+    window.location.reload(); // Recarga la página
+  };
 
   return (
     <div className="flex min-h-screen bg-[#fdf0df]">
@@ -45,9 +69,21 @@ export default function DashboardCompany() {
           </div>
         </section>
 
+        {/* Mostrar el token y albergueId */}
+        {/* <section>
+          <h2 className="text-xl font-semibold mb-4 text-green-600">
+            Token y Albergue ID Recibidos
+          </h2>
+          <div className="bg-white p-4 rounded shadow mb-6">
+            <p><strong>Token:</strong> {user.token}</p>
+            <p><strong>Albergue ID:</strong> {user.albergueId}</p>
+          </div>
+        </section> */}
+
+        {/* Formulario para agregar perritos */}
         <section>
           <h2 className="text-xl font-semibold mb-4">➕ Registrar Nuevo Doggo</h2>
-          <AddDoggoForm />
+          <AddDoggoForm onDogAdded={handleDogAdded} />
         </section>
       </main>
     </div>

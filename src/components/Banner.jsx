@@ -5,7 +5,6 @@ const Banner = () => {
   return (
     <section className="w-full bg-orange-100 py-6">
       <div className="max-w-4xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
-        {/* Texto */}
         <div className="max-w-md md:w-1/2">
           <h1 className="text-2xl font-bold leading-snug text-black mb-4">
             Un match que<br />cambia dos vidas<br />para siempre
@@ -23,7 +22,6 @@ const Banner = () => {
           </button>
         </div>
 
-        {/* Imagen */}
         <div className="md:w-1/2 flex justify-center">
           <img
             src={bannerDoggo}
