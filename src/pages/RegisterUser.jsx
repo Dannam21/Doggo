@@ -1,57 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../layout/Navbar';
 
 const RegisterUser = () => {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    nombre: '',
-    apellido: '',
-    dni: '',
-    correo: '',
-    contrasena: ''
-  });
-
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-    setFormData({
-      ...formData,
-      [id]: value,
-    });
-  };
-  
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-  
-    try {
-      const response = await fetch('http://localhost:8000/register/adoptante', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nombre: formData.nombre,
-          apellido: formData.apellido,
-          dni: formData.dni,
-          correo: formData.correo,
-          contrasena: formData.contrasena,
-        }),
-      });
-  
-      if (response.ok) {
-        navigate('/cuestionario');
-      } else {
-        const errorData = await response.json();
-        console.error('Error detallado:', errorData);
-        alert(`Error: ${errorData.message || 'Algo salió mal. Intenta nuevamente.'}`);
-      }
-    } catch (error) {
-      console.error('Error en el registro:', error);
-      alert('Hubo un error al registrar al usuario. Intenta nuevamente.');
-    }
+    navigate('/cuestionario'); 
   };
-  
 
   return (
     <main>
@@ -62,25 +19,20 @@ const RegisterUser = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">Nombres</label>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nombres</label>
               <input
                 type="text"
-                id="nombre"
-                value={formData.nombre}
-                onChange={handleChange}
+                id="name"
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 placeholder="Ingresa tu nombre"
                 required
               />
             </div>
-
             <div>
-              <label htmlFor="apellido" className="block text-sm font-medium text-gray-700">Apellidos</label>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">Apellidos</label>
               <input
                 type="text"
-                id="apellido"
-                value={formData.apellido}
-                onChange={handleChange}
+                id="name"
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 placeholder="Ingresa tu apellido"
                 required
@@ -88,25 +40,10 @@ const RegisterUser = () => {
             </div>
 
             <div>
-              <label htmlFor="dni" className="block text-sm font-medium text-gray-700">DNI</label>
-              <input
-                type="text"
-                id="dni"
-                value={formData.dni}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                placeholder="Ingresa tu DNI"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="correo" className="block text-sm font-medium text-gray-700">Correo electrónico</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Correo electrónico</label>
               <input
                 type="email"
-                id="correo"
-                value={formData.correo}
-                onChange={handleChange}
+                id="email"
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 placeholder="Ingresa tu correo"
                 required
@@ -114,12 +51,32 @@ const RegisterUser = () => {
             </div>
 
             <div>
-              <label htmlFor="contrasena" className="block text-sm font-medium text-gray-700">Contraseña</label>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Celular</label>
+              <input
+                type="phone"
+                id="phone"
+                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                placeholder="+51"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Contraseña</label>
               <input
                 type="password"
-                id="contrasena"
-                value={formData.contrasena}
-                onChange={handleChange}
+                id="password"
+                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirmar contraseña</label>
+              <input
+                type="password"
+                id="confirmPassword"
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 placeholder="••••••••"
                 required
@@ -138,7 +95,7 @@ const RegisterUser = () => {
             ¿Ya tienes cuenta? <a href="/login" className="text-orange-500 hover:underline">Inicia sesión</a>
           </p>
           <p className="mt-4 text-sm text-center text-gray-600">
-            ¿Eres empresa? <a href="/register/company" className="text-orange-500 hover:underline">Registro empresa</a>
+          ¿Eres empresa? <a href="/register/company" className="text-orange-500 hover:underline">Registro empresa</a>
           </p>
         </div>
       </div>
