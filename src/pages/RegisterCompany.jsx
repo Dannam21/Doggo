@@ -7,8 +7,7 @@ const RegisterCompany = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Aquí podrías guardar la info o validar datos
-    navigate('/dashboard/company'); // Cambia esta ruta según tu flujo
+    navigate('/dashboard/company');
   };
 
   return (
