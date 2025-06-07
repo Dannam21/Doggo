@@ -17,8 +17,6 @@ import CompanyStatistics from "./pages/empresa/CompanyStatistics";
 import CompanyCalendar from "./pages/empresa/CompanyCalendar";
 import CompanyMessages from "./pages/empresa/CompanyMessages";
 import Adddoggo from "./pages/empresa/Adddoggo";
-import LoginCompany from "./pages/LoginCompany";
-import LoginUser from "./pages/LoginUser";
 
 function App() {
   return (
@@ -28,10 +26,7 @@ function App() {
             {/* Web */}
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
-          {/* <Route path="/login" element={<Login />} /> */}
-          <Route path="/login" element={<LoginUser />} />
-          <Route path="/loginAlbergue" element={<LoginCompany />} />
-
+          <Route path="/login" element={<Login />} />
 
             {/* Register */}
           <Route path="/register" element={<Register />} />
