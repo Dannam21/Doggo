@@ -8,9 +8,17 @@ export default function ListDoggo() {
     const { user } = useContext(UserContext);
     const token = user?.token;
     const albergueId = user?.albergue_id;
-    
+    const [expandedTags, setExpandedTags] = useState({});
+
     const [dogs, setDogs] = useState([]);
     
+    const toggleTags = (id) => {
+        setExpandedTags((prev) => ({
+          ...prev,
+          [id]: !prev[id],
+        }));
+      };
+
     useEffect(() => {
         if (!token || !albergueId) return;
     
@@ -66,15 +74,35 @@ export default function ListDoggo() {
                     <p className="text-sm text-gray-600">Edad: {dog.edad} años</p>
                     <p className="text-sm text-gray-600">Especie: {dog.especie}</p>
                     <div className="mt-2">
-                        {dog.etiquetas.map((tag, index) => (
-                        <span
-                            key={index}
-                            className="inline-block bg-[#f77534] text-white text-xs px-2 py-1 rounded-full mr-1"
-                        >
-                            {tag}
-                        </span>
-                        ))}
+                        {(expandedTags[dog.id] ? dog.etiquetas : dog.etiquetas.slice(0, 5)).map(
+                            (tag, index) => (
+                            <span
+                                key={index}
+                                className="inline-block bg-[#f77534] text-white text-xs px-2 py-1 rounded-full mr-1 mb-1"
+                            >
+                                {tag}
+                            </span>
+                            )
+                        )}
+
+                        {dog.etiquetas.length > 5 && (
+                           <button
+                            onClick={() => toggleTags(dog.id)}
+                            className="bg-[#f77534] text-white rounded-full mr-1 mb-1 hover:bg-[#e76628]"
+                            style={{
+                                fontSize: "10px",
+                                padding: "2px 6px",
+                                lineHeight: "1rem",
+                                fontFamily: "inherit",
+                                border: "1px solid transparent",
+                                cursor: "pointer",
+                            }}
+                            >
+                            {expandedTags[dog.id] ? "ver menos" : "..."}
+                            </button>             
+                        )}
                     </div>
+
                     </div>
                 </div>
                 ))}
