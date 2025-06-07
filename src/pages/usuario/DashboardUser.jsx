@@ -1,125 +1,145 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Navbar from "../../layout/Navbar";
-import { FaHeart, FaTimes } from "react-icons/fa";
 
-const dogMatches = [
-  {
-    id: 1,
-    name: "Max ♂",
-    age: "5 años",
-    size: "Grande",
-    breed: "Golden Retriever",
-    health: "Todas las vacunas",
-    social: "Se lleva bien con niños, perros y gatos",
-    personality: "Juguetón, cariñoso y protector",
-    image: "https://placedog.net/600/400?id=1",
-  },
-  {
-    id: 2,
-    name: "Canela ♀",
-    age: "3 años",
-    size: "Mediano",
-    breed: "Labrador",
-    health: "Desparasitada y vacunada",
-    social: "Ideal para familias activas",
-    personality: "Curiosa, energética y leal",
-    image: "https://placedog.net/600/400?id=2",
-  },
-];
-
-export default function DashboardUser() {
+function DashboardUser() {
+  const [mascotasOrdenadas, setMascotasOrdenadas] = useState([]);
   const [index, setIndex] = useState(0);
-  const [animationDirection, setAnimationDirection] = useState(""); // 'left' | 'right'
-  const [isAnimating, setIsAnimating] = useState(false);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [adoptanteId, setAdoptanteId] = useState(null);
 
-  const currentDog = dogMatches[index];
-  const nextDog = dogMatches[(index + 1) % dogMatches.length];
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
-  const handleAction = (dir) => {
-    if (isAnimating) return;
-    setAnimationDirection(dir);
-    setIsAnimating(true);
+    fetch("http://localhost:8000/adoptante/me", {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("No se pudo obtener perfil de adoptante");
+        return res.json();
+      })
+      .then((perfil) => {
+        setAdoptanteId(perfil.id);
+        console.log("Perfil de adoptante:", perfil);
+        return fetch(`http://localhost:8000/recomendaciones/${perfil.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      })
+      .then((res) => {
+        if (!res.ok) throw new Error("Error al obtener recomendaciones");
+        return res.json();
+      })
+      .then((data) => {
+        setMascotasOrdenadas(data);
+      })
+      .catch((err) => {
+        console.error("Algún fetch falló:", err);
+        setMascotasOrdenadas([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
-    setTimeout(() => {
-      if (dir === "right") {
-        navigate("/home");
-      } else {
-        setIndex((prev) => (prev + 1) % dogMatches.length);
-        setAnimationDirection("");
-        setIsAnimating(false);
-      }
-    }, 500);
+  if (loading) {
+    return (
+      <main>
+        <Navbar />
+        <div className="p-6 bg-orange-50 min-h-screen flex flex-col items-center justify-center">
+          <h2 className="text-2xl font-bold">Obteniendo datos del adoptante y recomendaciones...</h2>
+        </div>
+      </main>
+    );
+  }
+
+  if (!adoptanteId) {
+    return (
+      <main>
+        <Navbar />
+        <div className="p-6 bg-orange-50 min-h-screen flex flex-col items-center justify-center">
+          <h2 className="text-2xl font-bold">Debes iniciar sesión como adoptante</h2>
+        </div>
+      </main>
+    );
+  }
+
+  if (mascotasOrdenadas.length === 0) {
+    return (
+      <main>
+        <Navbar />
+        <div className="p-6 bg-orange-50 min-h-screen flex flex-col items-center justify-center">
+          <h2 className="text-2xl font-bold">No hay mascotas para recomendar</h2>
+        </div>
+      </main>
+    );
+  }
+
+  const dog = mascotasOrdenadas[index];
+  if (!dog) {
+    return (
+      <main>
+        <Navbar />
+        <div className="p-6 bg-orange-50 min-h-screen flex flex-col items-center justify-center">
+          <h2 className="text-2xl font-bold">No hay más mascotas para mostrar</h2>
+        </div>
+      </main>
+    );
+  }
+
+  const handleLike = () => {
+    alert(`¡Has dado like a ${dog.nombre}! (similitud: ${(dog.similitud * 100).toFixed(0)}%)`);
+    setIndex((prev) => Math.min(prev + 1, mascotasOrdenadas.length));
   };
 
-  const getCurrentCardClasses = () => {
-    if (animationDirection === "left") {
-      return "translate-x-[-120%] translate-y-16 -rotate-12 opacity-0";
-    }
-    if (animationDirection === "right") {
-      return "translate-x-[120%] translate-y-16 rotate-12 opacity-0";
-    }
-    return "translate-x-0 translate-y-0 rotate-0 opacity-100";
+  const handleNope = () => {
+    setIndex((prev) => Math.min(prev + 1, mascotasOrdenadas.length));
   };
 
   return (
-    <main className="min-h-screen bg-[#FFF1DC]">
+    <main>
       <Navbar />
-      <div className="flex flex-col items-center justify-center px-4 py-10 text-[#2e2e2e]">
-        <p className="text-lg font-semibold">Tienes {dogMatches.length} matches</p>
-        <p className="text-sm mb-8">
-          Dale click al botón del corazón si deseas conocer más sobre el doggo
-        </p>
+      <div className="p-6 bg-orange-50 min-h-screen flex flex-col items-center">
+        <h2 className="text-3xl font-bold mb-4">🐾 Panel del Adoptante</h2>
 
-        <div className="relative w-[320px] h-[500px] mb-10">
-          {/* Carta siguiente (esperando debajo) */}
-          <div className="absolute inset-0 z-0 bg-[#ee9c70] text-white rounded-[28px] shadow-md p-4 
-            scale-[0.95] translate-y-3 opacity-80 transition-all duration-300">
-            <img src={nextDog.image} alt={nextDog.name} className="w-full h-48 object-cover rounded-md mb-4" />
-            <h3 className="text-xl font-bold text-center mb-2">{nextDog.name}</h3>
-            <p className="text-sm text-center italic">Esperando para ser el siguiente 🐶</p>
-          </div>
+        <div className="bg-white p-6 rounded shadow max-w-sm w-full text-center">
+          <img
+            src={`http://localhost:8000/imagenes/${dog.imagen_id}`}
+            alt={dog.nombre}
+            className="w-full h-60 object-cover rounded mb-4"
+          />
+          <h3 className="text-xl font-bold">{dog.nombre}</h3>
+          <p className="text-gray-600">{dog.edad} — {dog.especie}</p>
+          <p className="mt-2 text-sm italic">{dog.descripcion || "Sin descripción"}</p>
+          <p className="mt-1 text-sm text-gray-500">
+            Similitud: {(dog.similitud * 100).toFixed(0)}%
+          </p>
 
-          {/* Carta actual con animación */}
-          <div
-            className={`absolute inset-0 z-10 bg-[#ee9c70] text-white rounded-[28px] shadow-xl p-4
-              transition-all duration-500 ease-in-out transform ${getCurrentCardClasses()}`}
-          >
-            <img src={currentDog.image} alt={currentDog.name} className="w-full h-48 object-cover rounded-md mb-4" />
-            <h3 className="text-xl font-bold text-center mb-2">{currentDog.name}</h3>
-            <ul className="text-sm leading-snug space-y-1 px-2">
-              <li><strong>Edad:</strong> {currentDog.age}</li>
-              <li><strong>Tamaño:</strong> {currentDog.size}</li>
-              <li><strong>Raza:</strong> {currentDog.breed}</li>
-              <li><strong>Salud:</strong> {currentDog.health}</li>
-              <li>{currentDog.social}</li>
-              <li>{currentDog.personality}</li>
-            </ul>
-            <button className="mt-4 bg-white text-[#EE9C70] font-semibold px-4 py-2 rounded-full w-full text-sm hover:bg-[#fdf0df]">
-              More info
+          <div className="flex justify-around mt-4">
+            <button
+              onClick={handleNope}
+              className="bg-red-400 text-white px-4 py-2 rounded hover:bg-red-500"
+            >
+              No
+            </button>
+            <button
+              onClick={handleLike}
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            >
+              Adoptar
             </button>
           </div>
-        </div>
-
-        {/* Botones */}
-        <div className="flex gap-10">
-          <button
-            onClick={() => handleAction("left")}
-            className="bg-[#FFE9DD] w-14 h-14 flex items-center justify-center rounded-full text-2xl text-[#F25C5C] hover:scale-110 transition"
-            aria-label="No me interesa"
-          >
-            <FaTimes />
-          </button>
-          <button
-            onClick={() => handleAction("right")}
-            className="bg-[#D9F5ED] w-14 h-14 flex items-center justify-center rounded-full text-2xl text-[#4FB286] hover:scale-110 transition"
-            aria-label="Me interesa"
-          >
-            <FaHeart />
-          </button>
         </div>
       </div>
     </main>
   );
 }
+
+export default DashboardUser;
