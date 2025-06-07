@@ -21,7 +21,6 @@ import Adddoggo from "./pages/empresa/Adddoggo";
 // Páginas de usuario
 import User from "./pages/usuario/DashboardUser";
 import Questionnaire from "./pages/cuestionario/Questionnaire";
-import ListDoggo from "./pages/empresa/ListDoggo";
 
 function App() {
   return (
@@ -100,15 +99,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <Adddoggo />
-              </ProtectedRoute>
-            }
-          />
-
-            <Route
-            path="/company/listdoggo"
-            element={
-              <ProtectedRoute>
-                <ListDoggo />
               </ProtectedRoute>
             }
           />
