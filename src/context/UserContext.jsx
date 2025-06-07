@@ -1,34 +1,47 @@
 import React, { createContext, useState, useEffect } from "react";
 
-export const UserContext = createContext();
+export const UserContext = createContext({
+  name: null,
+  email: null,
+  token: null,
+  albergue_id: null,
+  setUser: () => {},
+});
 
 export const UserProvider = ({ children }) => {
-  const [user, setUserState] = useState(null);
+  const [user, setUser] = useState({
+    name: null,
+    email: null,
+    token: null,
+    albergue_id: null,
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem("myapp_user");
-    if (stored) {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
       try {
-        const parsed = JSON.parse(stored);
-        setUserState(parsed);
-      } catch {
-        localStorage.removeItem("myapp_user");
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser && parsedUser.token) {
+          setUser(parsedUser);
+        }
+      } catch (error) {
+        console.error("Error al parsear el usuario del localStorage:", error);
       }
     }
+    setLoading(false);
   }, []);
 
-  const setUser = (userData) => {
-    setUserState(userData);
-    localStorage.setItem("myapp_user", JSON.stringify(userData));
-  };
-
-  const logout = () => {
-    setUserState(null);
-    localStorage.removeItem("myapp_user");
-  };
+  useEffect(() => {
+    if (user && user.token) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+  }, [user]);
 
   return (
-    <UserContext.Provider value={{ user, setUser, logout }}>
+    <UserContext.Provider value={{ user, setUser, loading }}>
       {children}
     </UserContext.Provider>
   );

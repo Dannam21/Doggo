@@ -8,8 +8,19 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    setUser(null);
-    navigate("/home");
+    // Limpia el contexto del usuario
+    setUser({
+      name: null,
+      email: null,
+      token: null,
+      albergue_id: null,
+    });
+
+    // Elimina los datos del localStorage
+    localStorage.removeItem("user");
+
+    // Redirige al login (o a /home si lo prefieres)
+    navigate("/login");
   };
 
   return (

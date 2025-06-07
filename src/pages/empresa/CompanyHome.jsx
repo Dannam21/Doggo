@@ -7,10 +7,19 @@ export default function CompanyHome() {
   const [publicados, setPublicados] = useState(0);
   const [ultimasMascotas, setUltimasMascotas] = useState([]);
 
+  // Helper para formatear "hace X...", interpretando correctamente el offset "-05"
   const formatTimeAgo = (timestamp) => {
     if (!timestamp) return "";
 
-    const created = new Date(timestamp);
+    // Convertir "YYYY-MM-DD HH:mm:ss.xxx-05" a ISO "YYYY-MM-DDTHH:mm:ss-05:00"
+    const parts = timestamp.split(".");
+    const datePart = parts[0];
+    const offsetMatch = timestamp.match(/(-|\+)\d{2}$/);
+    const offsetRaw = offsetMatch ? offsetMatch[0] : "+00";
+    const offset = offsetRaw.includes(":") ? offsetRaw : `${offsetRaw}:00`;
+    const isoString = `${datePart.replace(" ", "T")}${offset}`;
+
+    const created = new Date(isoString);
     if (isNaN(created)) return "";
 
     const now = new Date();
@@ -44,25 +53,31 @@ export default function CompanyHome() {
         );
         if (!res.ok) {
           setPublicados(0);
+          setUltimasMascotas([]);
           return;
         }
         const mascotas = await res.json();
 
+        console.log("🐶 Mascotas crudas:", mascotas);
         setPublicados(Array.isArray(mascotas) ? mascotas.length : 0);
 
-        let ordenadas = [...mascotas];
-        if (mascotas[0]?.created_at) {
-          ordenadas.sort((a, b) => {
-            const aDate = new Date(a.created_at);
-            const bDate = new Date(b.created_at);
-            return bDate - aDate;
-          });
-        } else {
-          ordenadas.sort((a, b) => b.id - a.id);
-        }
+        // Ordenar por created_at con offset o por id
+        const ordenadas = [...mascotas].sort((a, b) => {
+          if (a.created_at && b.created_at) {
+            const toIso = (raw) => {
+              const [partFecha] = raw.split(".");
+              const offsetM = raw.match(/(-|\+)\d{2}$/);
+              const off = offsetM ? `${offsetM[0]}:00` : "+00:00";
+              return `${partFecha.replace(" ", "T")}${off}`;
+            };
+            return new Date(toIso(b.created_at)) - new Date(toIso(a.created_at));
+          }
+          return b.id - a.id;
+        });
 
         setUltimasMascotas(ordenadas.slice(0, 5));
       } catch (e) {
+        console.error("❌ Error en fetchPublicados:", e);
         setPublicados(0);
         setUltimasMascotas([]);
       }
@@ -79,11 +94,44 @@ export default function CompanyHome() {
           ¡Bienvenido, {user?.name || "Tu Albergue"}!
         </h1>
 
+        {/* Sección de estadísticas: grid de 4 tarjetas */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+          <div className="bg-white p-6 rounded shadow text-center">
+            <div className="text-3xl mb-2">🐾</div>
+            <p className="text-xl font-bold">{publicados}</p>
+            <p className="text-sm text-gray-600">Doggos publicados</p>
+          </div>
+          <div className="bg-white p-6 rounded shadow text-center">
+            <div className="text-3xl mb-2">🟡</div>
+            <p className="text-xl font-bold">3</p>
+            <p className="text-sm text-gray-600">En espera de aprobación</p>
+          </div>
+          <div className="bg-white p-6 rounded shadow text-center">
+            <div className="text-3xl mb-2">📩</div>
+            <p className="text-xl font-bold">5</p>
+            <p className="text-sm text-gray-600">Mensajes no leídos</p>
+          </div>
+          <div className="bg-white p-6 rounded shadow text-center">
+            <div className="text-3xl mb-2">🔄</div>
+            <p className="text-xl font-bold">2</p>
+            <p className="text-sm text-gray-600">Adopciones logradas</p>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold mb-4">Acciones rápidas</h2>
         <div className="flex flex-wrap gap-4 mb-10">
+          <button className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition">
+            Añadir doggo
+          </button>
+          <button className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition">
+            Ver listado
+          </button>
+          <button className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition">
+            Editar perfil
+          </button>
+          <button className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition">
+            Revisar mensajes
+          </button>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
@@ -92,23 +140,21 @@ export default function CompanyHome() {
             {ultimasMascotas.length === 0 ? (
               <p className="text-sm text-gray-500">No hay registros aún.</p>
             ) : (
-              ultimasMascotas.map((m) => {
-                return (
-                  <div key={m.id} className="flex items-center gap-4 mb-3">
-                    <img
-                      src={`http://localhost:8000/imagenes/${m.imagen_id}`}
-                      alt={m.nombre}
-                      className="rounded-full w-10 h-10 object-cover"
-                    />
-                    <div>
-                      <p className="font-medium">{m.nombre}</p>
-                      <p className="text-sm text-gray-500">
-                        Registrado hace {formatTimeAgo(m.created_at)}
-                      </p>
-                    </div>
+              ultimasMascotas.map((m) => (
+                <div key={m.id} className="flex items-center gap-4 mb-3">
+                  <img
+                    src={`http://localhost:8000/imagenes/${m.imagen_id}`}
+                    alt={m.nombre}
+                    className="rounded-full w-10 h-10 object-cover"
+                  />
+                  <div>
+                    <p className="font-medium">{m.nombre}</p>
+                    <p className="text-sm text-gray-500">
+                      Registrado hace {formatTimeAgo(m.created_at)}
+                    </p>
                   </div>
-                );
-              })
+                </div>
+              ))
             )}
           </div>
 
