@@ -7,21 +7,39 @@ import {
   FaSignOutAlt,
 } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useContext } from "react";
+import { UserContext } from "../context/UserContext";
 import doggoLogo from "../assets/doggo-logo.png";
 
 export default function SidebarCompany() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { setUser } = useContext(UserContext);
 
   const isActive = (path) => location.pathname === path;
 
+  const handleLogout = () => {
+    setUser({
+      name: null,
+      email: null,
+      token: null,
+      albergue_id: null,
+    });
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
   return (
-    <div className="w-64 flex flex-col justify-between border-r border-gray-300 bg-[#FFF9F2]">
+    <div className="w-64 h-screen flex flex-col justify-between border-r border-gray-300 bg-[#FFF9F2]">
       <div>
         {/* Logo */}
-        <div className="flex items-center gap-2 px-6 py-4">
+        <div
+          className="flex items-center gap-2 px-6 py-4 cursor-pointer"
+          onClick={() => navigate("/home")}
+        >
           <img src={doggoLogo} alt="Doggo Logo" className="w-42 h-12" />
         </div>
+
 
         {/* Menú */}
         <nav className="mt-4 space-y-2 px-6 text-sm">
@@ -89,13 +107,12 @@ export default function SidebarCompany() {
 
       {/* Cerrar sesión */}
       <div className="px-6 py-4">
-        <div
-          role="button"
-          onClick={() => navigate("/home")}
-          className="flex items-center gap-2 text-black hover:font-semibold cursor-pointer"
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 w-full bg-red-500 hover:bg-red-700 text-white py-2 px-3 rounded transition"
         >
           <FaSignOutAlt /> Cerrar sesión
-        </div>
+        </button>
       </div>
     </div>
   );
