@@ -23,16 +23,19 @@ export default function Adddoggo() {
         return res.json();
       })
       .then((data) => {
-        const enriched = data.map((m) => ({
-          id: m.id,
-          nombre: m.nombre,
-          edad: m.edad,
-          especie: m.especie,
-          imageUrl: `http://localhost:8000/imagenes/${m.imagen_id}`,
-          etiquetas: m.etiquetas || [],
-        }));
+        const enriched = data
+          .map((m) => ({
+            id: m.id,
+            nombre: m.nombre,
+            edad: m.edad,
+            especie: m.especie,
+            imageUrl: `http://localhost:8000/imagenes/${m.imagen_id}`,
+            etiquetas: m.etiquetas || [],
+          }))
+          .sort((a, b) => b.id - a.id) // Orden descendente por ID
+          .slice(0, 4); // Solo las 4 más recientes
         setDogs(enriched);
-      })
+      })      
       .catch((err) => console.error("Fetch mascotas:", err.message));
   }, [token, albergueId]);
 
@@ -50,7 +53,12 @@ export default function Adddoggo() {
         <section>
           <h2 className="text-xl font-semibold mb-4">🐾 Perritos Registrados</h2>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {dogs.map((dog) => (
+          {dogs
+            .slice() // para no mutar el estado original
+            .sort((a, b) => b.id - a.id) // ordena por ID descendente
+            .slice(0, 4) // toma las 4 más recientes
+            .map((dog) => (
+
               <div
                 key={dog.id}
                 className="bg-white rounded-lg shadow hover:shadow-md transition"
@@ -67,7 +75,7 @@ export default function Adddoggo() {
                   </p>
                   {dog.etiquetas.length > 0 && (
                     <ul className="mt-2 flex flex-wrap gap-1">
-                      {dog.etiquetas.map((tag) => (
+                      {dog.etiquetas.slice(0, 5).map((tag) => (
                         <li
                           key={tag}
                           className="text-xs bg-orange-200 text-orange-800 rounded-full px-2 py-1"
