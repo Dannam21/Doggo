@@ -22,6 +22,7 @@ import Adddoggo from "./pages/empresa/Adddoggo";
 import User from "./pages/usuario/DashboardUser";
 import Questionnaire from "./pages/cuestionario/Questionnaire";
 import ListDoggo from "./pages/empresa/ListDoggo";
+import EditDoggo from "./pages/empresa/EditDoggo";
 
 function App() {
   return (
@@ -47,6 +48,16 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/company/editdoggos"
+            element={
+              <ProtectedRoute>
+                <EditDoggo />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/company/home"
             element={
