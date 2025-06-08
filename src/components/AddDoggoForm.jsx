@@ -11,6 +11,7 @@ export default function AddDoggoForm({ onDogCreated }) {
     nombre: "",
     edad: "",
     tamaño: "",
+    genero:"",
     descripcion: "",
     imagenFile: null,
     vivienda: [],               
@@ -137,6 +138,7 @@ export default function AddDoggoForm({ onDogCreated }) {
         nombre: formData.nombre.trim(),
         edad: formData.edad.trim(),
         especie: formData.tamaño.trim(),
+        genero: formData.genero.trim(),
         descripcion: formData.descripcion.trim(),
         imagen_id: imagen_id,
         etiquetas: etiquetasParaAPI,
@@ -166,6 +168,7 @@ export default function AddDoggoForm({ onDogCreated }) {
         nombre: "",
         edad: "",
         tamaño: "",
+        genero: "",
         descripcion: "",
         imagenFile: null,
         vivienda: [],
@@ -248,6 +251,23 @@ export default function AddDoggoForm({ onDogCreated }) {
               />
             </div>
 
+
+            <div>
+              <label className="block text-sm font-semibold mb-1 text-gray-700">
+                Genero
+              </label>
+              <input
+                name="genero"
+                type="text"
+                value={formData.genero}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 text-sm"
+                placeholder="Hembra o Macho"
+                required
+              />
+            </div>
+
+
             <div>
               <label className="block text-sm font-semibold mb-1 text-gray-700">
                 Tamaño
@@ -268,7 +288,7 @@ export default function AddDoggoForm({ onDogCreated }) {
 
             <div>
               <label className="block text-sm font-semibold mb-1 text-gray-700">
-                Descripción
+                Historia
               </label>
               <textarea
                 name="descripcion"
