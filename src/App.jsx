@@ -23,6 +23,7 @@ import User from "./pages/usuario/DashboardUser";
 import Questionnaire from "./pages/cuestionario/Questionnaire";
 import ListDoggo from "./pages/empresa/ListDoggo";
 import EditDoggo from "./pages/empresa/EditDoggo";
+import DashboardUser from "./pages/usuario/DashboardUser";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
           <Route path="/register/user" element={<RegisterUser />} />
           <Route path="/register/company" element={<RegisterCompany />} />
           <Route path="/cuestionario" element={ <Questionnaire />}/>
+
 
           <Route
             path="/company/doggos"
@@ -57,6 +59,11 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+
+
+
+        
 
           <Route
             path="/company/home"
