@@ -204,8 +204,8 @@ export default function EditDoggo() {
 
       {/* Modal para editar */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-[90%] max-w-lg">
+        <div className="fixed inset-0 bg-[#FFE5B4]/60 flex justify-center items-center z-50">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-[90%] max-w-lg">
             <h2 className="text-2xl font-bold mb-6">Editar mascota</h2>
             <form onSubmit={handleEditSubmit} className="space-y-6">
               <div>
@@ -252,10 +252,11 @@ export default function EditDoggo() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-6 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition"
+                  className="px-6 py-3 bg-gray-300 text-white rounded-md hover:bg-gray-400 transition"
                 >
                   Cancelar
                 </button>
+
                 <button
                   type="submit"
                   className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
