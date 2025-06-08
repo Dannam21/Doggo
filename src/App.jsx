@@ -60,11 +60,6 @@ function App() {
             }
           />
 
-
-
-
-        
-
           <Route
             path="/company/home"
             element={
