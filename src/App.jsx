@@ -19,11 +19,10 @@ import DashboardCompany from "./pages/empresa/DashboardCompany";
 import Adddoggo from "./pages/empresa/Adddoggo";
 
 // Páginas de usuario
-// import User from "./pages/usuario/DashboardUser";
+import User from "./pages/usuario/DashboardUser";
 import Questionnaire from "./pages/cuestionario/Questionnaire";
 import ListDoggo from "./pages/empresa/ListDoggo";
 import EditDoggo from "./pages/empresa/EditDoggo";
-import DashboardUser from "./pages/usuario/DashboardUser";
 import DoggoUser from "./pages/usuario/DoggoUser";
 import MatchUser from "./pages/usuario/MatchUser";
 
