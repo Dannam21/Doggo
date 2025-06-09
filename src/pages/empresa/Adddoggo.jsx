@@ -44,9 +44,10 @@ export default function Adddoggo() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#fdf0df]">
-      <SidebarCompany />
-
+    <div className="flex bg-[#fdf0df] min-h-screen">
+  <div className="sticky top-0 h-screen">
+    <SidebarCompany />
+  </div>
       <main className="flex-1 px-10 py-10 space-y-10">
         <h1 className="text-3xl font-extrabold text-[#2e2e2e]">🐶 Añadir Doggos</h1>
 

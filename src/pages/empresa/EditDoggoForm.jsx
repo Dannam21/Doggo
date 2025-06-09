@@ -1,8 +1,8 @@
 import React, { useState, useContext } from "react";
 import { FaCloudUploadAlt } from "react-icons/fa";
-import { UserContext } from "../context/UserContext";
+import { UserContext } from "../../context/UserContext";
 
-export default function AddDoggoForm({ onDogCreated }) {
+export default function EditDoggo({ onDogCreated }) {
   const { user } = useContext(UserContext);
   const token = user?.token;
   const albergueId = user?.albergue_id;
@@ -11,8 +11,6 @@ export default function AddDoggoForm({ onDogCreated }) {
     nombre: "",
     edad: "",
     tamaño: "",
-    genero:"",
-    vacunas: [],
     descripcion: "",
     imagenFile: null,
     vivienda: [],               
@@ -27,7 +25,7 @@ export default function AddDoggoForm({ onDogCreated }) {
     energia: [],                
     temperamento: [],           
     otrosAtributos: [],         
-  });
+});
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -49,7 +47,6 @@ export default function AddDoggoForm({ onDogCreated }) {
       const limite =
         name === "temperamento" ? 3 :
         name === "jardin" ? 1 :
-        name === "vacunas" ? 5:
         2;
 
       if (checked) {
@@ -140,8 +137,6 @@ export default function AddDoggoForm({ onDogCreated }) {
         nombre: formData.nombre.trim(),
         edad: formData.edad.trim(),
         especie: formData.tamaño.trim(),
-        genero: formData.genero.trim(),
-        vacunas: formData.vacunas,
         descripcion: formData.descripcion.trim(),
         imagen_id: imagen_id,
         etiquetas: etiquetasParaAPI,
@@ -171,8 +166,6 @@ export default function AddDoggoForm({ onDogCreated }) {
         nombre: "",
         edad: "",
         tamaño: "",
-        genero: "",
-        vacunas: [],
         descripcion: "",
         imagenFile: null,
         vivienda: [],
@@ -209,132 +202,7 @@ export default function AddDoggoForm({ onDogCreated }) {
           onSubmit={handleSubmit}
           className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-start"
         >
-          <div className="space-y-5">
-            <div className="border-2 border-dashed border-gray-300 rounded-lg h-40 flex flex-col justify-center items-center hover:border-orange-400 cursor-pointer relative">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="absolute w-full h-full opacity-0 cursor-pointer"
-              />
-              <FaCloudUploadAlt className="text-4xl text-gray-400" />
-              <p className="text-gray-500 text-sm mt-1">
-                {formData.imagenFile
-                  ? formData.imagenFile.name
-                  : "Haz clic para subir imagen"}
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-1 text-gray-700">
-                Nombre
-              </label>
-              <input
-                name="nombre"
-                type="text"
-                value={formData.nombre}
-                onChange={handleChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 text-sm"
-                placeholder="Ej. Luna"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-1 text-gray-700">
-                Edad
-              </label>
-              <input
-                name="edad"
-                type="text"
-                value={formData.edad}
-                onChange={handleChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 text-sm"
-                placeholder="Ej. 2 años"
-                required
-              />
-            </div>
-
-
-            <div>
-              <label className="block text-sm font-semibold mb-1 text-gray-700">
-                Genero
-              </label>
-              <input
-                name="genero"
-                type="text"
-                value={formData.genero}
-                onChange={handleChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 text-sm"
-                placeholder="Hembra o Macho"
-                required
-              />
-            </div>
-
-
-            
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-              <h3 className="text-md font-medium text-gray-800 mb-1">
-                Vacunas:{" "}
-                <span className="text-gray-500 text-sm">(Máx. 5)</span>
-              </h3>
-              <div className="flex flex-wrap gap-4 mt-2">
-                {[
-                  { val: "Vacuna 1", label: "v1" },
-                  { val: "Vacuna 2", label: "v2" },
-                  { val: "Vacuna 3", label: "v3" },
-                ].map((op) => (
-                  <label key={op.val} className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      name="vacunas"
-                      value={op.val}
-                      checked={formData.vacunas.includes(op.val)}
-                      onChange={handleCheckboxChange}
-                      className="h-4 w-4 accent-orange-500"
-                    />
-                    <span className="text-gray-700">{op.label}</span>
-                  </label>
-                ))}
-              </div>
-              <p className="text-gray-500 text-xs mt-1">
-                {formData.vacunas.length} / 5 seleccionados
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-1 text-gray-700">
-                Tamaño
-              </label>
-              <select
-                name="tamaño"
-                value={formData.tamaño}
-                onChange={handleChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 text-sm"
-                required
-              >
-                <option value="">Selecciona un tamaño</option>
-                <option value="Pequeño">Pequeño</option>
-                <option value="Mediano">Mediano</option>
-                <option value="Grande">Grande</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-1 text-gray-700">
-                Historia
-              </label>
-              <textarea
-                name="descripcion"
-                rows="4"
-                value={formData.descripcion}
-                onChange={handleChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 resize-none min-h-[25rem] text-sm"
-                placeholder="Describe a tu doggo (opcional)"
-              />
-            </div>
-          </div>
-
+        
           <div className="space-y-6">
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
               <h3 className="text-md font-medium text-gray-800 mb-1">
