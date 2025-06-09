@@ -86,6 +86,7 @@ export default function CompanyHome() {
     fetchPublicados();
   }, [user]);
 
+  // asdasda
   return (
     <div className="flex min-h-screen bg-[#fdf0df]">
       <SidebarCompany />
