@@ -11,6 +11,8 @@ export default function AddDoggoForm({ onDogCreated }) {
     nombre: "",
     edad: "",
     tamaño: "",
+    genero:"",
+    vacunas: [],
     descripcion: "",
     imagenFile: null,
     vivienda: [],               
@@ -47,6 +49,7 @@ export default function AddDoggoForm({ onDogCreated }) {
       const limite =
         name === "temperamento" ? 3 :
         name === "jardin" ? 1 :
+        name === "vacunas" ? 5:
         2;
 
       if (checked) {
@@ -137,6 +140,8 @@ export default function AddDoggoForm({ onDogCreated }) {
         nombre: formData.nombre.trim(),
         edad: formData.edad.trim(),
         especie: formData.tamaño.trim(),
+        genero: formData.genero.trim(),
+        vacunas: formData.vacunas,
         descripcion: formData.descripcion.trim(),
         imagen_id: imagen_id,
         etiquetas: etiquetasParaAPI,
@@ -166,6 +171,8 @@ export default function AddDoggoForm({ onDogCreated }) {
         nombre: "",
         edad: "",
         tamaño: "",
+        genero: "",
+        vacunas: [],
         descripcion: "",
         imagenFile: null,
         vivienda: [],
@@ -248,6 +255,53 @@ export default function AddDoggoForm({ onDogCreated }) {
               />
             </div>
 
+
+            <div>
+              <label className="block text-sm font-semibold mb-1 text-gray-700">
+                Genero
+              </label>
+              <input
+                name="genero"
+                type="text"
+                value={formData.genero}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 text-sm"
+                placeholder="Hembra o Macho"
+                required
+              />
+            </div>
+
+
+            
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <h3 className="text-md font-medium text-gray-800 mb-1">
+                Vacunas:{" "}
+                <span className="text-gray-500 text-sm">(Máx. 5)</span>
+              </h3>
+              <div className="flex flex-wrap gap-4 mt-2">
+                {[
+                  { val: "Vacuna 1", label: "v1" },
+                  { val: "Vacuna 2", label: "v2" },
+                  { val: "Vacuna 3", label: "v3" },
+                ].map((op) => (
+                  <label key={op.val} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      name="vacunas"
+                      value={op.val}
+                      checked={formData.vacunas.includes(op.val)}
+                      onChange={handleCheckboxChange}
+                      className="h-4 w-4 accent-orange-500"
+                    />
+                    <span className="text-gray-700">{op.label}</span>
+                  </label>
+                ))}
+              </div>
+              <p className="text-gray-500 text-xs mt-1">
+                {formData.vacunas.length} / 5 seleccionados
+              </p>
+            </div>
+
             <div>
               <label className="block text-sm font-semibold mb-1 text-gray-700">
                 Tamaño
@@ -268,7 +322,7 @@ export default function AddDoggoForm({ onDogCreated }) {
 
             <div>
               <label className="block text-sm font-semibold mb-1 text-gray-700">
-                Descripción
+                Historia
               </label>
               <textarea
                 name="descripcion"
