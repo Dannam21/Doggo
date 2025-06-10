@@ -22,7 +22,7 @@ export default function DashboardUser() {
       setLoading(false);
       return;
     }
-    fetch("http://localhost:8000/adoptante/me", {
+    fetch("http://34.195.195.173:8000/adoptante/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => {
@@ -31,7 +31,7 @@ export default function DashboardUser() {
       })
       .then(perfil => {
         setAdoptanteId(perfil.id);
-        return fetch(`http://localhost:8000/recomendaciones/${perfil.id}`, {
+        return fetch(`http://34.195.195.173:8000/recomendaciones/${perfil.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
       })
@@ -138,7 +138,7 @@ export default function DashboardUser() {
             className={`absolute inset-0 z-0 bg-[#ee9c70] text-white rounded-xl shadow-md p-4 transition-all duration-300 transform ${cardClasses(nextDog)}`}
           >
             <img
-              src={`http://localhost:8000/imagenes/${nextDog.imagen_id}`}
+              src={`http://34.195.195.173:8000/imagenes/${nextDog.imagen_id}`}
               alt={nextDog.nombre}
               className="w-full h-48 object-cover rounded-md mb-4"
             />
@@ -151,7 +151,7 @@ export default function DashboardUser() {
             className={`absolute inset-0 z-10 bg-[#ee9c70] text-white rounded-xl shadow-xl p-4 transition-all duration-400 ease-in-out transform ${cardClasses(currentDog)}`}
           >
             <img
-              src={`http://localhost:8000/imagenes/${currentDog.imagen_id}`}
+              src={`http://34.195.195.173:8000/imagenes/${currentDog.imagen_id}`}
               alt={currentDog.nombre}
               className="w-full h-48 object-cover rounded-md mb-4"
             />

@@ -4,7 +4,7 @@ const Adopta = () => {
   const [pets, setPets] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/mascotas")
+    fetch("http://34.195.195.173:8000/mascotas")
       .then((res) => {
         if (!res.ok) {
           throw new Error("No se pudieron obtener las mascotas");
@@ -79,7 +79,7 @@ const Adopta = () => {
                     className="bg-orange-300 text-white rounded-lg p-4 text-center shadow-md hover:scale-105 transition"
                   >
                     <img
-                      src={`http://localhost:8000/imagenes/${pet.imagen_id}`}
+                      src={`http://34.195.195.173:8000/imagenes/${pet.imagen_id}`}
                       alt={pet.nombre}
                       className="w-full h-36 object-cover rounded-lg mb-3"
                       onError={(e) => {

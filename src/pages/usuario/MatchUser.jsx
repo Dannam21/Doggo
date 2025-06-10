@@ -20,7 +20,7 @@ export default function MatchUser() {
           <h1 className="text-2xl font-bold mb-4">It's a Match!</h1>
           <div className="bg-white rounded-full overflow-hidden w-40 h-40 mx-auto mb-4">
             <img
-              src={`http://localhost:8000/imagenes/${dog.imagen_id}`}
+              src={`http://34.195.195.173:8000/imagenes/${dog.imagen_id}`}
               alt={dog.nombre}
               className="w-full h-full object-cover"
             />

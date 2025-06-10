@@ -98,7 +98,7 @@ const Questionnaire = () => {
         etiquetas: etiquetasSeleccionadas,
       };
 
-      const registerRes = await fetch("http://localhost:8000/register/adoptante", {
+      const registerRes = await fetch("http://34.195.195.173:8000/register/adoptante", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payloadRegistro),
@@ -108,7 +108,7 @@ const Questionnaire = () => {
         throw new Error(errData.detail || "Error al registrar adoptante");
       }
 
-      const loginRes = await fetch("http://localhost:8000/login/adoptante", {
+      const loginRes = await fetch("http://34.195.195.173:8000/login/adoptante", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -123,7 +123,7 @@ const Questionnaire = () => {
       const loginData = await loginRes.json();
       const token = loginData.access_token;
 
-      const perfilRes = await fetch("http://localhost:8000/adoptante/me", {
+      const perfilRes = await fetch("http://34.195.195.173:8000/adoptante/me", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
