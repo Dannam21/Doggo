@@ -10,68 +10,75 @@ export default function CompanyMessages() {
 
   const [chatList, setChatList] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
+  const [selectedUserInfo, setSelectedUserInfo] = useState(null);
   const [messagesByUser, setMessagesByUser] = useState({});
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
+  const websocketRef = useRef(null);
 
-  const selectedUserData = chatList.find(
-    (chat) => `${chat.userType}-${chat.userId}` === selectedUser
-  );
+  const rolEmisor = "albergue"; // fijo
+  const rolReceptor = selectedUserInfo?.userType || ""; // puede ser "adoptante"
 
   const fetchChatList = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/mensajes/contactos?emisor_id=${emisorId}&emisor_tipo=albergue`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `http://localhost:8000/mensajes/contactos?emisor_id=${emisorId}&emisor_tipo=albergue`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       const data = await res.json();
-      setChatList(data);
-      return data; // <--- Esto permite el uso con .then()
+      const enhancedChatList = await Promise.all(
+        data.map(async (chat) => {
+          const userInfo = await fetchUserAvatar(chat.userType, chat.userId);
+          return { ...chat, name: userInfo.name, avatar: userInfo.avatar };
+        })
+      );
+      setChatList(enhancedChatList);
     } catch (error) {
       console.error("Error al cargar contactos del chat:", error);
     }
   };
-  
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const fetchMessages = async () => {
-    if (!emisorId || !selectedUserData) return;
-
-    try {
-      const receptorId = selectedUserData.userId;
-      const receptorTipo = selectedUserData.userType;
-
-      const res = await fetch(
-        `http://localhost:8000/mensajes/conversacion?id1=${emisorId}&tipo1=albergue&id2=${receptorId}&tipo2=${receptorTipo}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await res.json();
-
-      if (!Array.isArray(data)) {
-        console.error("Respuesta inesperada del backend:", data);
-        return;
+  const fetchUserAvatar = async (userType, userId) => {
+    if (userType === "adoptante") {
+      try {
+        const res = await fetch(`http://localhost:8000/adoptante/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const adoptante = await res.json();
+        const imagenId = adoptante.imagen_perfil_id;
+        const avatarUrl = imagenId
+          ? `http://localhost:8000/imagenesProfile/${imagenId}`
+          : "https://via.placeholder.com/40";
+        return { name: adoptante.nombre, avatar: avatarUrl };
+      } catch (error) {
+        console.error("Error al obtener info del adoptante:", error);
       }
+    }
+    return { name: "Usuario desconocido", avatar: "https://via.placeholder.com/40" };
+  };
 
-      const formattedMessages = data.map((msg, index) => {
-        const isFromCompany =
-          msg.emisor_id === emisorId && msg.emisor_tipo === "albergue";
+  const fetchMessages = async () => {
+    if (!emisorId || !selectedUser) return;
+    const [userType, userId] = selectedUser.split("-");
+    try {
+      const res = await fetch(
+        `http://localhost:8000/mensajes/conversacion?id1=${emisorId}&tipo1=albergue&id2=${userId}&tipo2=${userType}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const data = await res.json();
+      const userInfo = await fetchUserAvatar(userType, userId);
+      setSelectedUserInfo({ ...userInfo, userType, userId });
 
-        return {
-          id: index,
-          text: msg.contenido,
-          sender: isFromCompany ? "company" : "adopter",
-          senderName: isFromCompany ? "Tú" : selectedUserData.name,
-        };
-      });
+      const formattedMessages = data.map((msg, index) => ({
+        id: index,
+        text: msg.contenido,
+        sender: msg.emisor_id === emisorId && msg.emisor_tipo === "albergue" ? "company" : "adopter",
+        senderName: msg.emisor_id === emisorId ? "Tú" : userInfo.name,
+      }));
 
       setMessagesByUser((prev) => ({
         ...prev,
@@ -82,63 +89,93 @@ export default function CompanyMessages() {
     }
   };
 
-  
+  const handleSend = () => {
+    if (!newMessage.trim()) return;
+
+    if (websocketRef.current && websocketRef.current.readyState === WebSocket.OPEN) {
+      websocketRef.current.send(
+        JSON.stringify({
+          receptor_id: selectedUserInfo.userId,
+          receptor_tipo: rolReceptor,
+          contenido: newMessage,
+        })
+      );
+
+      // Añadir mensaje a la lista local
+      setMessagesByUser((prev) => ({
+        ...prev,
+        [selectedUser]: [
+          ...(prev[selectedUser] || []),
+          {
+            id: prev[selectedUser]?.length || 0,
+            text: newMessage,
+            sender: "company",
+            senderName: "Tú",
+          },
+        ],
+      }));
+
+      setNewMessage("");
+    } else {
+      console.warn("⚠️ WebSocket no está abierto");
+    }
+  };
+
+  const setupWebSocket = () => {
+    const ws = new WebSocket(`ws://localhost:8000/ws/chat/${rolEmisor}/${emisorId}`);
+
+    ws.onopen = () => {
+      console.log("✅ WebSocket conectado");
+      websocketRef.current = ws;
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const receptorKey = `${data.emisor_tipo}-${data.emisor_id}`;
+      const newMsg = {
+        id: (messagesByUser[receptorKey]?.length || 0),
+        text: data.contenido,
+        sender: "adopter",
+        senderName: selectedUserInfo?.name || "Usuario",
+      };
+
+      setMessagesByUser((prev) => ({
+        ...prev,
+        [receptorKey]: [...(prev[receptorKey] || []), newMsg],
+      }));
+    };
+
+    ws.onerror = (error) => {
+      console.error("❌ WebSocket error: ", error);
+    };
+
+    ws.onclose = () => {
+      console.log("🔌 WebSocket cerrado");
+    };
+  };
+
+  useEffect(() => {
+    fetchChatList();
+  }, [emisorId]);
+
   useEffect(() => {
     if (selectedUser) {
-      localStorage.setItem("selectedUser", selectedUser);
+      fetchMessages();
     }
   }, [selectedUser]);
 
-  
   useEffect(() => {
-    if (emisorId && token) {
-      const interval = setInterval(() => {
-        fetchChatList();
-      }, 10); // Actualiza cada 3 segundos
-  
-      return () => clearInterval(interval);
+    if (selectedUserInfo && token && emisorId) {
+      setupWebSocket();
     }
-  }, [emisorId, token]);
-    
-  useEffect(() => {
-    fetchMessages();
-    const interval = setInterval(() => {
-      fetchMessages();
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [selectedUser]);
+    return () => {
+      websocketRef.current?.close();
+    };
+  }, [selectedUserInfo, token, emisorId]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messagesByUser, selectedUser]);
-
-  const handleSend = async () => {
-    if (!newMessage.trim() || !emisorId || !selectedUserData) return;
-
-    const payload = {
-      emisor_id: emisorId,
-      emisor_tipo: "albergue",
-      receptor_id: selectedUserData.userId,
-      receptor_tipo: selectedUserData.userType,
-      contenido: newMessage,
-    };
-
-    try {
-      await fetch("http://localhost:8000/adoptante/mensajes/enviar", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      setNewMessage("");
-      fetchMessages();
-    } catch (error) {
-      console.error("Error al enviar mensaje:", error);
-    }
-  };
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -151,7 +188,7 @@ export default function CompanyMessages() {
     <div className="flex min-h-screen bg-[#fdf0df]">
       <SidebarCompany />
 
-      {/* Lista de chats */}
+      {/* Chat List Sidebar */}
       <div className="w-72 bg-white flex flex-col shadow-md">
         <div className="px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">Mensajes</h2>
@@ -167,34 +204,28 @@ export default function CompanyMessages() {
                 selectedUser === `${chat.userType}-${chat.userId}` ? "bg-orange-100" : ""
               }`}
             >
-              <img
-                src={chat.avatar}
-                alt={chat.name}
-                className="w-10 h-10 rounded-full object-cover mr-3"
-              />
+              <img src={chat.avatar} alt={chat.name} className="w-10 h-10 rounded-full object-cover mr-3" />
               <div>
                 <p className="font-semibold">{chat.name}</p>
-                <p className="text-sm text-gray-500 truncate w-40">
-                  {chat.lastMessage}
-                </p>
+                <p className="text-sm text-gray-500 truncate w-40">{chat.lastMessage}</p>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Vista de conversación */}
+      {/* Chat Area */}
       <main className="flex-1 p-6 flex flex-col">
-        {selectedUserData && (
+        {selectedUserInfo && (
           <>
             <div className="bg-white rounded-t-2xl shadow-sm">
               <div className="flex items-center gap-4 px-4 py-3">
                 <img
-                  src={selectedUserData.avatar}
-                  alt={selectedUserData.name}
+                  src={selectedUserInfo.avatar}
+                  alt={selectedUserInfo.name}
                   className="w-10 h-10 rounded-full object-cover"
                 />
-                <h3 className="text-lg font-semibold">{selectedUserData.name}</h3>
+                <h3 className="text-lg font-semibold">{selectedUserInfo.name}</h3>
               </div>
               <div className="h-[1px] bg-[#ccccd4] w-full" />
             </div>
@@ -204,9 +235,7 @@ export default function CompanyMessages() {
                 {(messagesByUser[selectedUser] || []).map((msg) => (
                   <div key={msg.id}>
                     <div className={`flex ${msg.sender === "company" ? "justify-end" : "justify-start"}`}>
-                      <div className="text-xs text-gray-500 mb-1">
-                        {msg.senderName}
-                      </div>
+                      <div className="text-xs text-gray-500 mb-1">{msg.senderName}</div>
                     </div>
 
                     <div className={`flex ${msg.sender === "company" ? "justify-end" : "justify-start"}`}>
