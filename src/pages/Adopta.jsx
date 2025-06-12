@@ -59,15 +59,17 @@ const Adopta = () => {
               </div>
               <div>
                 <p className="font-bold mb-2">Salud</p>
-                {["Esterilizado", "Vacunas completas", "Desparasitado"].map((item) => (
-                  <label key={item} className="block">
-                    <input type="checkbox" className="mr-2" /> {item}
-                  </label>
-                ))}
+                {["Esterilizado", "Vacunas completas", "Desparasitado"].map(
+                  (item) => (
+                    <label key={item} className="block">
+                      <input type="checkbox" className="mr-2" /> {item}
+                    </label>
+                  )
+                )}
               </div>
             </aside>
 
-            <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-5 gap-x-2 gap-y-6">
               {pets.length === 0 ? (
                 <p className="text-center text-gray-600 col-span-full">
                   No hay mascotas registradas por el momento.
@@ -76,21 +78,24 @@ const Adopta = () => {
                 pets.map((pet) => (
                   <div
                     key={pet.id}
-                    className="bg-orange-300 text-white rounded-lg p-4 text-center shadow-md hover:scale-105 transition"
+                    className="bg-orange-300 text-white rounded-xl shadow-md p-3 text-center hover:scale-105 transition-transform duration-300 ease-in-out w-56 mx-auto"
                   >
                     <img
                       src={`http://localhost:8000/imagenes/${pet.imagen_id}`}
                       alt={pet.nombre}
-                      className="w-full h-36 object-cover rounded-lg mb-3"
+                      className="max-h-full max-w-full object-contain"
                       onError={(e) => {
                         e.currentTarget.src =
                           "https://via.placeholder.com/400x300?text=Sin+Imagen";
                       }}
                     />
-                    <h3 className="font-bold text-lg">{pet.nombre}</h3>
-                    <p className="text-sm">
-                      {pet.edad} {pet.edad === 1 ? "año" : ""} <br />
-                      {pet.especie}
+                    <h3 className="font-bold text-xl">{pet.nombre}</h3>
+                    <p className="text-lg leading-relaxed  text-white">
+                      {pet.edad} {pet.edad === 1 ? "año" : "años"} <br />
+                      {pet.especie} <br />
+                      <span className="italic text-md text-white/90">
+                        Albergue: {pet.albergue_nombre}
+                      </span>
                     </p>
                   </div>
                 ))
