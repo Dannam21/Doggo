@@ -1,11 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
 import SidebarCompany from "../../components/SidebarCompany";
 import { UserContext } from "../../context/UserContext";
+import { useNavigate } from "react-router-dom";
+
 
 export default function CompanyHome() {
   const { user } = useContext(UserContext);
   const [publicados, setPublicados] = useState(0);
   const [ultimasMascotas, setUltimasMascotas] = useState([]);
+  const navigate = useNavigate();
+
 
   // Helper para formatear "hace X...", interpretando correctamente el offset "-05"
   const formatTimeAgo = (timestamp) => {
@@ -121,16 +125,21 @@ export default function CompanyHome() {
 
         <h2 className="text-xl font-semibold mb-4">Acciones rápidas</h2>
         <div className="flex flex-wrap gap-4 mb-10">
-          <button className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition">
+          <button className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition"
+          onClick={() => navigate("/company/adddoggo")}>
             Añadir doggo
           </button>
-          <button className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition">
+          <button className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition"
+          onClick={() => navigate("/company/listdoggo")}>
             Ver listado
           </button>
-          <button className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition">
+          <button className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition"
+          onClick={() => navigate("/company/editdoggos")}
+          >
             Editar perfil
           </button>
-          <button className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition">
+          <button className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition"
+          onClick={() => navigate("/company/messages")}>
             Revisar mensajes
           </button>
         </div>
