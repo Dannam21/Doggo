@@ -7,7 +7,6 @@ const RegisterUser = () => {
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
 
-  // Guardamos provisionalmente los datos de registro
   const [form, setForm] = useState({
     nombre: "",
     apellido: "",
@@ -16,8 +15,12 @@ const RegisterUser = () => {
     telefono: "",
     contrasena: "",
     confirmarContrasena: "",
+    imagenFile: null, // Nuevo estado para el archivo de imagen
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); // Nuevo estado para manejar la carga
+
+  const defaultProfileImageId = 1; // Puedes cambiar este ID por el ID de tu imagen por defecto
 
   const handleChange = (e) => {
     setForm((prev) => ({
@@ -27,27 +30,79 @@ const RegisterUser = () => {
     setError("");
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleFileChange = (e) => {
+    const file = e.target.files[0] || null;
+    setForm((prev) => ({ ...prev, imagenFile: file }));
     setError("");
+  };
 
-    if (form.contrasena !== form.confirmarContrasena) {
-      setError("Las contraseñas no coinciden.");
-      return;
+// ... (código anterior)
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true);
+
+  if (form.contrasena !== form.confirmarContrasena) {
+    setError("Las contraseñas no coinciden.");
+    setLoading(false);
+    return;
+  }
+
+  try {
+    let imagenPerfilId = defaultProfileImageId; // <--- DECLARACIÓN INICIAL
+
+    if (form.imagenFile) {
+      // Si el usuario subió una imagen, la subimos primero
+      const imagePayload = new FormData();
+      imagePayload.append("image", form.imagenFile);
+
+      const imgRes = await fetch("http://localhost:8000/imagenesProfile", {
+        method: "POST",
+        body: imagePayload,
+      });
+
+      if (!imgRes.ok) {
+        const errJson = await imgRes.json();
+        console.error("Error al subir la imagen:", errJson);
+        throw new Error(errJson.detail || "Error al subir la imagen de perfil.");
+      }
+      const imgData = await imgRes.json();
+      console.log("Datos de la imagen subida:", imgData);
+      imagenPerfilId = imgData.id; // <--- ASIGNACIÓN A LA VARIABLE YA DECLARADA
     }
 
-    setUser({
+    // AHORA ESTA LÍNEA DEBERÍA ESTAR FUERA DEL BLOQUE IF PARA ACCEDER A imagenPerfilId
+    const registerPayload = {
       nombre: form.nombre,
       apellido: form.apellido,
       dni: form.dni,
       correo: form.correo,
       telefono: form.telefono,
       contrasena: form.contrasena,
-    });
+      imagen_perfil_id: imagenPerfilId, // <--- USO DE LA VARIABLE
+    };
 
-    // Redirigimos a llenar el cuestionario
+    console.log("Payload de registro del adoptante:", registerPayload); // Esto también es útil
+
+    // Guardamos los datos en el contexto sin registrar todavía
+setUser({
+  nombre: form.nombre,
+  apellido: form.apellido,
+  dni: form.dni,
+  correo: form.correo,
+  telefono: form.telefono,
+  contrasena: form.contrasena,
+  imagen_perfil_id: imagenPerfilId,
+});
+
     navigate("/cuestionario");
-  };
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <main>
@@ -169,11 +224,50 @@ const RegisterUser = () => {
               />
             </div>
 
+            {/* Campo para subir imagen de perfil */}
+            <div className="flex flex-col items-center">
+              <label htmlFor="imagenFile" className="block text-sm font-medium text-gray-700 mb-2">
+                Imagen de Perfil (opcional)
+              </label>
+              <input
+                type="file"
+                id="imagenFile"
+                name="imagenFile"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden" // Ocultamos el input original para estilizarlo
+              />
+              <label
+                htmlFor="imagenFile"
+                className="cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg inline-flex items-center"
+              >
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                  ></path>
+                </svg>
+                {form.imagenFile ? form.imagenFile.name : "Seleccionar imagen"}
+              </label>
+              <p className="mt-2 text-xs text-gray-500">
+                Si no subes una imagen, se usará una por defecto.
+              </p>
+            </div>
+
             <button
               type="submit"
               className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-md transition"
+              disabled={loading} // Deshabilitar el botón mientras se procesa
             >
-              Continuar al cuestionario
+              {loading ? "Registrando..." : "Registrar"}
             </button>
           </form>
 
