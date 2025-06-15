@@ -33,6 +33,12 @@ export default function CompanyMessages() {
         })
       );
       setChatList(enhancedChatList);
+      
+      // ✅ Auto-seleccionar el primer chat si no hay ninguno seleccionado
+      if (enhancedChatList.length > 0 && !selectedUser) {
+        const firstChat = enhancedChatList[0];
+        setSelectedUser(`${firstChat.userType}-${firstChat.userId}`);
+      }
     } catch (error) {
       console.error("Error al cargar contactos del chat:", error);
     }
@@ -129,21 +135,44 @@ export default function CompanyMessages() {
       websocketRef.current = ws;
     };
 
-    ws.onmessage = (event) => {
+    ws.onmessage = async (event) => {
       const data = JSON.parse(event.data);
       const receptorKey = `${data.emisor_tipo}-${data.emisor_id}`;
       const newMsg = {
-        id: `${data.emisor_id}-${data.contenido}-${Date.now()}`, // antes usabas length
+        id: `${data.emisor_id}-${data.contenido}-${Date.now()}`,
         text: data.contenido,
         sender: "adopter",
         senderName: selectedUserInfo?.name || "Usuario",
       };
-      
+    
+      // Actualizar mensajes
       setMessagesByUser((prev) => ({
         ...prev,
         [receptorKey]: [...(prev[receptorKey] || []), newMsg],
       }));
+    
+      // ✅ Revisar si ese usuario ya está en el chatList
+      const alreadyInChatList = chatList.some(
+        (chat) => chat.userId === data.emisor_id && chat.userType === data.emisor_tipo
+      );
+    
+      if (!alreadyInChatList) {
+        const userInfo = await fetchUserAvatar(data.emisor_tipo, data.emisor_id);
+        const newChatItem = {
+          userId: data.emisor_id,
+          userType: data.emisor_tipo,
+          name: userInfo.name,
+          avatar: userInfo.avatar,
+          lastMessage: data.contenido,
+        };
+        
+        setChatList((prev) => [newChatItem, ...prev]);
+        
+        // 🔥 AUTO-SELECCIONAR EL NUEVO CHAT
+        setSelectedUser(receptorKey);
+      }
     };
+    
 
     ws.onerror = (error) => {
       console.error("❌ WebSocket error: ", error);
@@ -165,13 +194,14 @@ export default function CompanyMessages() {
   }, [selectedUser]);
 
   useEffect(() => {
-    if (selectedUserInfo && token && emisorId) {
+    if (token && emisorId) {
       setupWebSocket();
     }
     return () => {
       websocketRef.current?.close();
     };
-  }, [selectedUserInfo, token, emisorId]);
+  }, [token, emisorId]);
+  
 
   useEffect(() => {
     scrollToBottom();
