@@ -26,6 +26,7 @@ import EditDoggo from "./pages/empresa/EditDoggo";
 import DoggoUser from "./pages/usuario/DoggoUser";
 import MatchUser from "./pages/usuario/MatchUser";
 import UserProfile from "./pages/usuario/UserProfile";
+import UserMessages from "./pages/usuario/UserMessages";
 
 function App() {
   return (
@@ -101,6 +102,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <UserProfile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/user/messages"
+            element={
+              <ProtectedRoute>
+                <UserMessages />
               </ProtectedRoute>
             }
           />

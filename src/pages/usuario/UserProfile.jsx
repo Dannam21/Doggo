@@ -1,8 +1,10 @@
 import React, { useContext } from "react";
 import { UserContext } from "../../context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 const UserProfile = () => {
   const { user } = useContext(UserContext);
+  const navigate = useNavigate();
 
   if (!user || !user.token) {
     return (
@@ -28,17 +30,21 @@ const UserProfile = () => {
           <p className="text-sm font-semibold text-gray-500">Correo electrónico</p>
           <p className="text-lg">{user.email}</p>
         </div>
-
-        {/* Si quieres agregar más info, aquí puedes expandir */}
       </div>
 
-      {/* Botón de edición para futuro desarrollo */}
-      <div className="mt-8">
+      <div className="mt-8 flex gap-4 flex-wrap">
         <button
           disabled
           className="bg-gray-300 text-gray-600 px-4 py-2 rounded cursor-not-allowed"
         >
           Editar perfil (próximamente)
+        </button>
+
+        <button
+          onClick={() => navigate("/user/messages")}
+          className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition font-semibold"
+        >
+          Ir a mensajes 💬
         </button>
       </div>
     </div>
@@ -46,4 +52,3 @@ const UserProfile = () => {
 };
 
 export default UserProfile;
-

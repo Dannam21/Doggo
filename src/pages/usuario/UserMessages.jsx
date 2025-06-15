@@ -1,11 +1,10 @@
 import { useState, useRef, useEffect, useContext } from "react";
-import SidebarCompany from "../../components/SidebarCompany";
 import { FaPaperPlane } from "react-icons/fa";
 import { UserContext } from "../../context/UserContext";
 
-export default function CompanyMessages() {
+export default function UserMessages() {
   const { user } = useContext(UserContext);
-  const emisorId = user?.albergue_id;
+  const emisorId = user?.adoptante_id;
   const token = user?.token;
 
   const [chatList, setChatList] = useState([]);
@@ -16,13 +15,13 @@ export default function CompanyMessages() {
   const messagesEndRef = useRef(null);
   const websocketRef = useRef(null);
 
-  const rolEmisor = "albergue"; // fijo
-  const rolReceptor = selectedUserInfo?.userType || ""; // puede ser "adoptante"
+  const rolEmisor = "adoptante";
+  const rolReceptor = selectedUserInfo?.userType || "";
 
   const fetchChatList = async () => {
     try {
       const res = await fetch(
-        `http://localhost:8000/mensajes/contactos?emisor_id=${emisorId}&emisor_tipo=albergue`,
+        `http://localhost:8000/mensajes/contactos?emisor_id=${emisorId}&emisor_tipo=adoptante`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -38,24 +37,20 @@ export default function CompanyMessages() {
     }
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   const fetchUserAvatar = async (userType, userId) => {
-    if (userType === "adoptante") {
+    if (userType === "albergue") {
       try {
-        const res = await fetch(`http://localhost:8000/adoptante/${userId}`, {
+        const res = await fetch(`http://localhost:8000/albergue/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const adoptante = await res.json();
-        const imagenId = adoptante.imagen_perfil_id;
+        const albergue = await res.json();
+        const imagenId = albergue.imagen_perfil_id;
         const avatarUrl = imagenId
           ? `http://localhost:8000/imagenesProfile/${imagenId}`
           : "https://via.placeholder.com/40";
-        return { name: adoptante.nombre, avatar: avatarUrl };
+        return { name: albergue.nombre, avatar: avatarUrl };
       } catch (error) {
-        console.error("Error al obtener info del adoptante:", error);
+        console.error("Error al obtener info del albergue:", error);
       }
     }
     return { name: "Usuario desconocido", avatar: "https://via.placeholder.com/40" };
@@ -66,7 +61,7 @@ export default function CompanyMessages() {
     const [userType, userId] = selectedUser.split("-");
     try {
       const res = await fetch(
-        `http://localhost:8000/mensajes/conversacion?id1=${emisorId}&tipo1=albergue&id2=${userId}&tipo2=${userType}`,
+        `http://localhost:8000/mensajes/conversacion?id1=${emisorId}&tipo1=adoptante&id2=${userId}&tipo2=${userType}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -76,7 +71,7 @@ export default function CompanyMessages() {
       const formattedMessages = data.map((msg, index) => ({
         id: `${msg.emisor_id}-${msg.contenido}-${index}`, // antes: id: index
         text: msg.contenido,
-        sender: msg.emisor_id === emisorId && msg.emisor_tipo === "albergue" ? "company" : "adopter",
+        sender: msg.emisor_id === emisorId && msg.emisor_tipo === "adoptante" ? "adopter" : "company",
         senderName: msg.emisor_id === emisorId ? "Tú" : userInfo.name,
       }));
 
@@ -101,17 +96,16 @@ export default function CompanyMessages() {
         })
       );
 
-      // Añadir mensaje a la lista local
       setMessagesByUser((prev) => ({
         ...prev,
         [selectedUser]: [
           ...(prev[selectedUser] || []),
           {
-            id: `company-${newMessage}-${Date.now()}`, // clave única
+            id: `adopter-${newMessage}-${Date.now()}`, // clave única
             text: newMessage,
-            sender: "company",
+            sender: "adopter",
             senderName: "Tú",
-          }          
+          },
         ],
       }));
 
@@ -135,10 +129,10 @@ export default function CompanyMessages() {
       const newMsg = {
         id: `${data.emisor_id}-${data.contenido}-${Date.now()}`, // antes usabas length
         text: data.contenido,
-        sender: "adopter",
+        sender: "company",
         senderName: selectedUserInfo?.name || "Usuario",
       };
-      
+
       setMessagesByUser((prev) => ({
         ...prev,
         [receptorKey]: [...(prev[receptorKey] || []), newMsg],
@@ -152,6 +146,10 @@ export default function CompanyMessages() {
     ws.onclose = () => {
       console.log("🔌 WebSocket cerrado");
     };
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -186,12 +184,11 @@ export default function CompanyMessages() {
 
   return (
     <div className="flex min-h-screen bg-[#fdf0df]">
-      <SidebarCompany />
+      {/* Sidebar omitido o reemplazado */}
 
-      {/* Chat List Sidebar */}
       <div className="w-72 bg-white flex flex-col shadow-md">
         <div className="px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold">Mensajes</h2>
+          <h2 className="text-xl font-bold">Chats</h2>
           <FaPaperPlane className="text-gray-600" />
         </div>
 
@@ -214,7 +211,7 @@ export default function CompanyMessages() {
         </div>
       </div>
 
-      {/* Chat Area */}
+      {/* Chat principal */}
       <main className="flex-1 p-6 flex flex-col">
         {selectedUserInfo && (
           <>
@@ -234,14 +231,14 @@ export default function CompanyMessages() {
               <div className="flex-1 overflow-y-auto px-6 py-6 space-y-3">
                 {(messagesByUser[selectedUser] || []).map((msg) => (
                   <div key={msg.id}>
-                    <div className={`flex ${msg.sender === "company" ? "justify-end" : "justify-start"}`}>
+                    <div className={`flex ${msg.sender === "adopter" ? "justify-end" : "justify-start"}`}>
                       <div className="text-xs text-gray-500 mb-1">{msg.senderName}</div>
                     </div>
 
-                    <div className={`flex ${msg.sender === "company" ? "justify-end" : "justify-start"}`}>
+                    <div className={`flex ${msg.sender === "adopter" ? "justify-end" : "justify-start"}`}>
                       <div
                         className={`px-5 py-3 max-w-[65%] text-sm rounded-2xl whitespace-pre-wrap break-words shadow-sm ${
-                          msg.sender === "company"
+                          msg.sender === "adopter"
                             ? "bg-orange-200 text-right rounded-br-none"
                             : "bg-gray-200 text-left rounded-bl-none"
                         }`}
