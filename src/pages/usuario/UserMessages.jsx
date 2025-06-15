@@ -6,6 +6,7 @@ export default function UserMessages() {
   const { user } = useContext(UserContext);
   const emisorId = user?.adoptante_id;
   const token = user?.token;
+  console.log("Usuario cargado en contexto:", user);
 
   const [chatList, setChatList] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
