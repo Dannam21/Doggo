@@ -6,6 +6,7 @@ import { FaHeart, FaTimes } from "react-icons/fa";
 export default function DashboardUser() {
   const navigate = useNavigate();
   const location = useLocation();
+  // Restauramos el índice si venimos de DoggoUser o MatchUser
   const initialIndex = location.state?.restoreIndex ?? 0;
 
   const [mascotas, setMascotas] = useState([]);
@@ -24,17 +25,17 @@ export default function DashboardUser() {
     fetch("http://localhost:8000/adoptante/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => {
+      .then(res => {
         if (!res.ok) throw new Error();
         return res.json();
       })
-      .then((perfil) => {
+      .then(perfil => {
         setAdoptanteId(perfil.id);
         return fetch(`http://localhost:8000/recomendaciones/${perfil.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
       })
-      .then((res) => {
+      .then(res => {
         if (!res.ok) throw new Error();
         return res.json();
       })
@@ -46,39 +47,34 @@ export default function DashboardUser() {
   const currentDog = mascotas[index];
   const nextDog = mascotas[(index + 1) % mascotas.length];
 
-  const handleSwipe = (dir) => {
+  const handleSwipe = dir => {
     if (isAnimating) return;
     setAnimationDirection(dir);
     setIsAnimating(true);
     setTimeout(() => {
       if (dir === "right" && currentDog) {
-        navigate(`/doggoMatch/${currentDog.id}`, {
-          state: { fromIndex: index, dog: currentDog },
-        });
+        // ❤️ lleva a MatchUser
+        navigate(
+          `/doggoMatch/${currentDog.id}`,
+          { state: { fromIndex: index, dog: currentDog } }
+        );
       } else {
-        setIndex((i) => i + 1);
+        setIndex(i => i + 1);
       }
       setAnimationDirection("");
       setIsAnimating(false);
     }, 400);
   };
 
-  const cardClasses = (dog) => {
+  const cardClasses = dog => {
     if (dog === currentDog) {
-      if (animationDirection === "left")
-        return "translate-x-[-120%] -rotate-6 opacity-0 transition-transform duration-500 ease-in-out z-20";
-      
-      if (animationDirection === "right")
-        return "translate-x-[150%] opacity-0 transition-transform duration-500 ease-in"; // si decides mantenerlo
-      return "translate-x-0 translate-y-0 rotate-0 opacity-100 z-10 transition-transform duration-300 ease-in-out";
+      if (animationDirection === "left") return "translate-x-[-120%] -rotate-12 opacity-0";
+      if (animationDirection === "right") return "translate-x-[120%] rotate-12 opacity-0";
+      return "translate-x-0 rotate-0 opacity-100";
     }
-  
-    return "scale-[0.95] translate-y-2 opacity-90 z-0";
+    return "scale-[0.95] translate-y-3 opacity-80";
   };
-  
-  
-  
-  
+
   if (loading) {
     return (
       <>
@@ -89,7 +85,6 @@ export default function DashboardUser() {
       </>
     );
   }
-
   if (!adoptanteId) {
     return (
       <>
@@ -100,7 +95,6 @@ export default function DashboardUser() {
       </>
     );
   }
-
   if (mascotas.length === 0) {
     return (
       <>
@@ -111,7 +105,7 @@ export default function DashboardUser() {
       </>
     );
   }
-
+  // Después de la última recomendación
   if (index >= mascotas.length) {
     return (
       <>
@@ -132,85 +126,77 @@ export default function DashboardUser() {
   return (
     <main className="min-h-screen bg-[#FFF1DC]">
       <Navbar />
-      <div className="flex flex-col items-center justify-center px-4 py-10 text-[#2e2e2e]">
-        <p className="text-2xl font-semibold">
-          Tienes {mascotas.length} matches
-        </p>
-        <p className="text-md mb-8">
-          Haz click en el corazón (match) o en (detalle)
+      <div className="flex flex-col items-center justify-center px-4 py-10 text-[#2e2e2e]" >
+        <p className="text-lg font-semibold">Tienes {mascotas.length} matches</p>
+        <p className="text-sm mb-8" >
+          Haz click en el corazón (match) o en “More info” (detalle)
         </p>
 
         <div className="relative w-[320px] h-[500px] mb-10">
           {/* Carta siguiente */}
           <div
-            className={`absolute inset-0 z-0 w-72 h-[480px] bg-orange-300 text-white rounded-xl shadow-md p-3 text-center hover:scale-105 transition-transform duration-300 ease-in-out w-56 mx-auto ${cardClasses(
-              nextDog
-            )}`}
+            className={`absolute inset-0 z-0 bg-[#ee9c70] text-white rounded-xl shadow-md p-4 transition-all duration-300 transform ${cardClasses(nextDog)}`}
           >
             <img
               src={`http://localhost:8000/imagenes/${nextDog.imagen_id}`}
               alt={nextDog.nombre}
-              className="max-h-full max-w-full object-contain"
-              onError={(e) => {
-                e.currentTarget.src =
-                  "https://via.placeholder.com/400x300?text=Sin+Imagen";
-              }}
+              className="w-full h-48 object-cover rounded-md mb-4"
             />
-            <h3 className="font-bold text-xl">{nextDog.nombre}</h3>
-            <p className="text-lg leading-relaxed text-white">
-              {nextDog.edad} {nextDog.edad === 1 ? "año" : "años"} <br />
-              {nextDog.especie} <br />
-              <span className="italic text-md text-white/90">
-                Albergue: {nextDog.albergue_nombre}
-              </span>
-            </p>
+            <h3 className="text-xl font-bold text-center mb-2">{nextDog.nombre}</h3>
+            <p className="text-sm text-center italic">Esperando...</p>
           </div>
 
           {/* Carta actual */}
           <div
-  className={`absolute inset-x-0 top-0 bottom-0 z-10 w-72 h-[480px] bg-orange-300 text-white rounded-xl shadow-md p-5 text-center hover:scale-105 transition-transform duration-300 ease-in-out ${cardClasses(
-    currentDog
-  )}`}
->
+            className={`absolute inset-0 z-10 bg-[#ee9c70] text-white rounded-xl shadow-xl p-4 transition-all duration-400 ease-in-out transform ${cardClasses(currentDog)}`}
+          >
             <img
               src={`http://localhost:8000/imagenes/${currentDog.imagen_id}`}
               alt={currentDog.nombre}
-              className="max-h-full max-w-full object-contain"
-              onError={(e) => {
-                e.currentTarget.src =
-                  "https://via.placeholder.com/400x300?text=Sin+Imagen";
-              }}
+              className="w-full h-48 object-cover rounded-md mb-4"
             />
-            <h3 className="font-bold text-xl">{currentDog.nombre}</h3>
-            <p className="text-lg leading-relaxed text-white mb-4">
-              {currentDog.edad} año{currentDog.edad !== 1 && "s"} <br />
-              {currentDog.especie} <br />
-              <span className="italic text-md text-white/90">
-                Albergue: {currentDog.albergue_nombre}
-              </span>
-            </p>
+            <h3 className="text-xl font-bold text-center mb-2">{currentDog.nombre}</h3>
+            <ul className="text-sm leading-snug space-y-1 px-2 mb-4">
+              <li><strong>Edad:</strong> {currentDog.edad}</li>
+              <li><strong>Tamaño:</strong> {currentDog.especie}</li>
+              <li>
+                <strong>Descripción:</strong>{" "}
+                {currentDog.descripcion?.slice(0, 200)}...
+              </li>
+            </ul>
+            {/* More info va a DoggoUser */}
+            <button
+              onClick={() =>
+                navigate(
+                  `/doggoUser/${currentDog.id}`,
+                  { state: { fromIndex: index } }
+                )
+              }
+              className="block mx-auto mb-2 border-2 border-white text-white font-semibold px-4 py-2 rounded-full text-sm hover:bg-white hover:text-[#EE9C70] transition"
+            >
+              More info
+            </button>
           </div>
         </div>
 
         {/* Botones X y ❤️ */}
         <div className="flex gap-10">
-          <button-match
+          <button
             onClick={() => handleSwipe("left")}
-            className="w-20 h-20 flex items-center justify-center rounded-full bg-[#ffe4c4] border-2 border-[#F25C5C] text-[#F25C5C] shadow hover:scale-110 transition"
+            className="w-14 h-14 flex items-center justify-center rounded-full bg-[#ffe4c4] border-2 border-[#F25C5C] text-[#F25C5C] shadow hover:scale-110 transition"
             aria-label="No me interesa"
           >
-            <FaTimes size={35} />
-          </button-match>
-          <button-match
+            <FaTimes size={20} />
+          </button>
+          <button
             onClick={() => handleSwipe("right")}
-            className="w-20 h-20 flex items-center justify-center rounded-full bg-[#ffe4c4] border-2 border-[#4FB286] text-[#4FB286] shadow hover:scale-110 transition"
+            className="w-14 h-14 flex items-center justify-center rounded-full bg-[#ffe4c4] border-2 border-[#4FB286] text-[#4FB286] shadow hover:scale-110 transition"
             aria-label="Me interesa"
           >
-            <FaHeart size={35} />
-          </button-match>
+            <FaHeart size={20} />
+          </button>
         </div>
       </div>
     </main>
   );
 }
-

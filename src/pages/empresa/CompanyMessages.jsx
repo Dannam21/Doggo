@@ -49,24 +49,41 @@ export default function CompanyMessages() {
   };
 
   const fetchUserAvatar = async (userType, userId) => {
-    if (userType === "adoptante") {
-      try {
-        const res = await fetch(`http://localhost:8000/adoptante/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const adoptante = await res.json();
-        const imagenId = adoptante.imagen_perfil_id;
-        const avatarUrl = imagenId
-          ? `http://localhost:8000/imagenesProfile/${imagenId}`
-          : "https://via.placeholder.com/40";
-        return { name: adoptante.nombre, avatar: avatarUrl };
-      } catch (error) {
-        console.error("Error al obtener info del adoptante:", error);
+    console.log("📡 Buscando avatar para:", userType, userId);
+    try {
+      let url = "";
+      if (userType === "adoptante") {
+        url = `http://localhost:8000/adoptante/${userId}`;
+      } else if (userType === "albergue") {
+        url = `http://localhost:8000/albergue/${userId}`;
       }
+  
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      console.log(`🧾 Respuesta ${userType}:`, res.status);
+  
+      if (!res.ok) throw new Error("Usuario no encontrado");
+  
+      const user = await res.json();
+      console.log("✅ Usuario encontrado:", user);
+  
+      const imagenId = user.imagen_perfil_id;
+      const avatarUrl = imagenId
+        ? `http://localhost:8000/imagenesProfile/${imagenId}`
+        : "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.nombre);
+  
+      return { name: user.nombre, avatar: avatarUrl };
+    } catch (error) {
+      console.error("❌ Error al obtener info del usuario:", error.message);
     }
-    return { name: "Usuario desconocido", avatar: "https://via.placeholder.com/40" };
+  
+    return { name: "Usuario desconocido", avatar: "https://ui-avatars.com/api/?name=Usuario" };
   };
-
+  
+  
+  
   const fetchMessages = async () => {
     if (!emisorId || !selectedUser) return;
     const [userType, userId] = selectedUser.split("-");
@@ -95,9 +112,14 @@ export default function CompanyMessages() {
     }
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!newMessage.trim()) return;
-
+  
+    if (!selectedUserInfo?.name || !selectedUserInfo?.avatar) {
+      const userInfo = await fetchUserAvatar(rolReceptor, selectedUserInfo?.userId);
+      setSelectedUserInfo({ ...userInfo, userType: rolReceptor, userId: selectedUserInfo?.userId });
+    }
+  
     if (websocketRef.current && websocketRef.current.readyState === WebSocket.OPEN) {
       websocketRef.current.send(
         JSON.stringify({
@@ -106,27 +128,26 @@ export default function CompanyMessages() {
           contenido: newMessage,
         })
       );
-
-      // Añadir mensaje a la lista local
+  
       setMessagesByUser((prev) => ({
         ...prev,
         [selectedUser]: [
           ...(prev[selectedUser] || []),
           {
-            id: `company-${newMessage}-${Date.now()}`, // clave única
+            id: `company-${newMessage}-${Date.now()}`,
             text: newMessage,
             sender: "company",
             senderName: "Tú",
-          }          
+          },
         ],
       }));
-
+  
       setNewMessage("");
     } else {
       console.warn("⚠️ WebSocket no está abierto");
     }
   };
-
+  
   const setupWebSocket = () => {
     const ws = new WebSocket(`ws://localhost:8000/ws/chat/${rolEmisor}/${emisorId}`);
 
@@ -138,40 +159,22 @@ export default function CompanyMessages() {
     ws.onmessage = async (event) => {
       const data = JSON.parse(event.data);
       const receptorKey = `${data.emisor_tipo}-${data.emisor_id}`;
-      const newMsg = {
-        id: `${data.emisor_id}-${data.contenido}-${Date.now()}`,
-        text: data.contenido,
-        sender: "adopter",
-        senderName: selectedUserInfo?.name || "Usuario",
-      };
     
-      // Actualizar mensajes
+      // Opción segura: actualizas mensajes
       setMessagesByUser((prev) => ({
         ...prev,
-        [receptorKey]: [...(prev[receptorKey] || []), newMsg],
+        [receptorKey]: [...(prev[receptorKey] || []), {
+          id: `${data.emisor_id}-${data.contenido}-${Date.now()}`,
+          text: data.contenido,
+          sender: "adopter",
+          senderName: "Usuario",
+        }],
       }));
     
-      // ✅ Revisar si ese usuario ya está en el chatList
-      const alreadyInChatList = chatList.some(
-        (chat) => chat.userId === data.emisor_id && chat.userType === data.emisor_tipo
-      );
-    
-      if (!alreadyInChatList) {
-        const userInfo = await fetchUserAvatar(data.emisor_tipo, data.emisor_id);
-        const newChatItem = {
-          userId: data.emisor_id,
-          userType: data.emisor_tipo,
-          name: userInfo.name,
-          avatar: userInfo.avatar,
-          lastMessage: data.contenido,
-        };
-        
-        setChatList((prev) => [newChatItem, ...prev]);
-        
-        // 🔥 AUTO-SELECCIONAR EL NUEVO CHAT
-        setSelectedUser(receptorKey);
-      }
+      // Y actualizas la lista de chats si es necesario
+      fetchChatList();
     };
+    
     
 
     ws.onerror = (error) => {
