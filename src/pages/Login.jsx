@@ -45,6 +45,7 @@ const Login = () => {
       }
       const data = await res.json();
       const token = data.access_token;
+      const adoptanteId = data.id; 
 
       // **Guardar token en localStorage** para que persista entre recargas
       localStorage.setItem("token", token);
@@ -66,7 +67,7 @@ const Login = () => {
           name: `${perfil.nombre} ${perfil.apellido}`,
           email: perfil.correo,
           token,
-          albergue_id: null,
+          adoptante_id: adoptanteId
         });
         navigate("/home");
       } else {

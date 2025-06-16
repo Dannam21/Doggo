@@ -25,6 +25,8 @@ import ListDoggo from "./pages/empresa/ListDoggo";
 import EditDoggo from "./pages/empresa/EditDoggo";
 import DoggoUser from "./pages/usuario/DoggoUser";
 import MatchUser from "./pages/usuario/MatchUser";
+import UserProfile from "./pages/usuario/UserProfile";
+import UserMessages from "./pages/usuario/UserMessages";
 
 function App() {
   return (
@@ -61,6 +63,7 @@ function App() {
             }
           />
 
+
           <Route
             path="/company/home"
             element={
@@ -93,6 +96,26 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/user/profile"
+            element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/user/messages"
+            element={
+              <ProtectedRoute>
+                <UserMessages />
+              </ProtectedRoute>
+            }
+          />
+
+
           <Route
             path="/company/cambiar"
             element={
