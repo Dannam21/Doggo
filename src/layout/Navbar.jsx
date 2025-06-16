@@ -25,7 +25,7 @@ const Navbar = () => {
       navigate("/company/doggos");
     } else {
       // Si es adoptante
-      navigate("/user/profile");
+      navigate("/user/home");
     }
   };
 

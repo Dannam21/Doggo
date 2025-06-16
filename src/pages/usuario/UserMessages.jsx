@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { FaPaperPlane } from "react-icons/fa";
 import { UserContext } from "../../context/UserContext";
+import SidebarUser from "../../components/SidebarUser";
 
 export default function UserMessages() {
   const { user } = useContext(UserContext);
@@ -186,6 +187,7 @@ export default function UserMessages() {
   return (
     <div className="flex min-h-screen bg-[#fdf0df]">
       {/* Sidebar omitido o reemplazado */}
+      <SidebarUser />
 
       <div className="w-72 bg-white flex flex-col shadow-md">
         <div className="px-6 py-4 flex items-center justify-between">

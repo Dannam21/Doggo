@@ -1,8 +1,8 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../../layout/Navbar";
 
+
 export default function MatchUser() {
-  const navigate = useNavigate();
   const { state } = useLocation();
   const { dog, fromIndex } = state || {};
 
@@ -26,7 +26,7 @@ export default function MatchUser() {
             />
           </div>
           <p className="mb-6">
-            Has dado like a <span className="font-semibold">{dog.nombre}</span> y él también te ha dado like.
+            Has dado like a <span className="font-semibold">{dog.nombre}</span> y también te ha dado like.
           </p>
           <div className="flex gap-4 justify-center">
             <button
