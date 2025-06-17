@@ -127,7 +127,7 @@ export default function DashboardUser() {
       </>
     );
   }
-  // Después de la última recomendación
+
   if (index >= mascotas.length) {
     return (
       <>

@@ -159,7 +159,7 @@ export default function EditDoggo() {
 
 
   return (
-    <div className="flex min-h-screen bg-[#fdf0df]">
+    <div className="flex min-h-screen bg-[#fdf0df] ml-64">
       <SidebarCompany />
 
       <main className="flex-1 px-8 py-8 space-y-12">
