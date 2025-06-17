@@ -1,4 +1,3 @@
-// Sidebar para usuario (solo con perfil, mensajes, calendario)
 import {
     FaUser,
     FaEnvelope,
@@ -58,6 +57,17 @@ import {
               <FaEnvelope /> Mensajes
             </div>
   
+            <div
+              role="button"
+              onClick={() => navigate("/user/calendar")}
+              className={`flex items-center gap-2 text-black px-3 py-2 rounded-lg transition-all ${
+                isActive("/user/calendar")
+                  ? "bg-[#FFF6D8] border-l-4 border-yellow-300 font-semibold"
+                  : "hover:bg-[#FFF6D8] hover:font-semibold"
+              }`}
+            >
+              <FaCalendarAlt /> Calendario
+            </div>
           </nav>
         </div>
   

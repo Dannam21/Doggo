@@ -28,6 +28,7 @@ import MatchUser from "./pages/usuario/MatchUser";
 import UserProfile from "./pages/usuario/UserProfile";
 import UserMessages from "./pages/usuario/UserMessages";
 import UserHome from "./pages/usuario/UserHome";
+import UserCalendar from "./pages/usuario/UserCalendar";
 
 function App() {
   return (
@@ -124,6 +125,16 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+<Route
+            path="/user/calendar"
+            element={
+              <ProtectedRoute>
+                <UserCalendar />
+              </ProtectedRoute>
+            }
+          />
+
 
 
           <Route
