@@ -20,54 +20,68 @@ const Adopta = () => {
       });
   }, []);
 
+  const [filtros, setFiltros] = useState({
+    genero: [],
+    edad: [],
+  });
+
+  const toggleFiltro = (categoria, valor) => {
+    setFiltros((prev) => {
+      const yaSeleccionado = prev[categoria].includes(valor);
+      return {
+        ...prev,
+        [categoria]: yaSeleccionado
+          ? prev[categoria].filter((v) => v !== valor)
+          : [...prev[categoria], valor],
+      };
+    });
+  };
+
   return (
     <nav>
       {/* Contenedor relativo para que absolute funcione dentro */}
       <section className="relative w-full px-4 md:px-20 py-12">
         {/* Círculo decorativo (fondo) */}
-        {/*
-        <div className="absolute top-[130px] left-[-100px] w-[400px] h-[400px] bg-[#9cdcd4] rounded-full opacity-40 blur-[100px] z-0"></div>
-        <div className="absolute top-[130px] left-[-100px] w-[400px] h-[400px] bg-[#9cdcd4] rounded-full opacity-40 blur-[100px] z-0"></div>
-
-        <div className="absolute top-[600px] left-[1200px] w-[400px] h-[400px] bg-[#9cdcd4] rounded-full opacity-40 blur-[100px] z-0"></div>
-        <div className="absolute top-[600px] left-[1200px] w-[400px] h-[400px] bg-[#9cdcd4] rounded-full opacity-40 blur-[100px] z-0"></div>
-        */}
 
         {/* Contenido con z-index alto para estar delante */}
         <div className="relative z-10">
           <h2 className="text-2xl font-bold text-center mb-8">🐾 Adopta</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {/* Filtros (sin lógica por ahora, solo UI) */}
+            {/* Filtros (ahora con lógica) */}
             <aside className="bg-white rounded-lg p-6 shadow-sm space-y-6">
               <div>
                 <p className="font-bold mb-2">Género</p>
-                <label className="block">
-                  <input type="checkbox" className="mr-2" /> Macho
-                </label>
-                <label className="block">
-                  <input type="checkbox" className="mr-2" /> Hembra
-                </label>
+                {["Macho", "Hembra"].map((genero) => (
+                  <label key={genero} className="block">
+                    <input
+                      type="checkbox"
+                      className="mr-2"
+                      checked={filtros.genero.includes(genero)}
+                      onChange={() => toggleFiltro("genero", genero)} // ✅ corregido
+                    />
+                    {genero}
+                  </label>
+                ))}
               </div>
+
               <div>
                 <p className="font-bold mb-2">Edad</p>
                 {["Cachorro", "Joven", "Adulto", "Adulto Mayor"].map((age) => (
                   <label key={age} className="block">
-                    <input type="checkbox" className="mr-2" /> {age}
-                  </label>
-                ))}
-              </div>
-              <div>
-                <p className="font-bold mb-2">Salud</p>
-                {["Esterilizado", "Vacunas completas", "Desparasitado"].map((item) => (
-                  <label key={item} className="block">
-                    <input type="checkbox" className="mr-2" /> {item}
+                    <input
+                      type="checkbox"
+                      className="mr-2"
+                      checked={filtros.edad.includes(age)}
+                      onChange={() => toggleFiltro("edad", age)}
+                    />
+                    {age}
                   </label>
                 ))}
               </div>
             </aside>
 
-            <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols- lg:grid-cols-3 xl:grid-cols-4 gap-x-1 gap-y-6">
               {pets.length === 0 ? (
                 <p className="text-center text-gray-600 col-span-full">
                   No hay mascotas registradas por el momento.
@@ -76,22 +90,28 @@ const Adopta = () => {
                 pets.map((pet) => (
                   <div
                     key={pet.id}
-                    className="bg-orange-300 text-white rounded-lg p-4 text-center shadow-md hover:scale-105 transition"
+                    className="bg-orange-300 text-white rounded-xl shadow-md p-3 text-center hover:scale-105 transition-transform duration-300 ease-in-out w-56 mx-auto"
                   >
                     <img
                       src={`http://localhost:8000/imagenes/${pet.imagen_id}`}
                       alt={pet.nombre}
-                      className="w-full h-36 object-cover rounded-lg mb-3"
+                      className="max-h-full max-w-full object-contain"
                       onError={(e) => {
                         e.currentTarget.src =
                           "https://via.placeholder.com/400x300?text=Sin+Imagen";
                       }}
                     />
-                    <h3 className="font-bold text-lg">{pet.nombre}</h3>
-                    <p className="text-sm">
-                      {pet.edad} {pet.edad === 1 ? "año" : ""} <br />
-                      {pet.especie}
-                    </p>
+                    <h3 className="font-bold text-xl">{pet.nombre}</h3>
+                    <div className="text-lg leading-relaxed text-white space-y-1">
+                      <div>
+                        Edad: {pet.edad} {pet.edad === 1 ? "año" : "años"}
+                      </div>
+                      <div>Especie: {pet.especie}</div>
+                      <div>Género: {pet.genero || "No especificado"}</div>
+                      <div className="italic text-white/90">
+                        Albergue: {pet.albergue_nombre}
+                      </div>
+                    </div>
                   </div>
                 ))
               )}

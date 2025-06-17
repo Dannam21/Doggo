@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect, useContext } from "react";
-import SidebarCompany from "../../components/SidebarCompany";
 import { FaPaperPlane } from "react-icons/fa";
 import { UserContext } from "../../context/UserContext";
 
-export default function CompanyMessages() {
+export default function UserMessages() {
   const { user } = useContext(UserContext);
-  const emisorId = user?.albergue_id;
+  const emisorId = user?.adoptante_id;
   const token = user?.token;
+  console.log("Usuario cargado en contexto:", user);
 
   const [chatList, setChatList] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
@@ -16,13 +16,13 @@ export default function CompanyMessages() {
   const messagesEndRef = useRef(null);
   const websocketRef = useRef(null);
 
-  const rolEmisor = "albergue"; // fijo
-  const rolReceptor = selectedUserInfo?.userType || ""; // puede ser "adoptante"
+  const rolEmisor = "adoptante";
+  const rolReceptor = selectedUserInfo?.userType || "";
 
   const fetchChatList = async () => {
     try {
       const res = await fetch(
-        `http://localhost:8000/mensajes/contactos?emisor_id=${emisorId}&emisor_tipo=albergue`,
+        `http://localhost:8000/mensajes/contactos?emisor_id=${emisorId}&emisor_tipo=adoptante`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -33,63 +33,36 @@ export default function CompanyMessages() {
         })
       );
       setChatList(enhancedChatList);
-      
-      // ✅ Auto-seleccionar el primer chat si no hay ninguno seleccionado
-      if (enhancedChatList.length > 0 && !selectedUser) {
-        const firstChat = enhancedChatList[0];
-        setSelectedUser(`${firstChat.userType}-${firstChat.userId}`);
-      }
     } catch (error) {
       console.error("Error al cargar contactos del chat:", error);
     }
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const fetchUserAvatar = async (userType, userId) => {
+    if (userType === "albergue") {
+      try {
+        const res = await fetch(`http://localhost:8000/albergue/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const albergue = await res.json();
+        const imagenId = albergue.imagen_perfil_id;
+        const avatarUrl = imagenId
+          ? `http://localhost:8000/imagenesProfile/${imagenId}`
+          : "https://via.placeholder.com/40";
+        return { name: albergue.nombre, avatar: avatarUrl };
+      } catch (error) {
+        console.error("Error al obtener info del albergue:", error);
+      }
+    }
+    return { name: "Usuario desconocido", avatar: "https://via.placeholder.com/40" };
   };
 
-  const fetchUserAvatar = async (userType, userId) => {
-    console.log("📡 Buscando avatar para:", userType, userId);
-    try {
-      let url = "";
-      if (userType === "adoptante") {
-        url = `http://localhost:8000/adoptante/${userId}`;
-      } else if (userType === "albergue") {
-        url = `http://localhost:8000/albergue/${userId}`;
-      }
-  
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-  
-      console.log(`🧾 Respuesta ${userType}:`, res.status);
-  
-      if (!res.ok) throw new Error("Usuario no encontrado");
-  
-      const user = await res.json();
-      console.log("✅ Usuario encontrado:", user);
-  
-      const imagenId = user.imagen_perfil_id;
-      const avatarUrl = imagenId
-        ? `http://localhost:8000/imagenesProfile/${imagenId}`
-        : "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.nombre);
-  
-      return { name: user.nombre, avatar: avatarUrl };
-    } catch (error) {
-      console.error("❌ Error al obtener info del usuario:", error.message);
-    }
-  
-    return { name: "Usuario desconocido", avatar: "https://ui-avatars.com/api/?name=Usuario" };
-  };
-  
-  
-  
   const fetchMessages = async () => {
     if (!emisorId || !selectedUser) return;
     const [userType, userId] = selectedUser.split("-");
     try {
       const res = await fetch(
-        `http://localhost:8000/mensajes/conversacion?id1=${emisorId}&tipo1=albergue&id2=${userId}&tipo2=${userType}`,
+        `http://localhost:8000/mensajes/conversacion?id1=${emisorId}&tipo1=adoptante&id2=${userId}&tipo2=${userType}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -99,7 +72,7 @@ export default function CompanyMessages() {
       const formattedMessages = data.map((msg, index) => ({
         id: `${msg.emisor_id}-${msg.contenido}-${index}`, // antes: id: index
         text: msg.contenido,
-        sender: msg.emisor_id === emisorId && msg.emisor_tipo === "albergue" ? "company" : "adopter",
+        sender: msg.emisor_id === emisorId && msg.emisor_tipo === "adoptante" ? "adopter" : "company",
         senderName: msg.emisor_id === emisorId ? "Tú" : userInfo.name,
       }));
 
@@ -112,14 +85,9 @@ export default function CompanyMessages() {
     }
   };
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!newMessage.trim()) return;
-  
-    if (!selectedUserInfo?.name || !selectedUserInfo?.avatar) {
-      const userInfo = await fetchUserAvatar(rolReceptor, selectedUserInfo?.userId);
-      setSelectedUserInfo({ ...userInfo, userType: rolReceptor, userId: selectedUserInfo?.userId });
-    }
-  
+
     if (websocketRef.current && websocketRef.current.readyState === WebSocket.OPEN) {
       websocketRef.current.send(
         JSON.stringify({
@@ -128,26 +96,26 @@ export default function CompanyMessages() {
           contenido: newMessage,
         })
       );
-  
+
       setMessagesByUser((prev) => ({
         ...prev,
         [selectedUser]: [
           ...(prev[selectedUser] || []),
           {
-            id: `company-${newMessage}-${Date.now()}`,
+            id: `adopter-${newMessage}-${Date.now()}`, // clave única
             text: newMessage,
-            sender: "company",
+            sender: "adopter",
             senderName: "Tú",
           },
         ],
       }));
-  
+
       setNewMessage("");
     } else {
       console.warn("⚠️ WebSocket no está abierto");
     }
   };
-  
+
   const setupWebSocket = () => {
     const ws = new WebSocket(`ws://localhost:8000/ws/chat/${rolEmisor}/${emisorId}`);
 
@@ -156,26 +124,21 @@ export default function CompanyMessages() {
       websocketRef.current = ws;
     };
 
-    ws.onmessage = async (event) => {
+    ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       const receptorKey = `${data.emisor_tipo}-${data.emisor_id}`;
-    
-      // Opción segura: actualizas mensajes
+      const newMsg = {
+        id: `${data.emisor_id}-${data.contenido}-${Date.now()}`, // antes usabas length
+        text: data.contenido,
+        sender: "company",
+        senderName: selectedUserInfo?.name || "Usuario",
+      };
+
       setMessagesByUser((prev) => ({
         ...prev,
-        [receptorKey]: [...(prev[receptorKey] || []), {
-          id: `${data.emisor_id}-${data.contenido}-${Date.now()}`,
-          text: data.contenido,
-          sender: "adopter",
-          senderName: "Usuario",
-        }],
+        [receptorKey]: [...(prev[receptorKey] || []), newMsg],
       }));
-    
-      // Y actualizas la lista de chats si es necesario
-      fetchChatList();
     };
-    
-    
 
     ws.onerror = (error) => {
       console.error("❌ WebSocket error: ", error);
@@ -184,6 +147,10 @@ export default function CompanyMessages() {
     ws.onclose = () => {
       console.log("🔌 WebSocket cerrado");
     };
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -197,14 +164,13 @@ export default function CompanyMessages() {
   }, [selectedUser]);
 
   useEffect(() => {
-    if (token && emisorId) {
+    if (selectedUserInfo && token && emisorId) {
       setupWebSocket();
     }
     return () => {
       websocketRef.current?.close();
     };
-  }, [token, emisorId]);
-  
+  }, [selectedUserInfo, token, emisorId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -219,12 +185,11 @@ export default function CompanyMessages() {
 
   return (
     <div className="flex min-h-screen bg-[#fdf0df]">
-      <SidebarCompany />
+      {/* Sidebar omitido o reemplazado */}
 
-      {/* Chat List Sidebar */}
       <div className="w-72 bg-white flex flex-col shadow-md">
         <div className="px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold">Mensajes</h2>
+          <h2 className="text-xl font-bold">Chats</h2>
           <FaPaperPlane className="text-gray-600" />
         </div>
 
@@ -247,7 +212,7 @@ export default function CompanyMessages() {
         </div>
       </div>
 
-      {/* Chat Area */}
+      {/* Chat principal */}
       <main className="flex-1 p-6 flex flex-col">
         {selectedUserInfo && (
           <>
@@ -267,14 +232,14 @@ export default function CompanyMessages() {
               <div className="flex-1 overflow-y-auto px-6 py-6 space-y-3">
                 {(messagesByUser[selectedUser] || []).map((msg) => (
                   <div key={msg.id}>
-                    <div className={`flex ${msg.sender === "company" ? "justify-end" : "justify-start"}`}>
+                    <div className={`flex ${msg.sender === "adopter" ? "justify-end" : "justify-start"}`}>
                       <div className="text-xs text-gray-500 mb-1">{msg.senderName}</div>
                     </div>
 
-                    <div className={`flex ${msg.sender === "company" ? "justify-end" : "justify-start"}`}>
+                    <div className={`flex ${msg.sender === "adopter" ? "justify-end" : "justify-start"}`}>
                       <div
                         className={`px-5 py-3 max-w-[65%] text-sm rounded-2xl whitespace-pre-wrap break-words shadow-sm ${
-                          msg.sender === "company"
+                          msg.sender === "adopter"
                             ? "bg-orange-200 text-right rounded-br-none"
                             : "bg-gray-200 text-left rounded-bl-none"
                         }`}

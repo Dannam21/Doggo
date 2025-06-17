@@ -14,7 +14,7 @@ export default function DoggoUser() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    fetch(`http://localhost:8000/mascotas/${dogId}`, {
+    fetch(`http://localhost:8000/usuario/mascotas/${dogId}`, {
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     })
       .then(res => {

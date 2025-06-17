@@ -8,7 +8,6 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Limpia el contexto del usuario
     setUser({
       name: null,
       email: null,
@@ -16,11 +15,18 @@ const Navbar = () => {
       albergue_id: null,
     });
 
-    // Elimina los datos del localStorage
     localStorage.removeItem("user");
-
-    // Redirige al login (o a /home si lo prefieres)
     navigate("/login");
+  };
+
+  const handleGreetingClick = () => {
+    if (user && user.albergue_id) {
+      // Si es albergue
+      navigate("/company/doggos");
+    } else {
+      // Si es adoptante
+      navigate("/user/profile");
+    }
   };
 
   return (
@@ -33,7 +39,7 @@ const Navbar = () => {
         {user && user.token ? (
           <>
             <span
-              onClick={() => navigate("/company/doggos")}
+              onClick={handleGreetingClick}
               className="text-gray-700 cursor-pointer hover:text-orange-500 transition"
             >
               Hola, {user.name}

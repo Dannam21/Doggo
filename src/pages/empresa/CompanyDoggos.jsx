@@ -11,8 +11,7 @@ const CompanyDoggos = () => {
 
       <div className="flex-1 bg-[#FFF1DC] p-8">
         <div className="flex items-center gap-2 mb-6 text-xl font-semibold">
-          <FaHome />
-          ¡Bienvenido!
+          Acciones
         </div>
 
         <div className="space-y-4 max-w-xl">

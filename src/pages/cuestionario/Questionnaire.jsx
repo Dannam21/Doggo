@@ -95,8 +95,11 @@ const Questionnaire = () => {
         correo: user.correo,
         telefono: user.telefono,
         contrasena: user.contrasena,
+        imagen_perfil_id: user.imagen_perfil_id,
         etiquetas: etiquetasSeleccionadas,
       };
+
+      console.log("Payload que se enviará al backend:", payloadRegistro); // <-- AQUÍ
 
       const registerRes = await fetch("http://localhost:8000/register/adoptante", {
         method: "POST",
@@ -122,6 +125,7 @@ const Questionnaire = () => {
       }
       const loginData = await loginRes.json();
       const token = loginData.access_token;
+      console.log("Payload que se enviará al backend:", payloadRegistro); // <-- AQUÍ
 
       const perfilRes = await fetch("http://localhost:8000/adoptante/me", {
         method: "GET",
@@ -148,6 +152,7 @@ const Questionnaire = () => {
     }
   };
 
+  
   return (
     <main>
       <Navbar />
