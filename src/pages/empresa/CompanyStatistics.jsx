@@ -1,5 +1,5 @@
 import SidebarCompany from "../../components/SidebarCompany";
-import { FaPaw, FaClock, FaEnvelopeOpenText, FaHeart } from "react-icons/fa";
+import { FaHeart, FaHandshake, FaUsers, FaDog } from "react-icons/fa";
 import {
   ResponsiveContainer,
   BarChart,
@@ -8,22 +8,32 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
 } from "recharts";
 
 const stats = [
-  { icon: <FaPaw className="text-orange-500 text-3xl" />, title: "Doggos registrados", value: 50 },
-  { icon: <FaClock className="text-yellow-500 text-3xl" />, title: "Pendientes por aprobar", value: 3 },
-  { icon: <FaEnvelopeOpenText className="text-blue-500 text-3xl" />, title: "Mensajes recibidos", value: 12 },
-  { icon: <FaHeart className="text-pink-500 text-3xl" />, title: "Adopciones logradas", value: 7 },
+  { icon: <FaHeart className="text-pink-500 text-3xl" />, title: "Adopciones Completadas", value: 280 },
+  { icon: <FaHandshake className="text-yellow-500 text-3xl" />, title: "Matches Realizados", value: 1050 },
 ];
 
 const chartData = [
-  { mes: "Ene", adopciones: 2 },
-  { mes: "Feb", adopciones: 4 },
-  { mes: "Mar", adopciones: 3 },
-  { mes: "Abr", adopciones: 5 },
-  { mes: "May", adopciones: 7 },
+  { fecha: "Abr 1", adopciones: 18 },
+  { fecha: "Abr 5", adopciones: 22 },
+  { fecha: "Abr 11", adopciones: 37 },
+  { fecha: "Abr 18", adopciones: 29 },
+  { fecha: "Abr 21", adopciones: 25 },
 ];
+
+const pieData = [
+  { name: "Pequeño", value: 45 },
+  { name: "Mediano", value: 34 },
+  { name: "Grande", value: 21 },
+];
+
+const COLORS = ["#ff7675", "#74b9ff", "#55efc4"];
 
 export default function CompanyStatistics() {
   return (
@@ -31,9 +41,9 @@ export default function CompanyStatistics() {
       <SidebarCompany />
 
       <main className="flex-1 p-10 ml-64">
-                <h1 className="text-3xl font-bold mb-8 text-[#2e2e2e]">📊 Panel de Estadísticas</h1>
+        <h1 className="text-3xl font-bold mb-8 text-[#2e2e2e]">Panel de Estadísticas</h1>
 
-        {/* Tarjetas*/}
+        {/* Tarjetas */}
         <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {stats.map((item, idx) => (
             <div
@@ -47,41 +57,43 @@ export default function CompanyStatistics() {
           ))}
         </section>
 
-        {/* Botones de navegación */}
-        <section className="flex gap-6 mb-12">
-          <button
-            onClick={() => handleNavigate("/company/actividad")}
-            className="px-6 py-3 bg-[#ffb86f] hover:bg-[#ffa94d] text-white font-semibold rounded-xl shadow transition"
-          >
-            Actividad
-          </button>
-          <button
-            onClick={() => handleNavigate("/company/efectividad")}
-            className="px-6 py-3 bg-[#f67280] hover:bg-[#f45c70] text-white font-semibold rounded-xl shadow transition"
-          >
-            Efectividad
-          </button>
-          <button
-            onClick={() => handleNavigate("/company/post-adopcion")}
-            className="px-6 py-3 bg-[#6c5ce7] hover:bg-[#5e4bd3] text-white font-semibold rounded-xl shadow transition"
-          >
-            Post-adopción
-          </button>
-        </section>
+        {/* Gráficas */}
+        <section className="grid md:grid-cols-2 gap-8 mb-12">
+          <div className="bg-white rounded-xl shadow p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-700">📈 Adopciones por mes</h2>
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="fecha" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="adopciones" fill="#f67280" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
-        {/* grafico de barras */}
-        <section className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">📈 Adopciones por mes</h2>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="mes" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="adopciones" fill="#f77534" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="bg-white rounded-xl shadow p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-700">🐾 Adopciones por Tamaño</h2>
+            <div className="h-72 flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    outerRadius={90}
+                    label
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </section>
       </main>
