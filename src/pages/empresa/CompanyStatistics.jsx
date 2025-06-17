@@ -30,8 +30,8 @@ export default function CompanyStatistics() {
     <div className="flex min-h-screen bg-[#fdf0df]">
       <SidebarCompany />
 
-      <main className="flex-1 p-10">
-        <h1 className="text-3xl font-bold mb-8 text-[#2e2e2e]">📊 Panel de Estadísticas</h1>
+      <main className="flex-1 p-10 ml-64">
+                <h1 className="text-3xl font-bold mb-8 text-[#2e2e2e]">📊 Panel de Estadísticas</h1>
 
         {/* Tarjetas*/}
         <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -45,6 +45,28 @@ export default function CompanyStatistics() {
               <p className="text-sm text-gray-600 text-center">{item.title}</p>
             </div>
           ))}
+        </section>
+
+        {/* Botones de navegación */}
+        <section className="flex gap-6 mb-12">
+          <button
+            onClick={() => handleNavigate("/company/actividad")}
+            className="px-6 py-3 bg-[#ffb86f] hover:bg-[#ffa94d] text-white font-semibold rounded-xl shadow transition"
+          >
+            Actividad
+          </button>
+          <button
+            onClick={() => handleNavigate("/company/efectividad")}
+            className="px-6 py-3 bg-[#f67280] hover:bg-[#f45c70] text-white font-semibold rounded-xl shadow transition"
+          >
+            Efectividad
+          </button>
+          <button
+            onClick={() => handleNavigate("/company/post-adopcion")}
+            className="px-6 py-3 bg-[#6c5ce7] hover:bg-[#5e4bd3] text-white font-semibold rounded-xl shadow transition"
+          >
+            Post-adopción
+          </button>
         </section>
 
         {/* grafico de barras */}

@@ -6,7 +6,7 @@ const CompanyDoggos = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex h-screen">
+    <div className="flex min-h-screen bg-[#fdf0df] ml-64">
       <SidebarCompany />
 
       <div className="flex-1 bg-[#FFF1DC] p-8">

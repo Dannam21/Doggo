@@ -30,7 +30,7 @@ export default function SidebarCompany() {
   };
 
   return (
-    <div className="w-64 h-screen flex flex-col justify-between border-r border-gray-300 bg-[#FFF9F2]">
+    <div className="w-64 h-screen fixed top-0 left-0 flex flex-col justify-between border-r border-gray-300 bg-[#FFF9F2] z-50">
       <div>
         {/* Logo */}
         <div
@@ -39,7 +39,6 @@ export default function SidebarCompany() {
         >
           <img src={doggoLogo} alt="Doggo Logo" className="w-42 h-12" />
         </div>
-
 
         {/* Menú */}
         <nav className="mt-4 space-y-2 px-6 text-sm">
@@ -59,7 +58,7 @@ export default function SidebarCompany() {
             role="button"
             onClick={() => navigate("/company/doggos")}
             className={`flex items-center gap-2 text-black px-3 py-2 rounded-lg transition-all ${
-              isActive("/dashboard/doggos")
+              isActive("/company/doggos")
                 ? "bg-[#FFF6D8] border-l-4 border-yellow-300 font-semibold"
                 : "hover:bg-[#FFF6D8] hover:font-semibold"
             }`}
@@ -71,7 +70,7 @@ export default function SidebarCompany() {
             role="button"
             onClick={() => navigate("/company/messages")}
             className={`flex items-center gap-2 text-black px-3 py-2 rounded-lg transition-all ${
-              isActive("/dashboard/mensajes")
+              isActive("/company/messages")
                 ? "bg-[#FFF6D8] border-l-4 border-yellow-300 font-semibold"
                 : "hover:bg-[#FFF6D8] hover:font-semibold"
             }`}
@@ -83,7 +82,7 @@ export default function SidebarCompany() {
             role="button"
             onClick={() => navigate("/company/statistics")}
             className={`flex items-center gap-2 text-black px-3 py-2 rounded-lg transition-all ${
-              isActive("/dashboard/estadisticas")
+              isActive("/company/statistics")
                 ? "bg-[#FFF6D8] border-l-4 border-yellow-300 font-semibold"
                 : "hover:bg-[#FFF6D8] hover:font-semibold"
             }`}
@@ -95,7 +94,7 @@ export default function SidebarCompany() {
             role="button"
             onClick={() => navigate("/company/calendar")}
             className={`flex items-center gap-2 text-black px-3 py-2 rounded-lg transition-all ${
-              isActive("/dashboard/calendario")
+              isActive("/company/calendar")
                 ? "bg-[#FFF6D8] border-l-4 border-yellow-300 font-semibold"
                 : "hover:bg-[#FFF6D8] hover:font-semibold"
             }`}
