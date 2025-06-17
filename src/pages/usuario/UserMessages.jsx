@@ -6,7 +6,6 @@ export default function UserMessages() {
   const { user } = useContext(UserContext);
   const emisorId = user?.adoptante_id;
   const token = user?.token;
-  console.log("Usuario cargado en contexto:", user);
 
   const [chatList, setChatList] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
@@ -33,28 +32,43 @@ export default function UserMessages() {
         })
       );
       setChatList(enhancedChatList);
+
+      if (enhancedChatList.length > 0 && !selectedUser) {
+        const firstChat = enhancedChatList[0];
+        setSelectedUser(`${firstChat.userType}-${firstChat.userId}`);
+      }
     } catch (error) {
       console.error("Error al cargar contactos del chat:", error);
     }
   };
 
   const fetchUserAvatar = async (userType, userId) => {
-    if (userType === "albergue") {
-      try {
-        const res = await fetch(`http://localhost:8000/albergue/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const albergue = await res.json();
-        const imagenId = albergue.imagen_perfil_id;
-        const avatarUrl = imagenId
-          ? `http://localhost:8000/imagenesProfile/${imagenId}`
-          : "https://via.placeholder.com/40";
-        return { name: albergue.nombre, avatar: avatarUrl };
-      } catch (error) {
-        console.error("Error al obtener info del albergue:", error);
+    try {
+      let url = "";
+      if (userType === "adoptante") {
+        url = `http://localhost:8000/adoptante/${userId}`;
+      } else if (userType === "albergue") {
+        url = `http://localhost:8000/albergue/${userId}`;
       }
+
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) throw new Error("Usuario no encontrado");
+
+      const user = await res.json();
+      const imagenId = user.imagen_perfil_id;
+      const avatarUrl = imagenId
+        ? `http://localhost:8000/imagenesProfile/${imagenId}`
+        : "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.nombre);
+
+      return { name: user.nombre, avatar: avatarUrl };
+    } catch (error) {
+      console.error("Error al obtener info del usuario:", error.message);
     }
-    return { name: "Usuario desconocido", avatar: "https://via.placeholder.com/40" };
+
+    return { name: "Usuario desconocido", avatar: "https://ui-avatars.com/api/?name=Usuario" };
   };
 
   const fetchMessages = async () => {
@@ -70,10 +84,10 @@ export default function UserMessages() {
       setSelectedUserInfo({ ...userInfo, userType, userId });
 
       const formattedMessages = data.map((msg, index) => ({
-        id: `${msg.emisor_id}-${msg.contenido}-${index}`, // antes: id: index
+        id: `${msg.emisor_id}-${msg.contenido}-${index}`,
         text: msg.contenido,
         sender: msg.emisor_id === emisorId && msg.emisor_tipo === "adoptante" ? "adopter" : "company",
-        senderName: msg.emisor_id === emisorId ? "Tú" : userInfo.name,
+        senderName: userInfo.name,
       }));
 
       setMessagesByUser((prev) => ({
@@ -85,8 +99,13 @@ export default function UserMessages() {
     }
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!newMessage.trim()) return;
+
+    if (!selectedUserInfo?.name || !selectedUserInfo?.avatar) {
+      const userInfo = await fetchUserAvatar(rolReceptor, selectedUserInfo?.userId);
+      setSelectedUserInfo({ ...userInfo, userType: rolReceptor, userId: selectedUserInfo?.userId });
+    }
 
     if (websocketRef.current && websocketRef.current.readyState === WebSocket.OPEN) {
       websocketRef.current.send(
@@ -102,17 +121,17 @@ export default function UserMessages() {
         [selectedUser]: [
           ...(prev[selectedUser] || []),
           {
-            id: `adopter-${newMessage}-${Date.now()}`, // clave única
+            id: `adopter-${newMessage}-${Date.now()}`,
             text: newMessage,
             sender: "adopter",
-            senderName: "Tú",
+            senderName: selectedUserInfo.name,
           },
         ],
       }));
 
       setNewMessage("");
     } else {
-      console.warn("⚠️ WebSocket no está abierto");
+      console.warn("WebSocket no está abierto");
     }
   };
 
@@ -120,37 +139,37 @@ export default function UserMessages() {
     const ws = new WebSocket(`ws://localhost:8000/ws/chat/${rolEmisor}/${emisorId}`);
 
     ws.onopen = () => {
-      console.log("✅ WebSocket conectado");
       websocketRef.current = ws;
     };
 
-    ws.onmessage = (event) => {
+    ws.onmessage = async (event) => {
       const data = JSON.parse(event.data);
       const receptorKey = `${data.emisor_tipo}-${data.emisor_id}`;
-      const newMsg = {
-        id: `${data.emisor_id}-${data.contenido}-${Date.now()}`, // antes usabas length
-        text: data.contenido,
-        sender: "company",
-        senderName: selectedUserInfo?.name || "Usuario",
-      };
+      const userInfo = await fetchUserAvatar(data.emisor_tipo, data.emisor_id);
 
       setMessagesByUser((prev) => ({
         ...prev,
-        [receptorKey]: [...(prev[receptorKey] || []), newMsg],
+        [receptorKey]: [
+          ...(prev[receptorKey] || []),
+          {
+            id: `${data.emisor_id}-${data.contenido}-${Date.now()}`,
+            text: data.contenido,
+            sender: data.emisor_tipo === "adoptante" ? "adopter" : "company",
+            senderName: userInfo.name,
+          },
+        ],
       }));
+
+      fetchChatList();
     };
 
     ws.onerror = (error) => {
-      console.error("❌ WebSocket error: ", error);
+      console.error("WebSocket error: ", error);
     };
 
     ws.onclose = () => {
-      console.log("🔌 WebSocket cerrado");
+      console.log("WebSocket cerrado");
     };
-  };
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -164,16 +183,16 @@ export default function UserMessages() {
   }, [selectedUser]);
 
   useEffect(() => {
-    if (selectedUserInfo && token && emisorId) {
+    if (token && emisorId) {
       setupWebSocket();
     }
     return () => {
       websocketRef.current?.close();
     };
-  }, [selectedUserInfo, token, emisorId]);
+  }, [token, emisorId]);
 
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messagesByUser, selectedUser]);
 
   const handleKeyDown = (e) => {
@@ -185,11 +204,10 @@ export default function UserMessages() {
 
   return (
     <div className="flex min-h-screen bg-[#fdf0df]">
-      {/* Sidebar omitido o reemplazado */}
-
+      {/* Chat List Sidebar */}
       <div className="w-72 bg-white flex flex-col shadow-md">
         <div className="px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold">Chats</h2>
+          <h2 className="text-xl font-bold">Mensajes</h2>
           <FaPaperPlane className="text-gray-600" />
         </div>
 
@@ -212,7 +230,7 @@ export default function UserMessages() {
         </div>
       </div>
 
-      {/* Chat principal */}
+      {/* Chat Area */}
       <main className="flex-1 p-6 flex flex-col">
         {selectedUserInfo && (
           <>
@@ -233,7 +251,9 @@ export default function UserMessages() {
                 {(messagesByUser[selectedUser] || []).map((msg) => (
                   <div key={msg.id}>
                     <div className={`flex ${msg.sender === "adopter" ? "justify-end" : "justify-start"}`}>
-                      <div className="text-xs text-gray-500 mb-1">{msg.senderName}</div>
+                      <div className="text-xs text-gray-500 mb-1">
+                        {msg.sender === "adopter" ? "Tú" : msg.senderName}
+                      </div>
                     </div>
 
                     <div className={`flex ${msg.sender === "adopter" ? "justify-end" : "justify-start"}`}>

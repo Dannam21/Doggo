@@ -53,11 +53,33 @@ export default function DashboardUser() {
     setIsAnimating(true);
     setTimeout(() => {
       if (dir === "right" && currentDog) {
-        // ❤️ lleva a MatchUser
-        navigate(
-          `/doggoMatch/${currentDog.id}`,
-          { state: { fromIndex: index, dog: currentDog } }
-        );
+        const token = localStorage.getItem("token");
+  
+        // 🔥 Aquí haces el POST para guardar el match
+        fetch("http://localhost:8000/matches/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            adoptante_id: adoptanteId,
+            mascota_id: currentDog.id,
+          }),
+        })
+          .then(res => {
+            if (!res.ok) throw new Error("Error al guardar el match");
+            return res.json();
+          })
+          .then(() => {
+            // Redirigir al match screen si quieres
+            navigate(`/doggoMatch/${currentDog.id}`, {
+              state: { fromIndex: index, dog: currentDog },
+            });
+          })
+          .catch(err => {
+            console.error("No se pudo guardar el match:", err);
+          });
       } else {
         setIndex(i => i + 1);
       }
@@ -65,7 +87,7 @@ export default function DashboardUser() {
       setIsAnimating(false);
     }, 400);
   };
-
+  
   const cardClasses = dog => {
     if (dog === currentDog) {
       if (animationDirection === "left") return "translate-x-[-120%] -rotate-12 opacity-0";
