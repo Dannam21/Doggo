@@ -3,6 +3,7 @@ import Navbar from "../../layout/Navbar";
 import { useContext } from "react";
 import { UserContext } from "../../context/UserContext";
 
+
 export default function MatchUser() {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
@@ -60,7 +61,7 @@ export default function MatchUser() {
             />
           </div>
           <p className="mb-6">
-            Has dado like a <span className="font-semibold">{dog.nombre}</span> y él también te ha dado like.
+            Has dado like a <span className="font-semibold">{dog.nombre}</span> y también te ha dado like.
           </p>
           <div className="flex gap-4 justify-center">
             <button
