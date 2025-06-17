@@ -21,6 +21,7 @@ import Adddoggo from "./pages/empresa/Adddoggo";
 // Páginas de usuario
 import User from "./pages/usuario/DashboardUser";
 import Questionnaire from "./pages/cuestionario/Questionnaire";
+import QuestionnairePreferences from "./pages/cuestionario/QuestionnairePreference";
 import ListDoggo from "./pages/empresa/ListDoggo";
 import EditDoggo from "./pages/empresa/EditDoggo";
 import DoggoUser from "./pages/usuario/DoggoUser";
@@ -43,7 +44,9 @@ function App() {
           <Route path="/register/user" element={<RegisterUser />} />
           <Route path="/register/company" element={<RegisterCompany />} />
           <Route path="/cuestionario" element={ <Questionnaire />}/>
+          <Route path="/preferences" element={<QuestionnairePreferences />} />
 
+          {/* RUTAS PROTEGIDAS */}
 
           <Route
             path="/company/doggos"
