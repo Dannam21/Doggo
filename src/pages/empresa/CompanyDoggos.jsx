@@ -30,6 +30,13 @@ const CompanyDoggos = () => {
             <FaThumbsUp className="text-[#2e2e2e]" /> Listado de Doggos
           </button>
 
+          <button
+            className="flex items-center gap-2 px-4 py-3 bg-[#FCFCFA] text-black rounded shadow text-left w-full hover:bg-[#f6f6f6]"
+            onClick={() => navigate("/company/editdoggos")}
+          >
+            <FaThumbsUp className="text-[#2e2e2e]" /> Editar Doggos
+          </button>
+
           <button className="px-4 py-3 bg-[#FCFCFA] text-black rounded shadow text-left w-full hover:bg-[#f6f6f6]">
             Ver historial de doggo
           </button>

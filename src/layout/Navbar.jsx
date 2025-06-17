@@ -32,7 +32,12 @@ const Navbar = () => {
       <div className="space-x-4 font-semibold">
         {user && user.token ? (
           <>
-            <span className="text-gray-700">Hola, {user.name}</span>
+            <span
+              onClick={() => navigate("/company/doggos")}
+              className="text-gray-700 cursor-pointer hover:text-orange-500 transition"
+            >
+              Hola, {user.name}
+            </span>
             <button
               onClick={handleLogout}
               className="bg-sky-500 hover:bg-sky-700 text-white py-1 px-3 rounded"
