@@ -1,9 +1,9 @@
 import SidebarCompany from "../../components/SidebarCompany";
-import { FaHeart, FaHandshake, FaUsers, FaDog } from "react-icons/fa";
+import { FaHeart, FaHandshake, FaUsers, FaClock } from "react-icons/fa";
 import {
   ResponsiveContainer,
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
@@ -20,17 +20,25 @@ const stats = [
 ];
 
 const chartData = [
-  { fecha: "Abr 1", adopciones: 18 },
-  { fecha: "Abr 5", adopciones: 22 },
-  { fecha: "Abr 11", adopciones: 37 },
-  { fecha: "Abr 18", adopciones: 29 },
-  { fecha: "Abr 21", adopciones: 25 },
+  { fecha: "Apr 1", adopciones: 13 },
+  { fecha: "Apr 5", adopciones: 19 },
+  { fecha: "Apr 11", adopciones: 35 },
+  { fecha: "Apr 18", adopciones: 18 },
+  { fecha: "Apr 21", adopciones: 26 },
 ];
 
 const pieData = [
   { name: "Pequeño", value: 45 },
   { name: "Mediano", value: 34 },
   { name: "Grande", value: 21 },
+];
+
+const topDoggos = [
+  { nombre: "Rex", matches: 42 },
+  { nombre: "Bella", matches: 39 },
+  { nombre: "Daisy", matches: 35 },
+  { nombre: "Max", matches: 29 },
+  { nombre: "Milo", matches: 27 },
 ];
 
 const COLORS = ["#ff7675", "#74b9ff", "#55efc4"];
@@ -43,8 +51,8 @@ export default function CompanyStatistics() {
       <main className="flex-1 p-10 ml-64">
         <h1 className="text-3xl font-bold mb-8 text-[#2e2e2e]">Panel de Estadísticas</h1>
 
-        {/* Tarjetas */}
-        <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        {/* KPIs */}
+        <section className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
           {stats.map((item, idx) => (
             <div
               key={idx}
@@ -60,22 +68,22 @@ export default function CompanyStatistics() {
         {/* Gráficas */}
         <section className="grid md:grid-cols-2 gap-8 mb-12">
           <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">📈 Adopciones por mes</h2>
+            <h2 className="text-xl font-semibold mb-4 text-gray-700">📈 Adopciones por Día</h2>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData}>
+                <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="fecha" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="adopciones" fill="#f67280" radius={[6, 6, 0, 0]} />
-                </BarChart>
+                  <Line type="monotone" dataKey="adopciones" stroke="#f67280" strokeWidth={3} />
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">🐾 Adopciones por Tamaño</h2>
+            <h2 className="text-xl font-semibold mb-4 text-gray-700">🐶 Adopciones por Tamaño</h2>
             <div className="h-72 flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -95,6 +103,27 @@ export default function CompanyStatistics() {
               </ResponsiveContainer>
             </div>
           </div>
+        </section>
+
+        {/* Tabla de top doggos */}
+        <section className="bg-white rounded-xl shadow p-6">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">Top 5 Doggos por Matches</h2>
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b">
+                <th className="py-2">Nombre</th>
+                <th className="py-2">Matches</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topDoggos.map((dog, idx) => (
+                <tr key={idx} className="border-b hover:bg-gray-100">
+                  <td className="py-2 font-medium">{dog.nombre}</td>
+                  <td className="py-2">{dog.matches}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </section>
       </main>
     </div>
