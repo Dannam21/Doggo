@@ -22,7 +22,7 @@ export default function CompanyMessages() {
   const fetchChatList = async () => {
     try {
       const res = await fetch(
-        `http://localhost:8000/mensajes/contactos?emisor_id=${emisorId}&emisor_tipo=albergue`,
+        `http://34.195.195.173:8000/mensajes/contactos?emisor_id=${emisorId}&emisor_tipo=albergue`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -53,15 +53,14 @@ export default function CompanyMessages() {
     try {
       let url = "";
       if (userType === "adoptante") {
-        url = `http://localhost:8000/adoptante/${userId}`;
+        url = `http://34.195.195.173:8000/adoptante/${userId}`;
       } else if (userType === "albergue") {
-        url = `http://localhost:8000/albergue/${userId}`;
+        url = `http://34.195.195.173:8000/albergue/${userId}`;
       }
   
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
       console.log(`🧾 Respuesta ${userType}:`, res.status);
   
       if (!res.ok) throw new Error("Usuario no encontrado");
@@ -71,7 +70,7 @@ export default function CompanyMessages() {
   
       const imagenId = user.imagen_perfil_id;
       const avatarUrl = imagenId
-        ? `http://localhost:8000/imagenesProfile/${imagenId}`
+        ? `http://34.195.195.173:8000/imagenesProfile/${imagenId}`
         : "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.nombre);
   
       return { name: user.nombre, avatar: avatarUrl };
@@ -89,7 +88,7 @@ export default function CompanyMessages() {
     const [userType, userId] = selectedUser.split("-");
     try {
       const res = await fetch(
-        `http://localhost:8000/mensajes/conversacion?id1=${emisorId}&tipo1=albergue&id2=${userId}&tipo2=${userType}`,
+        `http://34.195.195.173:8000/mensajes/conversacion?id1=${emisorId}&tipo1=albergue&id2=${userId}&tipo2=${userType}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -100,7 +99,8 @@ export default function CompanyMessages() {
         id: `${msg.emisor_id}-${msg.contenido}-${index}`, // antes: id: index
         text: msg.contenido,
         sender: msg.emisor_id === emisorId && msg.emisor_tipo === "albergue" ? "company" : "adopter",
-        senderName: msg.emisor_id === emisorId ? "Tú" : userInfo.name,
+        senderName: userInfo.name,
+
       }));
 
       setMessagesByUser((prev) => ({
@@ -137,7 +137,7 @@ export default function CompanyMessages() {
             id: `company-${newMessage}-${Date.now()}`,
             text: newMessage,
             sender: "company",
-            senderName: "Tú",
+            senderName: selectedUserInfo.name,
           },
         ],
       }));
@@ -149,7 +149,7 @@ export default function CompanyMessages() {
   };
   
   const setupWebSocket = () => {
-    const ws = new WebSocket(`ws://localhost:8000/ws/chat/${rolEmisor}/${emisorId}`);
+    const ws = new WebSocket(`ws://34.195.195.173:8000/ws/chat/${rolEmisor}/${emisorId}`);
 
     ws.onopen = () => {
       console.log("✅ WebSocket conectado");
@@ -160,22 +160,24 @@ export default function CompanyMessages() {
       const data = JSON.parse(event.data);
       const receptorKey = `${data.emisor_tipo}-${data.emisor_id}`;
     
-      // Opción segura: actualizas mensajes
+      // Obtener nombre y avatar del emisor
+      const userInfo = await fetchUserAvatar(data.emisor_tipo, data.emisor_id);
+    
       setMessagesByUser((prev) => ({
         ...prev,
-        [receptorKey]: [...(prev[receptorKey] || []), {
-          id: `${data.emisor_id}-${data.contenido}-${Date.now()}`,
-          text: data.contenido,
-          sender: "adopter",
-          senderName: "Usuario",
-        }],
+        [receptorKey]: [
+          ...(prev[receptorKey] || []),
+          {
+            id: `${data.emisor_id}-${data.contenido}-${Date.now()}`,
+            text: data.contenido,
+            sender: data.emisor_tipo === "albergue" ? "company" : "adopter",
+            senderName: userInfo.name,
+          },
+        ],
       }));
     
-      // Y actualizas la lista de chats si es necesario
       fetchChatList();
     };
-    
-    
 
     ws.onerror = (error) => {
       console.error("❌ WebSocket error: ", error);
@@ -218,7 +220,7 @@ export default function CompanyMessages() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#fdf0df]">
+    <div className="flex min-h-screen bg-[#fdf0df] ml-64">
       <SidebarCompany />
 
       {/* Chat List Sidebar */}
@@ -248,8 +250,8 @@ export default function CompanyMessages() {
       </div>
 
       {/* Chat Area */}
-      <main className="flex-1 p-6 flex flex-col">
-        {selectedUserInfo && (
+      <main className="flex-1 p-6 flex flex-col ml-64"> 
+                {selectedUserInfo && (
           <>
             <div className="bg-white rounded-t-2xl shadow-sm">
               <div className="flex items-center gap-4 px-4 py-3">
@@ -268,7 +270,9 @@ export default function CompanyMessages() {
                 {(messagesByUser[selectedUser] || []).map((msg) => (
                   <div key={msg.id}>
                     <div className={`flex ${msg.sender === "company" ? "justify-end" : "justify-start"}`}>
-                      <div className="text-xs text-gray-500 mb-1">{msg.senderName}</div>
+                      <div className="text-xs text-gray-500 mb-1">
+                        {msg.sender === "company" ? "Tú" : msg.senderName}
+                      </div>
                     </div>
 
                     <div className={`flex ${msg.sender === "company" ? "justify-end" : "justify-start"}`}>

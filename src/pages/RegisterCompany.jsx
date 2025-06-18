@@ -34,7 +34,7 @@ const RegisterCompany = () => {
     };
 
     try {
-      const res = await fetch("http://localhost:8000/register/albergue", {
+      const res = await fetch("http://34.195.195.173:8000/register/albergue", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

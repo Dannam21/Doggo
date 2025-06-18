@@ -65,6 +65,77 @@ const Questionnaire = () => {
 
     // Construimos un objeto JSON de respuestas (key → respuesta o array)
     const etiquetasObj = { ...formData };
+    let etiquetasSeleccionadas = [];
+    [
+      "vivienda",
+      "tieneJardin",
+      "estiloVida",
+      "experiencia",
+      "tiempo",
+      "convivencia",
+      "otrasMascotas",
+      "compromiso",
+      "fuera",
+      "energia",
+    ].forEach((key) => {
+      if (formData[key]) etiquetasSeleccionadas.push(formData[key]);
+    });
+    etiquetasSeleccionadas = etiquetasSeleccionadas
+      .concat(formData.temperamento)
+      .concat(formData.otrosAtributos);
+
+    try {
+      const payloadRegistro = {
+        nombre: user.nombre,
+        apellido: user.apellido,
+        dni: user.dni,
+        correo: user.correo,
+        telefono: user.telefono,
+        contrasena: user.contrasena,
+        imagen_perfil_id: user.imagen_perfil_id,
+        etiquetas: etiquetasSeleccionadas,
+      };
+
+      console.log("Payload que se enviará al backend:", payloadRegistro); // <-- AQUÍ
+
+      const registerRes = await fetch("http://34.195.195.173:8000/register/adoptante", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payloadRegistro),
+      });
+      if (!registerRes.ok) {
+        const errData = await registerRes.json();
+        throw new Error(errData.detail || "Error al registrar adoptante");
+      }
+
+      const loginRes = await fetch("http://34.195.195.173:8000/login/adoptante", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          correo: user.correo,
+          contrasena: user.contrasena,
+        }),
+      });
+      if (!loginRes.ok) {
+        const errData2 = await loginRes.json();
+        throw new Error(errData2.detail || "Error al iniciar sesión automáticamente");
+      }
+      const loginData = await loginRes.json();
+      const token = loginData.access_token;
+      console.log("Payload que se enviará al backend:", payloadRegistro); // <-- AQUÍ
+
+      const perfilRes = await fetch("http://34.195.195.173:8000/adoptante/me", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!perfilRes.ok) {
+        const perfilErr = await perfilRes.json();
+        throw new Error(perfilErr.detail || "No se pudo obtener perfil");
+      }
+      const perfilData = await perfilRes.json();
 
     // Payload completo para el registro
     const payloadRegistro = {

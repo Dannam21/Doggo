@@ -109,7 +109,7 @@ export default function EditDoggo({ onDogCreated }) {
       const imagePayload = new FormData();
       imagePayload.append("image", formData.imagenFile);
 
-      const imgRes = await fetch("http://localhost:8000/imagenes", {
+      const imgRes = await fetch("http://34.195.195.173:8000/imagenes", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: imagePayload,
@@ -142,7 +142,7 @@ export default function EditDoggo({ onDogCreated }) {
         etiquetas: etiquetasParaAPI,
         fecha_creacion: fechaCreacion, // se incluye el timestamp aquí
       };
-      const res = await fetch("http://localhost:8000/mascotas", {
+      const res = await fetch("http://34.195.195.173:8000/mascotas", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -155,7 +155,7 @@ export default function EditDoggo({ onDogCreated }) {
         throw new Error(errJson.detail || "Error al registrar la mascota");
       }
       const newDog = await res.json();
-      newDog.imageUrl = `http://localhost:8000/imagenes/${imagen_id}`;
+      newDog.imageUrl = `http://34.195.195.173:8000/imagenes/${imagen_id}`;
       newDog.etiquetas = etiquetasParaAPI;
       newDog.fecha_creacion = fechaCreacion;
 

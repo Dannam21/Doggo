@@ -47,7 +47,7 @@ export default function CompanyHome() {
       if (!user?.token || !user?.albergue_id) return;
       try {
         const res = await fetch(
-          `http://localhost:8000/mascotas/albergue/${user.albergue_id}`,
+          `http://34.195.195.173:8000/mascotas/albergue/${user.albergue_id}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -92,7 +92,7 @@ export default function CompanyHome() {
 
   // asdasda
   return (
-    <div className="flex min-h-screen bg-[#fdf0df]">
+  <div className="flex min-h-screen bg-[#fdf0df] ml-64">
       <SidebarCompany />
       <div className="flex-1 p-8">
         <h1 className="text-3xl font-bold mb-8">
@@ -153,7 +153,7 @@ export default function CompanyHome() {
               ultimasMascotas.map((m) => (
                 <div key={m.id} className="flex items-center gap-4 mb-3">
                   <img
-                    src={`http://localhost:8000/imagenes/${m.imagen_id}`}
+                    src={`http://34.195.195.173:8000/imagenes/${m.imagen_id}`}
                     alt={m.nombre}
                     className="rounded-full w-10 h-10 object-cover"
                   />

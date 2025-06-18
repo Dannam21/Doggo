@@ -22,7 +22,7 @@ export default function DashboardUser() {
       setLoading(false);
       return;
     }
-    fetch("http://localhost:8000/adoptante/me", {
+    fetch("http://34.195.195.173:8000/adoptante/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => {
@@ -31,7 +31,7 @@ export default function DashboardUser() {
       })
       .then(perfil => {
         setAdoptanteId(perfil.id);
-        return fetch(`http://localhost:8000/recomendaciones/${perfil.id}`, {
+        return fetch(`http://34.195.195.173:8000/recomendaciones/${perfil.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
       })
@@ -53,11 +53,33 @@ export default function DashboardUser() {
     setIsAnimating(true);
     setTimeout(() => {
       if (dir === "right" && currentDog) {
-        // ❤️ lleva a MatchUser
-        navigate(
-          `/doggoMatch/${currentDog.id}`,
-          { state: { fromIndex: index, dog: currentDog } }
-        );
+        const token = localStorage.getItem("token");
+  
+        // 🔥 Aquí haces el POST para guardar el match
+        fetch("http://34.195.195.173:8000/matches/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            adoptante_id: adoptanteId,
+            mascota_id: currentDog.id,
+          }),
+        })
+          .then(res => {
+            if (!res.ok) throw new Error("Error al guardar el match");
+            return res.json();
+          })
+          .then(() => {
+            // Redirigir al match screen si quieres
+            navigate(`/doggoMatch/${currentDog.id}`, {
+              state: { fromIndex: index, dog: currentDog },
+            });
+          })
+          .catch(err => {
+            console.error("No se pudo guardar el match:", err);
+          });
       } else {
         setIndex(i => i + 1);
       }
@@ -65,7 +87,7 @@ export default function DashboardUser() {
       setIsAnimating(false);
     }, 400);
   };
-
+  
   const cardClasses = dog => {
     if (dog === currentDog) {
       if (animationDirection === "left") return "translate-x-[-120%] -rotate-12 opacity-0";
@@ -105,7 +127,7 @@ export default function DashboardUser() {
       </>
     );
   }
-  // Después de la última recomendación
+
   if (index >= mascotas.length) {
     return (
       <>
@@ -138,7 +160,7 @@ export default function DashboardUser() {
             className={`absolute inset-0 z-0 bg-[#ee9c70] text-white rounded-xl shadow-md p-4 transition-all duration-300 transform ${cardClasses(nextDog)}`}
           >
             <img
-              src={`http://localhost:8000/imagenes/${nextDog.imagen_id}`}
+              src={`http://34.195.195.173:8000/imagenes/${nextDog.imagen_id}`}
               alt={nextDog.nombre}
               className="w-full h-48 object-cover rounded-md mb-4"
             />
@@ -151,7 +173,7 @@ export default function DashboardUser() {
             className={`absolute inset-0 z-10 bg-[#ee9c70] text-white rounded-xl shadow-xl p-4 transition-all duration-400 ease-in-out transform ${cardClasses(currentDog)}`}
           >
             <img
-              src={`http://localhost:8000/imagenes/${currentDog.imagen_id}`}
+              src={`http://34.195.195.173:8000/imagenes/${currentDog.imagen_id}`}
               alt={currentDog.nombre}
               className="w-full h-48 object-cover rounded-md mb-4"
             />

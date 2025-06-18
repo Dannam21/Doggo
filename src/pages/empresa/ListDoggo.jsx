@@ -22,7 +22,7 @@ export default function ListDoggo() {
     useEffect(() => {
         if (!token || !albergueId) return;
     
-        fetch(`http://localhost:8000/mascotas/albergue/${albergueId}`, {
+        fetch(`http://34.195.195.173:8000/mascotas/albergue/${albergueId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -37,7 +37,7 @@ export default function ListDoggo() {
             nombre: m.nombre,
             edad: m.edad,
             especie: m.especie,
-            imageUrl: `http://localhost:8000/imagenes/${m.imagen_id}`,
+            imageUrl: `http://34.195.195.173:8000/imagenes/${m.imagen_id}`,
             etiquetas: m.etiquetas || [],
             }));
             setDogs(enriched);
@@ -50,7 +50,7 @@ export default function ListDoggo() {
     };
     
     return (
-        <div className="flex min-h-screen bg-[#fdf0df]">
+        <div className="flex min-h-screen bg-[#fdf0df] ml-64">
         <SidebarCompany />
     
         <main className="flex-1 px-10 py-10 space-y-10">
