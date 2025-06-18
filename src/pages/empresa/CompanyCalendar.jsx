@@ -145,7 +145,7 @@ export default function CompanyCalendar() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#fdf0df] font-sans">
+    <div className="flex min-h-screen bg-[#fdf0df] ml-64">
       <SidebarCompany />
       <main className="flex-1 p-10">
         <h1 className="text-4xl font-bold text-[#2e2e2e] mb-10 flex items-center gap-3">

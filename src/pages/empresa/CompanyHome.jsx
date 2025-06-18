@@ -92,7 +92,7 @@ export default function CompanyHome() {
 
   // asdasda
   return (
-    <div className="flex min-h-screen bg-[#fdf0df]">
+  <div className="flex min-h-screen bg-[#fdf0df] ml-64">
       <SidebarCompany />
       <div className="flex-1 p-8">
         <h1 className="text-3xl font-bold mb-8">

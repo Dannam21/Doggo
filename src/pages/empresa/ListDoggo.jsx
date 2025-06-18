@@ -50,7 +50,7 @@ export default function ListDoggo() {
     };
     
     return (
-        <div className="flex min-h-screen bg-[#fdf0df]">
+        <div className="flex min-h-screen bg-[#fdf0df] ml-64">
         <SidebarCompany />
     
         <main className="flex-1 px-10 py-10 space-y-10">

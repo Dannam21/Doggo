@@ -220,7 +220,7 @@ export default function CompanyMessages() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#fdf0df]">
+    <div className="flex min-h-screen bg-[#fdf0df] ml-64">
       <SidebarCompany />
 
       {/* Chat List Sidebar */}
@@ -250,8 +250,8 @@ export default function CompanyMessages() {
       </div>
 
       {/* Chat Area */}
-      <main className="flex-1 p-6 flex flex-col">
-        {selectedUserInfo && (
+      <main className="flex-1 p-6 flex flex-col ml-64"> 
+                {selectedUserInfo && (
           <>
             <div className="bg-white rounded-t-2xl shadow-sm">
               <div className="flex items-center gap-4 px-4 py-3">

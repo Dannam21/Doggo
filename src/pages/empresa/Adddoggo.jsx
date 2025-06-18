@@ -44,7 +44,7 @@ export default function Adddoggo() {
   };
 
   return (
-    <div className="flex bg-[#fdf0df] min-h-screen">
+    <div className="flex min-h-screen bg-[#fdf0df] ml-64">
   <div className="sticky top-0 h-screen">
     <SidebarCompany />
   </div>
