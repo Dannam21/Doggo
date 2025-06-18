@@ -23,7 +23,7 @@ const QuestionnairePreferences = () => {
   // Redirigir si no existe payload de registro previo
   useEffect(() => {
     if (!user?.payloadRegistro) {
-      navigate("/questionnaire");
+      navigate("/cuestionario");
     }
   }, [user, navigate]);
 
