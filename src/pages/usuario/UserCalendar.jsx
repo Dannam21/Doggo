@@ -15,7 +15,7 @@ export default function UserCalendar() {
   const fetchEventosDeDia = async (date) => {
     const fecha = date.toISOString().split("T")[0];
     try {
-      const res = await fetch(`http://localhost:8000/calendario/dia/${fecha}`);
+      const res = await fetch(`http://34.195.195.173:8000/calendario/dia/${fecha}`);
       const data = await res.json();
       const dateKey = date.toDateString();
 
@@ -35,7 +35,7 @@ export default function UserCalendar() {
   const fetchEventoById = async (id, date) => {
     const fecha = date.toISOString().split("T")[0];
     try {
-      const res = await fetch(`http://localhost:8000/calendario/dia/${fecha}`);
+      const res = await fetch(`http://34.195.195.173:8000/calendario/dia/${fecha}`);
       const data = await res.json();
 
       const eventoEncontrado = data.find(

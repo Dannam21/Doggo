@@ -21,7 +21,7 @@ export default function CompanyCalendar() {
   const fetchEventosDeDia = async (date) => {
     const fecha = date.toISOString().split("T")[0];
     try {
-      const res = await fetch(`http://localhost:8000/calendario/dia/${fecha}`);
+      const res = await fetch(`http://34.195.195.173:8000/calendario/dia/${fecha}`);
       const data = await res.json();
       const eventosConTipo = data;
 
@@ -41,7 +41,7 @@ export default function CompanyCalendar() {
   const fetchEventoById = async (id, date) => {
     const fecha = date.toISOString().split("T")[0];
     try {
-      const res = await fetch(`http://localhost:8000/calendario/dia/${fecha}`);
+      const res = await fetch(`http://34.195.195.173:8000/calendario/dia/${fecha}`);
       const data = await res.json();
   
       const eventosConTipo = data.map((evento) => {
@@ -71,7 +71,7 @@ export default function CompanyCalendar() {
   // 👥 ADOPTANTES CONVERSADOS
   useEffect(() => {
     if (user?.albergue_id) {
-      fetch(`http://localhost:8000/mensajes/contactos?emisor_id=${user.albergue_id}&emisor_tipo=albergue`)
+      fetch(`http://34.195.195.173:8000/mensajes/contactos?emisor_id=${user.albergue_id}&emisor_tipo=albergue`)
         .then(res => res.json())
         .then(data => {
           const adoptantes = data.filter(contacto => contacto.userType === "adoptante");
@@ -99,7 +99,7 @@ export default function CompanyCalendar() {
     const adoptanteId = user?.adoptante_id || manualAdoptanteId;
 
     if (tipoEvento === "evento") {
-      endpoint = "http://localhost:8000/calendario/evento";
+      endpoint = "http://34.195.195.173:8000/calendario/evento";
       payload = { calendario: baseCalendario };
     } else {
       if (!adoptanteId) {
@@ -107,7 +107,7 @@ export default function CompanyCalendar() {
         return;
       }
 
-      endpoint = "http://localhost:8000/calendario/visita";
+      endpoint = "http://34.195.195.173:8000/calendario/visita";
       payload = {
         calendario: baseCalendario,
         adoptante_id: adoptanteId,

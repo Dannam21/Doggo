@@ -22,7 +22,7 @@ export default function CompanyMessages() {
   const fetchChatList = async () => {
     try {
       const res = await fetch(
-        `http://localhost:8000/mensajes/contactos?emisor_id=${emisorId}&emisor_tipo=albergue`,
+        `http://34.195.195.173:8000/mensajes/contactos?emisor_id=${emisorId}&emisor_tipo=albergue`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -53,9 +53,9 @@ export default function CompanyMessages() {
     try {
       let url = "";
       if (userType === "adoptante") {
-        url = `http://localhost:8000/adoptante/${userId}`;
+        url = `http://34.195.195.173:8000/adoptante/${userId}`;
       } else if (userType === "albergue") {
-        url = `http://localhost:8000/albergue/${userId}`;
+        url = `http://34.195.195.173:8000/albergue/${userId}`;
       }
   
       const res = await fetch(url, {
@@ -70,7 +70,7 @@ export default function CompanyMessages() {
   
       const imagenId = user.imagen_perfil_id;
       const avatarUrl = imagenId
-        ? `http://localhost:8000/imagenesProfile/${imagenId}`
+        ? `http://34.195.195.173:8000/imagenesProfile/${imagenId}`
         : "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.nombre);
   
       return { name: user.nombre, avatar: avatarUrl };
@@ -88,7 +88,7 @@ export default function CompanyMessages() {
     const [userType, userId] = selectedUser.split("-");
     try {
       const res = await fetch(
-        `http://localhost:8000/mensajes/conversacion?id1=${emisorId}&tipo1=albergue&id2=${userId}&tipo2=${userType}`,
+        `http://34.195.195.173:8000/mensajes/conversacion?id1=${emisorId}&tipo1=albergue&id2=${userId}&tipo2=${userType}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -149,7 +149,7 @@ export default function CompanyMessages() {
   };
   
   const setupWebSocket = () => {
-    const ws = new WebSocket(`ws://localhost:8000/ws/chat/${rolEmisor}/${emisorId}`);
+    const ws = new WebSocket(`ws://34.195.195.173:8000/ws/chat/${rolEmisor}/${emisorId}`);
 
     ws.onopen = () => {
       console.log("✅ WebSocket conectado");

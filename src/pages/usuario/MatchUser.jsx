@@ -17,11 +17,11 @@ export default function MatchUser() {
 
   const iniciarChatAutomatico = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/usuario/mascotas/${dog.id}`);
+      const res = await fetch(`http://34.195.195.173:8000/usuario/mascotas/${dog.id}`);
       const mascota = await res.json();
       const albergueId = mascota.albergue_id;
   
-      const socket = new WebSocket(`ws://localhost:8000/ws/chat/adoptante/${user.adoptante_id}`);
+      const socket = new WebSocket(`ws://34.195.195.173:8000/ws/chat/adoptante/${user.adoptante_id}`);
   
       socket.onopen = () => {
         const mensaje = {
@@ -55,7 +55,7 @@ export default function MatchUser() {
           <h1 className="text-2xl font-bold mb-4">¡Es un Match!</h1>
           <div className="bg-white rounded-full overflow-hidden w-40 h-40 mx-auto mb-4">
             <img
-              src={`http://localhost:8000/imagenes/${dog.imagen_id}`}
+              src={`http://34.195.195.173:8000/imagenes/${dog.imagen_id}`}
               alt={dog.nombre}
               className="w-full h-full object-cover"
             />

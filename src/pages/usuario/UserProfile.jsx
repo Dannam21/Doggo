@@ -26,7 +26,7 @@ const UserProfile = () => {
             <div className="flex flex-col items-center w-40">
               <div className="w-40 h-40 mb-4">
                 <img
-                  src={`http://localhost:8000/imagenes/${user.imagen_perfil_id}`}
+                  src={`http://34.195.195.173:8000/imagenes/${user.imagen_perfil_id}`}
                   alt="Foto de perfil"
                   className="w-full h-full rounded-full object-cover border border-gray-300"
                 />
