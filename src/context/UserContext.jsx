@@ -4,7 +4,8 @@ export const UserContext = createContext({
   name: null,
   email: null,
   token: null,
-  albergue_id: null,
+  user_id: null,
+  imagen_perfil_id: null,
   setUser: () => {},
 });
 
@@ -13,7 +14,8 @@ export const UserProvider = ({ children }) => {
     name: null,
     email: null,
     token: null,
-    albergue_id: null,
+    user_id: null,
+    imagen_perfil_id: null,
   });
   const [loading, setLoading] = useState(true);
 

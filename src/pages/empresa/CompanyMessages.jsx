@@ -250,7 +250,7 @@ export default function CompanyMessages() {
       </div>
 
       {/* Chat Area */}
-      <main className="flex-1 p-6 flex flex-col ml-64"> 
+      <main className="flex-1 p-6 flex flex-col"> 
                 {selectedUserInfo && (
           <>
             <div className="bg-white rounded-t-2xl shadow-sm">
