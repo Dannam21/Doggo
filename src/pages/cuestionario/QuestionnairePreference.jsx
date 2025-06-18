@@ -20,14 +20,14 @@ const QuestionnairePreferences = () => {
   const navigate = useNavigate();
   const { user, setUser } = useContext(UserContext);
 
-  // Redirigir si no existe payload de registro previo
+  const [registroFinalizado, setRegistroFinalizado] = useState(false);
+
   useEffect(() => {
-    if (!user?.payloadRegistro) {
+    if (!registroFinalizado && !user?.payloadRegistro) {
       navigate("/cuestionario");
     }
-  }, [user, navigate]);
+  }, [user, navigate, registroFinalizado]);
 
-  // Estado inicial de pesos: todos en 3 (medio)
   const [weights, setWeights] = useState(
     questions.reduce((acc, q) => ({ ...acc, [q.key]: 3 }), {})
   );
@@ -39,51 +39,54 @@ const QuestionnairePreferences = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Preparamos payload de registro con etiquetas (dict) y pesos
     const payload = {
       ...user.payloadRegistro,
       etiquetas: user.questionnaire,
       pesos: weights,
     };
+    console.log("Payload de registro:", payload);
 
     try {
-      // 1) Registro
       const regRes = await fetch("http://localhost:8000/register/adoptante", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
       if (!regRes.ok) {
         const err = await regRes.json();
         throw new Error(err.detail || "Error en registro");
       }
-      const { token, id } = await regRes.json();
 
-      // 2) Obtener perfil
-      const perfilRes = await fetch("http://localhost:8000/adoptante/me", {
+      const { access_token, id } = await regRes.json();
+      console.log("Registro exitoso:", { access_token, id });
+
+      const perfilRes = await fetch(`http://localhost:8000/adoptante/${id}`, {
         method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${access_token}` },
       });
+
       if (!perfilRes.ok) {
         const err2 = await perfilRes.json();
         throw new Error(err2.detail || "Error al obtener perfil");
       }
+
       const perfil = await perfilRes.json();
       const fullName = `${perfil.nombre} ${perfil.apellido}`;
 
-      // 3) Guardar en contexto y localStorage
       const newUser = {
         name: fullName,
         email: perfil.correo,
-        token,
+        token: access_token,
         id: perfil.id,
         pesos: weights,
       };
-      setUser(newUser);
-      localStorage.setItem("user", JSON.stringify(newUser));
 
-      // 4) Redirigir a home
-      navigate("/home");
+      setUser(null);
+      localStorage.removeItem("user");
+
+      setRegistroFinalizado(true); // ⚠️ Esto evita que el useEffect redirija mal
+      navigate("/login");
     } catch (err) {
       alert(`Error: ${err.message}`);
     }
@@ -97,7 +100,6 @@ const QuestionnairePreferences = () => {
           <h2 className="text-3xl font-bold text-center mb-4 text-black">
             Ajusta tus preferencias de peso
           </h2>
-          {/* Leyenda de escala */}
           <div className="mb-6">
             <p className="text-gray-600"><strong>Escala (1=No importa, 5=Muy importante):</strong></p>
             <ul className="list-disc list-inside text-gray-600">

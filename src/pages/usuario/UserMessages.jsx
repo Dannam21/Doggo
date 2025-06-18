@@ -9,9 +9,8 @@ export default function UserMessages() {
   const token = user?.token;
 
   const [chatList, setChatList] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(() => {
-    return localStorage.getItem("lastUserChat") || "";
-  });
+  const [selectedUser, setSelectedUser] = useState("");
+
   const [selectedUserInfo, setSelectedUserInfo] = useState(null);
   const [messagesByUser, setMessagesByUser] = useState({});
   const [newMessage, setNewMessage] = useState("");
@@ -58,11 +57,34 @@ export default function UserMessages() {
         });
       }
   
-      setChatList(Object.values(grouped)); // array de albergues con lista de mascotas
+      const fetchedChats = Object.values(grouped);
+      setChatList(fetchedChats);
+  
+      // Obtener última selección si existe y es válida
+      const lastChat = localStorage.getItem("lastUserChat");
+  
+      const chatExists = fetchedChats.some(group =>
+        group.chats.some(chat =>
+          `${group.userType}-${group.userId}-${chat.mascota_id}` === lastChat
+        )
+      );
+  
+      if (fetchedChats.length === 0) {
+        setSelectedUser("");
+        localStorage.removeItem("lastUserChat");
+      } else if (chatExists) {
+        setSelectedUser(lastChat);
+      } else {
+        const firstGroup = fetchedChats[0];
+        const firstChat = firstGroup.chats[0];
+        const firstChatKey = `${firstGroup.userType}-${firstGroup.userId}-${firstChat.mascota_id}`;
+        setSelectedUser(firstChatKey);
+      }
     } catch (error) {
       console.error("Error al cargar contactos del chat:", error);
     }
   };
+  
   
 
   const fetchUserAvatar = async (userType, userId) => {

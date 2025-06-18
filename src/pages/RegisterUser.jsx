@@ -36,7 +36,6 @@ const RegisterUser = () => {
     setError("");
   };
 
-// ... (código anterior)
 
 const handleSubmit = async (e) => {
   e.preventDefault();

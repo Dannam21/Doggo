@@ -50,6 +50,7 @@ const Login = () => {
       // **Guardar token en localStorage** para que persista entre recargas
       localStorage.setItem("token", token);
 
+      console.log("Login exitoso:", { token, adoptanteId });
       if (form.role === "user") {
         // --- Perfil de adoptante ---
         const profileRes = await fetch("http://localhost:8000/adoptante/me", {
