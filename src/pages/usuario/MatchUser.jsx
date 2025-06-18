@@ -3,7 +3,6 @@ import Navbar from "../../layout/Navbar";
 import { useContext } from "react";
 import { UserContext } from "../../context/UserContext";
 
-
 export default function MatchUser() {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
@@ -20,24 +19,61 @@ export default function MatchUser() {
       const res = await fetch(`http://localhost:8000/usuario/mascotas/${dog.id}`);
       const mascota = await res.json();
       const albergueId = mascota.albergue_id;
-  
+
       const socket = new WebSocket(`ws://localhost:8000/ws/chat/adoptante/${user.adoptante_id}`);
-  
+
       socket.onopen = () => {
-        const mensaje = {
+        console.log("✅ WebSocket abierto");
+      
+        const mensajeTexto = {
           receptor_id: albergueId,
           receptor_tipo: "albergue",
-          contenido: "Hola, ¿esta mascota sigue disponible?"
+          mascota_id: dog.id,
+          contenido: `Hola, ¿${dog.nombre} (ID: ${dog.id}) sigue disponible?`
         };
-        socket.send(JSON.stringify(mensaje));
-  
-        // Esperamos un poquito para asegurarnos de que se envió antes de cerrar
+      
+        socket.send(JSON.stringify(mensajeTexto));
+        console.log("📤 MensajeTexto enviado");
+      
         setTimeout(() => {
-          socket.close(); // Cerrar conexión WebSocket
-          navigate("/user/messages"); // Redirigir a la vista de mensajes
-        }, 300); // 300ms es suficiente, puedes ajustar
+          if (socket.readyState === WebSocket.OPEN) {
+            const mensajeCard = {
+              receptor_id: albergueId,
+              receptor_tipo: "albergue",
+              mascota_id: dog.id,
+              contenido: JSON.stringify({
+                tipo: "card_perro",
+                nombre: dog.nombre,
+                descripcion: dog.descripcion,
+                imagen: `http://localhost:8000/imagenes/${dog.imagen_id}`
+              })
+            };
+      
+            socket.send(JSON.stringify(mensajeCard));
+            console.log("📤 MensajeCard enviado");
+          } else {
+            console.warn("⚠️ No se pudo enviar MensajeCard: socket cerrado");
+          }
+      
+          setTimeout(() => {
+            socket.close();
+            console.log("❌ WebSocket cerrado manualmente");
+            localStorage.setItem("lastUserChat", `albergue-${albergueId}-${dog.id}`);
+            navigate("/user/messages");
+            }, 300);
+        }, 200);
       };
-  
+      
+      socket.onerror = (e) => {
+        console.error("🛑 WebSocket error:", e);
+      };
+      
+      socket.onclose = (event) => {
+        console.warn("⚠️ WebSocket cerrado automáticamente", event);
+      };
+      
+      
+
       socket.onerror = (e) => {
         console.error("Error al conectar con WebSocket:", e);
       };
@@ -45,7 +81,6 @@ export default function MatchUser() {
       console.error("Error al iniciar chat automático:", err);
     }
   };
-  
 
   return (
     <>
@@ -68,7 +103,7 @@ export default function MatchUser() {
               onClick={() => navigate("/dashboard/user", { state: { restoreIndex: fromIndex } })}
               className="flex-1 bg-[#4FB286] text-white font-semibold py-2 rounded-lg hover:bg-green-600 transition"
             >
-              Regresar
+              Regresar  
             </button>
             <button
               onClick={iniciarChatAutomatico}
