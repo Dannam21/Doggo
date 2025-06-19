@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import Navbar from "../../layout/Navbar";
+import axios from "axios";
 
 export default function DoggoUser() {
   const navigate = useNavigate();
@@ -11,6 +12,23 @@ export default function DoggoUser() {
   const [dog, setDog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [donationAmount, setDonationAmount] = useState(500); // Monto por defecto
+  const [isProcessingDonation, setIsProcessingDonation] = useState(false);
+
+  // Cargar el SDK de MercadoPago
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://sdk.mercadopago.com/js/v2';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      // Cleanup: remover el script cuando el componente se desmonte
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -25,6 +43,38 @@ export default function DoggoUser() {
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
   }, [dogId]);
+
+  // Función para procesar la donación
+  const handleDonation = async () => {
+    const token = localStorage.getItem("token"); // ✅ Declarar token aquí
+    setIsProcessingDonation(true);
+    try {
+      const response = await axios.post("http://localhost:8000/crear-donacion", {
+        amount: donationAmount,
+        dogId: dog.id,
+        dogName: dog.nombre,
+        description: "Donación para " + dog.nombre,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      // Redirigir al usuario a la página de pago
+      window.location.href = response.data.initPoint;
+  
+    } catch (error) {
+      console.error("Error al procesar donación:", error);
+      alert("Ocurrió un error al procesar la donación.");
+    } finally {
+      setIsProcessingDonation(false);
+    }
+  };
+  
+  
+
+  // Montos predefinidos
+  const predefinedAmounts = [500, 1000, 2000, 5000];
 
   if (loading) return <>
     <Navbar />
@@ -88,6 +138,48 @@ export default function DoggoUser() {
                   ))}
                 </div>
               )}
+
+              {/* Sección de donación */}
+              <div className="mb-6 p-4 bg-yellow-50 rounded-lg border">
+                <h3 className="font-semibold text-lg mb-3">💝 Ayuda a {dog.nombre}</h3>
+                
+                {/* Montos predefinidos */}
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 mb-2">Selecciona un monto:</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {predefinedAmounts.map(amount => (
+                      <button
+                        key={amount}
+                        onClick={() => setDonationAmount(amount)}
+                        className={`p-2 rounded border text-sm font-medium transition ${
+                          donationAmount === amount 
+                            ? 'bg-yellow-500 text-white border-yellow-500' 
+                            : 'bg-white text-gray-700 border-gray-300 hover:border-yellow-400'
+                        }`}
+                      >
+                        S/ {amount}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Monto personalizado */}
+                <div className="mb-4">
+                  <label className="block text-sm text-gray-600 mb-1">O ingresa tu monto:</label>
+                  <div className="flex items-center">
+                    <span className="bg-gray-100 px-3 py-2 border border-r-0 rounded-l text-sm">S/</span>
+                    <input
+                      type="number"
+                      min="100"
+                      value={donationAmount}
+                      onChange={(e) => setDonationAmount(parseInt(e.target.value) || 0)}
+                      className="flex-1 px-3 py-2 border rounded-r focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                      placeholder="100"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Monto mínimo: S/ 100</p>
+                </div>
+              </div>
             </div>
 
             {/* Botones */}
@@ -100,36 +192,23 @@ export default function DoggoUser() {
               >
                 Regresar
               </button>
-              <button
-  onClick={() => {
-    const monto = prompt("¿Cuánto deseas donar?");
-    if (!monto || isNaN(monto)) return alert("Monto inválido");
-
-    const token = localStorage.getItem("token");
-
-    fetch("http://localhost:8000/donar", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        mascota_id: dog.id,
-        monto: parseInt(monto),
-      }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Error al donar");
-        return res.json();
-      })
-      .then(() => alert("¡Gracias por tu donación!"))
-      .catch((err) => alert(err.message));
-  }}
-  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-lg transition"
->
-  Donar
-</button>
-
+              <button 
+                onClick={handleDonation}
+                disabled={isProcessingDonation || !donationAmount || donationAmount < 100}
+                className="flex-1 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition flex items-center justify-center"
+              >
+                {isProcessingDonation ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Procesando...
+                  </span>
+                ) : (
+                  `Donar S/ ${donationAmount}`
+                )}
+              </button>
             </div>
           </div>
         </div>
