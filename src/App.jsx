@@ -17,6 +17,7 @@ import CompanyStatistics from "./pages/empresa/CompanyStatistics";
 import CompanyMessages from "./pages/empresa/CompanyMessages";
 import DashboardCompany from "./pages/empresa/DashboardCompany";
 import Adddoggo from "./pages/empresa/Adddoggo";
+import CompanyMatches from "./pages/empresa/CompanyMatches";
 
 // Páginas de usuario
 import User from "./pages/usuario/DashboardUser";
@@ -85,6 +86,16 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+          path = "/company/matches"
+          element={
+            <ProtectedRoute>
+              <CompanyMatches />
+            </ProtectedRoute>
+          }
+          />
+
           <Route
             path="/company/statistics"
             element={

@@ -1,4 +1,5 @@
 import {
+    FaHome,
     FaUser,
     FaEnvelope,
     FaCalendarAlt,
@@ -33,6 +34,18 @@ import {
           </div>
   
           <nav className="mt-4 space-y-2 px-6 text-sm">
+            <div
+              role="button"
+              onClick={() => navigate("/user/home")}
+              className={`flex items-center gap-2 text-black px-3 py-2 rounded-lg transition-all ${
+                isActive("/user/home")
+                  ? "bg-[#FFF6D8] border-l-4 border-yellow-300 font-semibold"
+                  : "hover:bg-[#FFF6D8] hover:font-semibold"
+              }`}
+            >
+              <FaHome /> Home
+            </div>
+
             <div
               role="button"
               onClick={() => navigate("/user/profile")}

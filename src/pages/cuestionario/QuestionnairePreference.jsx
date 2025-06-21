@@ -29,7 +29,7 @@ const QuestionnairePreferences = () => {
   }, [user, navigate, registroFinalizado]);
 
   const [weights, setWeights] = useState(
-    questions.reduce((acc, q) => ({ ...acc, [q.key]: 3 }), {})
+    questions.reduce((acc, q) => ({ ...acc, [q.key]: 1 }), {})
   );
 
   const handleChange = (key, value) => {
@@ -85,7 +85,7 @@ const QuestionnairePreferences = () => {
       setUser(null);
       localStorage.removeItem("user");
 
-      setRegistroFinalizado(true); // ⚠️ Esto evita que el useEffect redirija mal
+      setRegistroFinalizado(true); 
       navigate("/login");
     } catch (err) {
       alert(`Error: ${err.message}`);

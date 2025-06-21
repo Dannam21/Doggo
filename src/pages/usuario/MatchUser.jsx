@@ -15,6 +15,29 @@ export default function MatchUser() {
   }
 
   const iniciarChatAutomatico = async () => {
+    const token = localStorage.getItem("token");
+    // 1️⃣ Registrar el match antes de nada
+    try {
+      const matchRes = await fetch("http://localhost:8000/matches/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          adoptante_id: user.adoptante_id,
+          mascota_id: dog.id,
+        }),
+      });
+      if (!matchRes.ok) {
+        throw new Error("Error al registrar match");
+      }
+      console.log("✅ Match registrado correctamente");
+    } catch (err) {
+      console.error("❌ No se pudo registrar el match:", err);
+      // Opcional: mostrar un toast o alerta
+      return;
+    }
     try {
       const res = await fetch(`http://localhost:8000/usuario/mascotas/${dog.id}`);
       const mascota = await res.json();

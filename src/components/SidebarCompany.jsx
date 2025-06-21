@@ -1,6 +1,7 @@
 import {
   FaHome,
   FaDog,
+  FaHeart,
   FaEnvelope,
   FaChartBar,
   FaCalendarAlt,
@@ -64,6 +65,18 @@ export default function SidebarCompany() {
             }`}
           >
             <FaDog /> Doggos
+          </div>
+          
+          <div
+            role="button"
+            onClick={() => navigate("/company/matches")}
+            className={`flex items-center gap-2 text-black px-3 py-2 rounded-lg transition-all ${
+              isActive("/company/matches")
+                ? "bg-[#FFF6D8] border-l-4 border-yellow-300 font-semibold"
+                : "hover:bg-[#FFF6D8] hover:font-semibold"
+            }`}
+          >
+            <FaHeart /> Matches
           </div>
 
           <div
