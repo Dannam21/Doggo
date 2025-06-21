@@ -30,6 +30,7 @@ import UserProfile from "./pages/usuario/UserProfile";
 import UserMessages from "./pages/usuario/UserMessages";
 import UserHome from "./pages/usuario/UserHome";
 import UserCalendar from "./pages/usuario/UserCalendar";
+import DonacionExitosa from "./pages/usuario/DonacionExitosa";
 
 function App() {
   return (
@@ -47,9 +48,10 @@ function App() {
           <Route path="/register/company" element={<RegisterCompany />} />
           <Route path="/cuestionario" element={ <Questionnaire />}/>
           <Route path="/preferences" element={<QuestionnairePreferences />} />
+          <Route path="/donacion/exito" element={<DonacionExitosa />} />
 
           {/* RUTAS PROTEGIDAS */}
-
+          
           <Route
             path="/company/doggos"
             element={
@@ -102,7 +104,7 @@ function App() {
             }
           />
 
-<Route
+          <Route
             path="/user/home"
             element={
               <ProtectedRoute>
@@ -129,7 +131,7 @@ function App() {
             }
           />
 
-<Route
+          <Route
             path="/user/calendar"
             element={
               <ProtectedRoute>
