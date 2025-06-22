@@ -137,12 +137,7 @@ export default function CompanyHome() {
           >
             Ver listado
           </button>
-          <button
-            className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition"
-            onClick={() => navigate("/company/editdoggos")}
-          >
-            Editar perfil
-          </button>
+          
           <button
             className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition"
             onClick={() => navigate("/company/messages")}
