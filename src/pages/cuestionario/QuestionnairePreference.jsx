@@ -13,7 +13,7 @@ const questions = [
   { key: "otrasMascotas", label: "Otras mascotas en casa" },
   { key: "compromiso", label: "Compromiso de cuidado" },
   { key: "fuera", label: "Tiempo fuera de casa" },
-  { key: "energia", label: "Nivel de energía deseado" }
+  { key: "energia", label: "Nivel de energía deseado" },
 ];
 
 const QuestionnairePreferences = () => {
@@ -33,7 +33,7 @@ const QuestionnairePreferences = () => {
   );
 
   const handleChange = (key, value) => {
-    setWeights(prev => ({ ...prev, [key]: parseInt(value, 10) }));
+    setWeights((prev) => ({ ...prev, [key]: parseInt(value, 10) }));
   };
 
   const handleSubmit = async (e) => {
@@ -85,7 +85,7 @@ const QuestionnairePreferences = () => {
       setUser(null);
       localStorage.removeItem("user");
 
-      setRegistroFinalizado(true); 
+      setRegistroFinalizado(true);
       navigate("/login");
     } catch (err) {
       alert(`Error: ${err.message}`);
@@ -95,43 +95,68 @@ const QuestionnairePreferences = () => {
   return (
     <main>
       <Navbar />
+
       <div className="min-h-screen bg-orange-50 flex items-center justify-center p-4">
         <div className="bg-white shadow-xl rounded-xl p-8 w-full max-w-3xl">
+          <button3
+            type="button"
+            onClick={() => navigate(-1)}
+            className="mb-4 text-sm text-gray-500 hover:text-gray-700 transition self-start"
+          >
+            ← Atrás
+          </button3>
           <h2 className="text-3xl font-bold text-center mb-4 text-black">
             Ajusta tus preferencias de peso
           </h2>
           <div className="mb-6">
-            <p className="text-gray-600"><strong>Escala (1=No importa, 5=Muy importante):</strong></p>
+            <p className="text-gray-600">
+              <strong>Escala (1=No importa, 5=Muy importante):</strong>
+            </p>
             <ul className="list-disc list-inside text-gray-600">
-              <li><strong>1:</strong> No importa</li>
-              <li><strong>2:</strong> Poco importante</li>
-              <li><strong>3:</strong> Moderado</li>
-              <li><strong>4:</strong> Importante</li>
-              <li><strong>5:</strong> Muy importante</li>
+              <li>
+                <strong>1:</strong> No importa
+              </li>
+              <li>
+                <strong>2:</strong> Poco importante
+              </li>
+              <li>
+                <strong>3:</strong> Moderado
+              </li>
+              <li>
+                <strong>4:</strong> Importante
+              </li>
+              <li>
+                <strong>5:</strong> Muy importante
+              </li>
             </ul>
           </div>
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {questions.map(q => (
-              <div key={q.key}>
-                <h3 className="text-lg font-semibold mb-2 text-gray-700">
-                  {q.label}
-                </h3>
-                <div className="flex gap-6">
-                  {[1,2,3,4,5].map(val => (
-                    <label key={val} className="flex flex-col items-center">
-                      <input
-                        type="radio"
-                        name={q.key}
-                        value={val}
-                        checked={weights[q.key] === val}
-                        onChange={e => handleChange(q.key, e.target.value)}
-                      />
-                      <span className="mt-1 text-sm text-gray-600">{val}</span>
-                    </label>
-                  ))}
+
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              {questions.map((q) => (
+                <div key={q.key}>
+                  <h3 className="text-lg font-semibold mb-2 text-gray-700">
+                    {q.label}
+                  </h3>
+                  <div className="flex gap-4">
+                    {[1, 2, 3, 4, 5].map((val) => (
+                      <label key={val} className="flex flex-col items-center">
+                        <input
+                          type="radio"
+                          name={q.key}
+                          value={val}
+                          checked={weights[q.key] === val}
+                          onChange={(e) => handleChange(q.key, e.target.value)}
+                        />
+                        <span className="mt-1 text-sm text-gray-600">
+                          {val}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
             <button
               type="submit"
               className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-md transition"
