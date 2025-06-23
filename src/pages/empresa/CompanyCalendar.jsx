@@ -6,6 +6,7 @@ import { UserContext } from "../../context/UserContext";
 
 export default function CompanyCalendar() {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [hora, setHora] = useState("12:00");
   const [events, setEvents] = useState({});
   const [newEvent, setNewEvent] = useState("");
   const [tipoEvento, setTipoEvento] = useState("evento");
@@ -81,7 +82,9 @@ export default function CompanyCalendar() {
   const handleAddEvent = async () => {
     if (!newEvent.trim()) return;
 
-    const fechaISO = selectedDate.toISOString();
+    const [yyyy, mm, dd] = selectedDate.toISOString().split("T")[0].split("-");
+    const fechaConHora = new Date(`${yyyy}-${mm}-${dd}T${hora}:00`);
+    const fechaISO = fechaConHora.toISOString();
 
     const baseCalendario = {
       fecha_hora: fechaISO,
@@ -215,6 +218,13 @@ export default function CompanyCalendar() {
               className="w-full p-3 border border-gray-300 rounded-xl mb-4 focus:ring-2 focus:ring-orange-400"
             />
 
+            <input
+              type="time"
+              value={hora}
+              onChange={(e) => setHora(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-xl mb-4 focus:ring-2 focus:ring-orange-400"
+            />
+
             {tipoEvento === "visita" && (
               <select
                 value={manualAdoptanteId || ""}
@@ -246,7 +256,7 @@ export default function CompanyCalendar() {
                 <ul className="space-y-2 text-gray-800">
                   {events[selectedDate.toDateString()].map((ev, idx) => (
                     <li
-                      key={idx}
+                      key={`${ev.id}-${idx}`}
                       className="bg-orange-100 px-4 py-2 rounded-lg shadow-sm cursor-pointer hover:bg-orange-200 transition"
                       onClick={() => fetchEventoById(ev.id, selectedDate)}
                     >
@@ -278,7 +288,10 @@ export default function CompanyCalendar() {
                   </p>
                   <p>
                     <strong>Fecha:</strong>{" "}
-                    {new Date(evento.fecha_hora).toLocaleString()}
+                    {new Date(evento.fecha_hora).toLocaleString("es-PE", {
+                      dateStyle: "full",
+                      timeStyle: "short",
+                    })}
                   </p>
                   <p>
                     <strong>Lugar:</strong> {evento.lugar}

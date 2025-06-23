@@ -9,7 +9,10 @@ const CompanyDoggos = () => {
     
 <div className="flex flex-col md:flex-row min-h-screen bg-[#fdf0df] pt-[72px] md:pt-0">
 
-      <SidebarCompany />
+<div className="w-64">
+  <SidebarCompany />
+</div>
+
 
       <div className="flex-1 bg-[#FFF1DC] p-8">
         <div className="flex items-center gap-2 mb-6 text-xl font-semibold">

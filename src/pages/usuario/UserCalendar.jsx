@@ -5,7 +5,7 @@ import SidebarUser from "../../components/SidebarUser";
 import { UserContext } from "../../context/UserContext";
 
 export default function UserCalendar() {
-  const [selectedDate] = useState(new Date()); // Día actual fijo
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [events, setEvents] = useState([]);
   const { user } = useContext(UserContext);
   const adoptanteId = user?.adoptante_id;
@@ -13,16 +13,16 @@ export default function UserCalendar() {
   const fetchEventosDeDia = async (date) => {
     const fecha = date.toISOString().split("T")[0];
     try {
-      const res = await fetch(`http://localhost:8000/calendario/dia/${fecha}`);
+      const res = await fetch(
+        `http://localhost:8000/calendario/dia/${fecha}?adoptante_id=${adoptanteId}`
+      );
       const data = await res.json();
 
-      // Filtrar por adoptante y que venga del company (asumimos que eso se puede identificar)
       const eventosFiltrados = data.filter(
         (evento) =>
-          evento.adoptante_id === adoptanteId &&
-          evento.emisor_tipo === "albergue" // Aquí filtramos los que vienen del company
+          evento.tipo === "visita" &&
+          String(evento.adoptante_id) === String(adoptanteId)
       );
-
       setEvents(eventosFiltrados);
     } catch (err) {
       console.error("Error cargando eventos:", err);
@@ -30,8 +30,10 @@ export default function UserCalendar() {
   };
 
   useEffect(() => {
-    fetchEventosDeDia(selectedDate);
-  }, [selectedDate]);
+    if (adoptanteId) {
+      fetchEventosDeDia(selectedDate);
+    }
+  }, [selectedDate, adoptanteId]);
 
   return (
     <div className="flex min-h-screen bg-[#fdf0df] font-sans">
@@ -44,35 +46,42 @@ export default function UserCalendar() {
         <div className="grid md:grid-cols-2 gap-10">
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
             <Calendar
+              onChange={setSelectedDate}
               value={selectedDate}
-              className="w-full rounded-xl overflow-hidden pointer-events-none opacity-50"
-              tileDisabled={() => true} // evita interacción
+              className="w-full rounded-xl overflow-hidden"
             />
             <p className="mt-4 text-gray-700 text-center">
-  Día actual:{" "}
-  <span className="font-medium">
-    {selectedDate.toLocaleDateString("es-PE", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })}
-  </span>
-</p>
-
+              Día seleccionado:{" "}
+              <span className="font-medium">
+                {selectedDate.toLocaleDateString("es-PE", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </span>
+            </p>
           </div>
 
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800">📌 Mis Citas</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+              📌 Mis Citas
+            </h2>
 
             {events.length > 0 ? (
               <ul className="space-y-2 text-gray-800">
-                {events.map((ev, idx) => (
+                {events.map((ev) => (
                   <li
-                    key={idx}
+                    key={ev.id}
                     className="bg-orange-100 px-4 py-2 rounded-lg shadow-sm"
                   >
-                    {ev.asunto}
+                    <div className="font-bold">{ev.asunto}</div>
+                    <div className="text-sm text-gray-600">
+                      {new Date(ev.fecha_hora).toLocaleTimeString("es-PE", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
                   </li>
                 ))}
               </ul>
