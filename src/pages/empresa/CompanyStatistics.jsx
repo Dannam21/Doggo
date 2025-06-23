@@ -1,4 +1,3 @@
-// src/pages/empresa/CompanyStatistics.jsx
 import React, { useContext, useEffect, useState } from "react";
 import SidebarCompany from "../../components/SidebarCompany";
 import { UserContext } from "../../context/UserContext";
@@ -101,8 +100,7 @@ export default function CompanyStatistics() {
     { title: "🤝 Matches Totales Realizados", value: matchTotals.length },
   ];
 
-  // Línea: adopciones por semana
-  const adoptionChartData = (() => {
+  const chartData = (() => {
     const weeks = getLast4Weeks();
     const counts = adoptions.reduce((acc, a) => {
       const d = new Date(a.fecha);
@@ -117,8 +115,8 @@ export default function CompanyStatistics() {
     return weeks.map((w) => ({ semana: w, adopciones: counts[w] || 0 }));
   })();
 
-  // Pie: adopciones por ESPECIE
-  const adoptionPieData = (() => {
+  const pieData = (() => {
+    const categories = ["Pequeño", "Mediano", "Grande"];
     const counts = adoptions.reduce((acc, a) => {
       const especie = mascotaMap[a.mascota.id]?.especie ?? "Desconocido";
       acc[especie] = (acc[especie] || 0) + 1;
@@ -169,11 +167,13 @@ export default function CompanyStatistics() {
   })();
 
   return (
-    <div className="flex min-h-screen bg-[#fdf0df]">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#fdf0df]">
       <SidebarCompany />
-      <main className="flex-1 p-10 ml-64">
+      <main className="flex-1 w-full pt-[60px] md:pt-10 px-4 md:px-10 md:ml-64">
         <h1 className="text-3xl font-bold mb-8 text-[#2e2e2e]">Panel de Estadísticas</h1>
-        {/* KPIs */}
+
+
+        {/* Estadísticas principales */}
         <section className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
           {stats.map((item, idx) => (
             <div
@@ -185,7 +185,8 @@ export default function CompanyStatistics() {
             </div>
           ))}
         </section>
-        {/* Adopciones */}
+
+        {/* Gráficos */}
         <section className="grid md:grid-cols-2 gap-8 mb-12">
           {/* LineChart */}
           <div className="bg-white rounded-xl shadow p-6">
@@ -204,7 +205,6 @@ export default function CompanyStatistics() {
               </ResponsiveContainer>
             </div>
           </div>
-          {/* PieChart ESPECIE */}
           <div className="bg-white rounded-xl shadow p-6">
             <h2 className="text-xl font-semibold mb-4 text-gray-700">🐶 Adopciones por Especie</h2>
             <div className="h-72 flex items-center justify-center">
@@ -221,41 +221,7 @@ export default function CompanyStatistics() {
             </div>
           </div>
         </section>
-        {/* Matches Totales */}
-        <section className="grid md:grid-cols-2 gap-8 mb-12">
-          {/* LineChart */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">📈 Matches Totales por Semana</h2>
-            <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={matchTotalsByWeek}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="semana" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="matches" stroke="#74b9ff" strokeWidth={3} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          {/* PieChart ESPECIE */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">🐾 Matches Totales por Especie</h2>
-            <div className="h-72 flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={matchTotalsPieData} dataKey="value" nameKey="name" outerRadius={90} label>
-                    {matchTotalsPieData.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </section>
-        {/* Top 5 Doggos */}
+        {/* Tabla de doggos top */}
         <section className="bg-white rounded-xl shadow p-6">
           <h2 className="text-xl font-semibold mb-4 text-gray-700">Top 5 Doggos por Matches</h2>
           <table className="w-full text-left">

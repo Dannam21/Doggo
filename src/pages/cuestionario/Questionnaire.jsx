@@ -91,12 +91,21 @@ const Questionnaire = () => {
     <main>
       <Navbar />
       <div className="min-h-screen bg-orange-50 flex items-center justify-center p-4">
-        <div className="bg-white shadow-xl rounded-xl p-8 w-full max-w-3xl">
+      <div className="bg-white shadow-xl rounded-xl p-16 w-full max-w-5xl">
+      <button3
+            type="button"
+            onClick={() => navigate(-1)}
+            className="mb-4 text-sm text-gray-500 hover:text-gray-700 transition self-start"
+          >
+            ← Atrás
+          </button3>
           <h2 className="text-3xl font-bold text-center mb-6 text-black">
             Cuestionario de Compatibilidad
           </h2>
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Vivienda */}
+         
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          
+          {/* Vivienda */}
             <div>
               <h3 className="text-lg font-semibold mb-2">
                 Vivienda{" "}
@@ -416,8 +425,8 @@ const Questionnaire = () => {
 
             <button
               type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-md transition"
-            >
+              className="col-span-2 w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-md transition"
+              >
               Continuar a Preferencias
             </button>
           </form>

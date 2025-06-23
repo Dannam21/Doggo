@@ -71,7 +71,7 @@ export default function CompanyMatches() {
     <div className="flex">
       <SidebarCompany />
       <main className="flex-1 min-h-screen bg-[#FFF9F2] p-6 ml-64">
-        <h1 className="text-3xl font-bold mb-6">📇 Matches</h1>
+        <h1 className="text-3xl font-bold mb-6">🧡 Matches</h1>
         {loading ? (
           <p className="text-lg text-gray-600">Cargando matches…</p>
         ) : matches.length === 0 ? (

@@ -6,13 +6,13 @@ import { FaHeart, FaTimes } from "react-icons/fa";
 export default function DashboardUser() {
   const navigate = useNavigate();
   const location = useLocation();
-  // Restauramos el índice si venimos de DoggoUser o MatchUser
   const initialIndex = location.state?.restoreIndex ?? 0;
 
   const [mascotas, setMascotas] = useState([]);
   const [index, setIndex] = useState(initialIndex);
   const [loading, setLoading] = useState(true);
   const [adoptanteId, setAdoptanteId] = useState(null);
+  const [citas, setCitas] = useState([]);
   const [animationDirection, setAnimationDirection] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -22,6 +22,7 @@ export default function DashboardUser() {
       setLoading(false);
       return;
     }
+
     fetch("http://localhost:8000/adoptante/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -29,18 +30,30 @@ export default function DashboardUser() {
         if (!res.ok) throw new Error();
         return res.json();
       })
-      .then(perfil => {
+      .then(async perfil => {
         setAdoptanteId(perfil.id);
-        return fetch(`http://localhost:8000/recomendaciones/${perfil.id}`, {
+
+        // 🟧 Obtener recomendaciones
+        const recomendacionesRes = await fetch(`http://localhost:8000/recomendaciones/${perfil.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        const recomendaciones = await recomendacionesRes.json();
+
+        setMascotas(recomendaciones);
+
+        // 🟨 Obtener citas del día actual
+        const today = new Date().toISOString().split("T")[0];
+        const citasRes = await fetch(`http://localhost:8000/calendario/dia/${today}`);
+        const todasLasCitas = await citasRes.json();
+        const citasDelAdoptante = todasLasCitas.filter(
+          (cita) => cita.adoptante_id === perfil.id
+        );
+        setCitas(citasDelAdoptante);
       })
-      .then(res => {
-        if (!res.ok) throw new Error();
-        return res.json();
+      .catch(() => {
+        setMascotas([]);
+        setCitas([]);
       })
-      .then(setMascotas)
-      .catch(() => setMascotas([]))
       .finally(() => setLoading(false));
   }, []);
 
@@ -53,9 +66,9 @@ export default function DashboardUser() {
     setIsAnimating(true);
     setTimeout(() => {
       if (dir === "right" && currentDog) {
-            navigate(`/doggoMatch/${currentDog.id}`, {
-              state: { fromIndex: index, dog: currentDog },
-            });
+        navigate(`/doggoMatch/${currentDog.id}`, {
+          state: { fromIndex: index, dog: currentDog },
+        });
       } else {
         setIndex(i => i + 1);
       }
@@ -63,7 +76,7 @@ export default function DashboardUser() {
       setIsAnimating(false);
     }, 400);
   };
-  
+
   const cardClasses = dog => {
     if (dog === currentDog) {
       if (animationDirection === "left") return "translate-x-[-120%] -rotate-12 opacity-0";
@@ -126,73 +139,52 @@ export default function DashboardUser() {
       <Navbar />
       <div className="flex flex-col items-center justify-center px-4 py-10 text-[#2e2e2e]" >
         <p className="text-lg font-semibold">Tienes {mascotas.length} matches</p>
-        <p className="text-sm mb-8" >
-          Haz click en el corazón (match) o en “More info” (detalle)
-        </p>
+        <p className="text-sm mb-8">Haz click en el corazón (match) o en “More info” (detalle)</p>
 
         <div className="relative w-[320px] h-[500px] mb-10">
           {/* Carta siguiente */}
-          <div
-            className={`absolute inset-0 z-0 bg-[#ee9c70] text-white rounded-xl shadow-md p-4 transition-all duration-300 transform ${cardClasses(nextDog)}`}
-          >
-            <img
-              src={`http://localhost:8000/imagenes/${nextDog.imagen_id}`}
-              alt={nextDog.nombre}
-              className="w-full h-48 object-cover rounded-md mb-4"
-            />
+          <div className={`absolute inset-0 z-10 bg-[#ee9c70] text-white rounded-2xl shadow-2xl p-6 transition-all duration-400 ease-in-out transform ${cardClasses(currentDog)}`}>
+            <img src={`http://localhost:8000/imagenes/${currentDog.imagen_id}`} alt={currentDog.nombre} className="max-h-60 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-center mb-2">{nextDog.nombre}</h3>
             <p className="text-sm text-center italic">Esperando...</p>
           </div>
 
           {/* Carta actual */}
-          <div
-            className={`absolute inset-0 z-10 bg-[#ee9c70] text-white rounded-xl shadow-xl p-4 transition-all duration-400 ease-in-out transform ${cardClasses(currentDog)}`}
-          >
-            <img
-              src={`http://localhost:8000/imagenes/${currentDog.imagen_id}`}
-              alt={currentDog.nombre}
-              className="w-full h-48 object-cover rounded-md mb-4"
-            />
+          <div className={`absolute inset-0 z-10 bg-[#ee9c70] text-white rounded-2xl shadow-2xl p-6 transition-all duration-400 ease-in-out transform ${cardClasses(currentDog)}`}>
+            <img src={`http://localhost:8000/imagenes/${currentDog.imagen_id}`} alt={currentDog.nombre} className="max-h-60 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-center mb-2">{currentDog.nombre}</h3>
             <ul className="text-sm leading-snug space-y-1 px-2 mb-4">
               <li><strong>Edad:</strong> {currentDog.edad}</li>
               <li><strong>Tamaño:</strong> {currentDog.especie}</li>
-              <li>
-                <strong>Descripción:</strong>{" "}
-                {currentDog.descripcion?.slice(0, 200)}...
-              </li>
+              <li><strong>Descripción:</strong> {currentDog.descripcion?.slice(0, 200)}...</li>
             </ul>
-            {/* More info va a DoggoUser */}
-            <button
-              onClick={() =>
-                navigate(
-                  `/doggoUser/${currentDog.id}`,
-                  { state: { fromIndex: index } }
-                )
-              }
-              className="block mx-auto mb-2 border-2 border-white text-white font-semibold px-4 py-2 rounded-full text-sm hover:bg-white hover:text-[#EE9C70] transition"
-            >
-              More info
-            </button>
+            <button onClick={() => navigate(`/doggoUser/${currentDog.id}`, { state: { fromIndex: index } })} className="block mx-auto mb-2 border-2 border-white text-white font-semibold px-4 py-2 rounded-full text-sm hover:bg-white hover:text-[#EE9C70] transition">More info</button>
           </div>
         </div>
 
-        {/* Botones X y ❤️ */}
         <div className="flex gap-10">
-          <button
-            onClick={() => handleSwipe("left")}
-            className="w-14 h-14 flex items-center justify-center rounded-full bg-[#ffe4c4] border-2 border-[#F25C5C] text-[#F25C5C] shadow hover:scale-110 transition"
-            aria-label="No me interesa"
-          >
+          <button onClick={() => handleSwipe("left")} className="w-14 h-14 flex items-center justify-center rounded-full bg-[#ffe4c4] border-2 border-[#F25C5C] text-[#F25C5C] shadow hover:scale-110 transition" aria-label="No me interesa">
             <FaTimes size={20} />
           </button>
-          <button
-            onClick={() => handleSwipe("right")}
-            className="w-14 h-14 flex items-center justify-center rounded-full bg-[#ffe4c4] border-2 border-[#4FB286] text-[#4FB286] shadow hover:scale-110 transition"
-            aria-label="Me interesa"
-          >
+          <button onClick={() => handleSwipe("right")} className="w-14 h-14 flex items-center justify-center rounded-full bg-[#ffe4c4] border-2 border-[#4FB286] text-[#4FB286] shadow hover:scale-110 transition" aria-label="Me interesa">
             <FaHeart size={20} />
           </button>
+        </div>
+
+        {/* Citas del día */}
+        <div className="mt-10 text-center max-w-md mx-auto bg-white p-6 rounded-xl shadow">
+          <h2 className="text-lg font-bold mb-2 text-[#ee9c70]">📅 Citas para hoy</h2>
+          {citas.length > 0 ? (
+            <ul className="text-sm text-gray-800">
+              {citas.map(cita => (
+                <li key={cita.id} className="mb-2">
+                  <strong>{new Date(cita.fecha_hora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong> — {cita.asunto}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-gray-400">No tienes citas programadas para hoy</p>
+          )}
         </div>
       </div>
     </main>

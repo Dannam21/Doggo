@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Adopta = () => {
   const [pets, setPets] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("http://localhost:8000/mascotas")
@@ -16,13 +18,14 @@ const Adopta = () => {
       })
       .catch((err) => {
         console.error("Error al cargar mascotas:", err);
-        setPets([]); // dejamos el array vacío si hay error
+        setPets([]);
       });
   }, []);
 
   const [filtros, setFiltros] = useState({
     genero: [],
     edad: [],
+    especie: [],
   });
 
   const toggleFiltro = (categoria, valor) => {
@@ -37,19 +40,32 @@ const Adopta = () => {
     });
   };
 
+  const limpiarFiltros = () => {
+    setFiltros({ genero: [], edad: [], especie: [] });
+  };
+
+  const mascotasFiltradas = pets.filter((pet) => {
+    const { genero, edad, especie } = filtros;
+
+    const coincideGenero = genero.length === 0 || genero.includes(pet.genero);
+    const coincideEdad = edad.length === 0 || edad.includes(pet.edad);
+    const coincideEspecie =
+      especie.length === 0 || especie.includes(pet.especie);
+
+    return coincideGenero && coincideEdad && coincideEspecie;
+  });
+
   return (
     <nav>
-      {/* Contenedor relativo para que absolute funcione dentro */}
       <section className="relative w-full px-4 md:px-20 py-12">
-        {/* Círculo decorativo (fondo) */}
-
-        {/* Contenido con z-index alto para estar delante */}
         <div className="relative z-10">
           <h2 className="text-2xl font-bold text-center mb-8">🐾 Adopta</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {/* Filtros (ahora con lógica) */}
-            <aside className="bg-white rounded-lg p-6 shadow-sm space-y-6">
+  
+          {/* Contenedor principal responsive con flex en md */}
+          <div className="flex flex-col md:flex-row gap-8">
+  
+            {/* Filtros */}
+            <aside className="bg-white rounded-lg p-6 shadow-sm space-y-6 md:w-1/4">
               <div>
                 <p className="font-bold mb-2">Género</p>
                 {["Macho", "Hembra"].map((genero) => (
@@ -58,13 +74,13 @@ const Adopta = () => {
                       type="checkbox"
                       className="mr-2"
                       checked={filtros.genero.includes(genero)}
-                      onChange={() => toggleFiltro("genero", genero)} // ✅ corregido
+                      onChange={() => toggleFiltro("genero", genero)}
                     />
                     {genero}
                   </label>
                 ))}
               </div>
-
+  
               <div>
                 <p className="font-bold mb-2">Edad</p>
                 {["Cachorro", "Joven", "Adulto", "Adulto Mayor"].map((age) => (
@@ -79,39 +95,58 @@ const Adopta = () => {
                   </label>
                 ))}
               </div>
+  
+              <div>
+                <p className="font-bold mb-2">Especie</p>
+                {["Pequeño", "Grande", "Mediano"].map((especie) => (
+                  <label key={especie} className="block">
+                    <input
+                      type="checkbox"
+                      className="mr-2"
+                      checked={filtros.especie.includes(especie)}
+                      onChange={() => toggleFiltro("especie", especie)}
+                    />
+                    {especie}
+                  </label>
+                ))}
+              </div>
             </aside>
-
-            <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols- lg:grid-cols-3 xl:grid-cols-4 gap-x-1 gap-y-6">
-              {pets.length === 0 ? (
+  
+            {/* Tarjetas */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:w-3/4">
+              {mascotasFiltradas.length === 0 ? (
                 <p className="text-center text-gray-600 col-span-full">
-                  No hay mascotas registradas por el momento.
+                  No hay mascotas que coincidan con los filtros seleccionados.
                 </p>
               ) : (
-                pets.map((pet) => (
+                mascotasFiltradas.map((pet) => (
                   <div
                     key={pet.id}
-                    className="bg-orange-300 text-white rounded-xl shadow-md p-3 text-center hover:scale-105 transition-transform duration-300 ease-in-out w-56 mx-auto"
+                    className="bg-orange-300 text-white rounded-xl shadow-md p-6 text-center hover:scale-105 transition-transform duration-300 ease-in-out w-full"
                   >
                     <img
                       src={`http://localhost:8000/imagenes/${pet.imagen_id}`}
                       alt={pet.nombre}
-                      className="max-h-full max-w-full object-contain"
+                      className="max-h-40 w-full object-contain mb-2"
                       onError={(e) => {
                         e.currentTarget.src =
                           "https://via.placeholder.com/400x300?text=Sin+Imagen";
                       }}
                     />
                     <h3 className="font-bold text-xl">{pet.nombre}</h3>
-                    <div className="text-lg leading-relaxed text-white space-y-1">
+                    <div className="text-white space-y-1 text-sm mt-1">
                       <div>
                         Edad: {pet.edad} {pet.edad === 1 ? "año" : "años"}
                       </div>
-                      <div>Especie: {pet.especie}</div>
+                      <div>Tamaño: {pet.especie}</div>
                       <div>Género: {pet.genero || "No especificado"}</div>
-                      <div className="italic text-white/90">
-                        Albergue: {pet.albergue_nombre}
-                      </div>
                     </div>
+                    <button
+                      onClick={() => navigate(`/detail/${pet.id}`)}
+                      className="mt-3 text-sm bg-white text-white hover:bg-orange-100 font-semibold py-1 px-4 rounded transition"
+                    >
+                      Más info
+                    </button>
                   </div>
                 ))
               )}
@@ -121,6 +156,5 @@ const Adopta = () => {
       </section>
     </nav>
   );
-};
-
+}
 export default Adopta;

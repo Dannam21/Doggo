@@ -17,6 +17,7 @@ import CompanyStatistics from "./pages/empresa/CompanyStatistics";
 import CompanyMessages from "./pages/empresa/CompanyMessages";
 import DashboardCompany from "./pages/empresa/DashboardCompany";
 import Adddoggo from "./pages/empresa/Adddoggo";
+import DoggoDetail from "./pages/empresa/DoggoDetail";
 import CompanyMatches from "./pages/empresa/CompanyMatches";
 
 // Páginas de usuario
@@ -48,6 +49,7 @@ function App() {
           <Route path="/register/company" element={<RegisterCompany />} />
           <Route path="/cuestionario" element={ <Questionnaire />}/>
           <Route path="/preferences" element={<QuestionnairePreferences />} />
+          <Route path="/detail/:dogId" element={<DoggoDetail />} />
 
           {/* RUTAS PROTEGIDAS */}
 

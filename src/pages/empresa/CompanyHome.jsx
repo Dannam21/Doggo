@@ -7,8 +7,8 @@ export default function CompanyHome() {
   const { user } = useContext(UserContext);
   const [publicados, setPublicados] = useState(0);
   const [ultimasMascotas, setUltimasMascotas] = useState([]);
-  const [matchesCount, setMatchesCount] = useState(0);       // ← Nuevo
-  const [adoptionsCount, setAdoptionsCount] = useState(0);   // ← Nuevo
+  const [matchesCount, setMatchesCount] = useState(0);      
+  const [adoptionsCount, setAdoptionsCount] = useState(0);   
   const navigate = useNavigate();
 
   const formatTimeAgo = (timestamp) => {
@@ -91,10 +91,10 @@ export default function CompanyHome() {
   }, [user]);
 
   return (
-    <div className="flex min-h-screen bg-[#fdf0df] ml-64">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#fdf0df] pt-[60px] md:pt-0">
       <SidebarCompany />
-      <div className="flex-1 p-8">
-        <h1 className="text-3xl font-bold mb-8">
+      <div className="flex-1 p-4 md:p-8 md:ml-64">
+        <h1 className="text-2xl md:text-3xl font-bold mb-6">
           ¡Bienvenido, {user?.name || "Tu Albergue"}!
         </h1>
 
@@ -137,12 +137,7 @@ export default function CompanyHome() {
           >
             Ver listado
           </button>
-          <button
-            className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition"
-            onClick={() => navigate("/company/editdoggos")}
-          >
-            Editar perfil
-          </button>
+          
           <button
             className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition"
             onClick={() => navigate("/company/messages")}
