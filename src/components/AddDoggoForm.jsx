@@ -146,6 +146,7 @@ export default function AddDoggoForm({ onDogCreated }) {
         imagen_id: imagen_id,
         etiquetas: etiquetasParaAPI,
         fecha_creacion: fechaCreacion, // se incluye el timestamp aquí
+        estado: "En adopción",
       };
       const res = await fetch("http://localhost:8000/mascotas", {
         method: "POST",
