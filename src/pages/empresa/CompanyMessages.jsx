@@ -233,6 +233,39 @@ export default function CompanyMessages() {
     }
   };
 
+  const handleCompletarAdopcion = async () => {
+    const [userType, adoptanteId, mascotaIdStr] = selectedUser.split("-");
+    const mascotaId = parseInt(mascotaIdStr);
+  
+    try {
+      // 1. Confirmar adopción
+      const matchRes = await fetch(`http://localhost:8000/matches/${adoptanteId}/${mascotaId}/complete`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!matchRes.ok) {
+        const err = await matchRes.json();
+        throw new Error(err.detail || "Error al confirmar la adopción");
+      }
+  
+      // 2. Cambiar estado a Adoptado
+      const patchRes = await fetch(`http://localhost:8000/mascotas/${mascotaId}/adoptar`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!patchRes.ok) {
+        const err = await patchRes.json();
+        throw new Error(err.detail || "Error al marcar como adoptado");
+      }
+  
+      alert("✅ Adopción confirmada y mascota marcada como adoptada.");
+    } catch (err) {
+      console.error("❌ Error en la adopción:", err.message);
+      alert("❌ " + err.message);
+    }
+  };
+  
+
   return (
     <div className="flex min-h-screen bg-[#fdf0df] ml-64">
       <SidebarCompany />
@@ -284,9 +317,20 @@ export default function CompanyMessages() {
                   className="w-10 h-10 rounded-full object-cover"
                 />
                 <h3 className="text-lg font-semibold">{selectedUserInfo.name}</h3>
+
+                <button
+          onClick={handleCompletarAdopcion}
+          className="bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-2 rounded font-semibold"
+        >
+          Confirmar adopción
+        </button>
               </div>
+
+              
               <div className="h-[1px] bg-[#ccccd4] w-full" />
             </div>
+
+            
 
             <div className="flex flex-col bg-white rounded-b-2xl shadow-md flex-1 overflow-hidden">
               <div className="flex-1 overflow-y-auto px-6 py-6 space-y-3">
