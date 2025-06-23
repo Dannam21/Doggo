@@ -1,4 +1,3 @@
-// 👇 IMPORTACIONES
 import React, { useState, useEffect, useContext } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
@@ -17,43 +16,36 @@ export default function CompanyCalendar() {
   const { user } = useContext(UserContext);
   const albergueId = user?.albergue_id;
 
-  // ✅ CARGAR EVENTOS DE UN DÍA
   const fetchEventosDeDia = async (date) => {
     const fecha = date.toISOString().split("T")[0];
     try {
       const res = await fetch(`http://localhost:8000/calendario/dia/${fecha}`);
       const data = await res.json();
       const eventosConTipo = data;
-
-
       const dateKey = date.toDateString();
-
-      setEvents((prev) => ({
-        ...prev,
-        [dateKey]: eventosConTipo,
-      }));
+      setEvents((prev) => ({ ...prev, [dateKey]: eventosConTipo }));
     } catch (err) {
       console.error("Error cargando eventos del día:", err);
     }
   };
 
-  
   const fetchEventoById = async (id, date) => {
     const fecha = date.toISOString().split("T")[0];
     try {
       const res = await fetch(`http://localhost:8000/calendario/dia/${fecha}`);
       const data = await res.json();
-  
+
       const eventosConTipo = data.map((evento) => {
-        const isVisita = "adoptante_id" in evento && evento.adoptante_id !== null;
+        const isVisita =
+          "adoptante_id" in evento && evento.adoptante_id !== null;
         return {
           ...evento,
           tipo: isVisita ? "visita" : "evento",
           adoptante_id: isVisita ? evento.adoptante_id : null,
         };
       });
-  
-      const eventoEncontrado = eventosConTipo.find(e => e.id === id);
+
+      const eventoEncontrado = eventosConTipo.find((e) => e.id === id);
       if (eventoEncontrado) {
         setSelectedEvent(eventoEncontrado);
       } else {
@@ -63,21 +55,26 @@ export default function CompanyCalendar() {
       console.error("Error al obtener evento por ID:", err);
     }
   };
-  
+
   useEffect(() => {
     fetchEventosDeDia(selectedDate);
   }, [selectedDate]);
 
-  // 👥 ADOPTANTES CONVERSADOS
   useEffect(() => {
     if (user?.albergue_id) {
-      fetch(`http://localhost:8000/mensajes/contactos?emisor_id=${user.albergue_id}&emisor_tipo=albergue`)
-        .then(res => res.json())
-        .then(data => {
-          const adoptantes = data.filter(contacto => contacto.userType === "adoptante");
+      fetch(
+        `http://localhost:8000/mensajes/contactos?emisor_id=${user.albergue_id}&emisor_tipo=albergue`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          const adoptantes = data.filter(
+            (contacto) => contacto.userType === "adoptante"
+          );
           setAdoptantesDisponibles(adoptantes);
         })
-        .catch(err => console.error("Error al obtener contactos adoptantes:", err));
+        .catch((err) =>
+          console.error("Error al obtener contactos adoptantes:", err)
+        );
     }
   }, [user?.albergue_id]);
 
@@ -95,7 +92,6 @@ export default function CompanyCalendar() {
 
     let endpoint = "";
     let payload = {};
-
     const adoptanteId = user?.adoptante_id || manualAdoptanteId;
 
     if (tipoEvento === "evento") {
@@ -145,14 +141,14 @@ export default function CompanyCalendar() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#fdf0df] ml-64">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#fdf0df]">
       <SidebarCompany />
-      <main className="flex-1 p-10">
+      <main className="flex-1 w-full pt-[60px] md:pt-10 px-4 md:px-10 ml-0 md:ml-64">
         <h1 className="text-4xl font-bold text-[#2e2e2e] mb-10 flex items-center gap-3">
           Calendario de Citas
         </h1>
 
-        <div className="grid md:grid-cols-2 gap-10">
+        <div className="grid md:grid-cols-2 gap-10 mb-10">
           {/* CALENDARIO */}
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
             <Calendar
@@ -168,14 +164,25 @@ export default function CompanyCalendar() {
                   return "bg-orange-100 text-orange-800 font-semibold";
               }}
             />
+
             <p className="mt-4 text-gray-700 text-center">
-              Día seleccionado: <span className="font-medium">{selectedDate.toDateString()}</span>
+              Día seleccionado:{" "}
+              <span className="font-medium">
+                {selectedDate.toLocaleDateString("es-PE", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </span>
             </p>
           </div>
 
           {/* AGREGAR CITA */}
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800">➕ Agregar Cita</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+              ➕ Agregar Cita
+            </h2>
 
             <div className="flex mb-4 space-x-4">
               <button
@@ -208,7 +215,6 @@ export default function CompanyCalendar() {
               className="w-full p-3 border border-gray-300 rounded-xl mb-4 focus:ring-2 focus:ring-orange-400"
             />
 
-            {/* SELECT DE ADOPTANTES */}
             {tipoEvento === "visita" && (
               <select
                 value={manualAdoptanteId || ""}
@@ -231,7 +237,7 @@ export default function CompanyCalendar() {
               Guardar cita
             </button>
 
-            {/* LISTA DE EVENTOS DEL DÍA */}
+            {/* Lista de citas */}
             <div className="mt-8">
               <h3 className="text-lg font-bold mb-3 text-gray-700">
                 📌 Citas del {selectedDate.toDateString()}
@@ -243,7 +249,7 @@ export default function CompanyCalendar() {
                       key={idx}
                       className="bg-orange-100 px-4 py-2 rounded-lg shadow-sm cursor-pointer hover:bg-orange-200 transition"
                       onClick={() => fetchEventoById(ev.id, selectedDate)}
-                      >
+                    >
                       {ev.asunto} {ev.tipo === "visita" && "(Visita)"}
                     </li>
                   ))}
@@ -252,38 +258,54 @@ export default function CompanyCalendar() {
                 <p className="text-sm text-gray-400">Sin citas para este día</p>
               )}
             </div>
-
-            {/* DETALLES DEL EVENTO */}
-            {(events[selectedDate.toDateString()] || []).length > 0 && (
-  <div className="mt-8 p-4 bg-orange-50 border border-orange-300 rounded-lg">
-    <h4 className="text-lg font-semibold mb-4 text-orange-700">📄 Detalles del día</h4>
-    <ul className="space-y-4">
-      {events[selectedDate.toDateString()].map((evento) => (
-        <li key={evento.id} className="bg-white rounded-xl p-4 shadow border border-orange-200">
-          <p><strong>Asunto:</strong> {evento.asunto}</p>
-          <p><strong>Fecha:</strong> {new Date(evento.fecha_hora).toLocaleString()}</p>
-          <p><strong>Lugar:</strong> {evento.lugar}</p>
-          <p><strong>Tipo:</strong> {evento.tipo === "visita" ? "Visita" : "Evento"}</p>
-          {evento.tipo === "visita" && (
-  <p>
-    <strong>Adoptante:</strong>{" "}
-    {
-      adoptantesDisponibles.find(adop => adop.userId === evento.adoptante_id)
-        ? `${adoptantesDisponibles.find(adop => adop.userId === evento.adoptante_id).name} (ID: ${evento.adoptante_id})`
-        : `ID: ${evento.adoptante_id || "Desconocido"}`
-    }
-  </p>
-)}
-
-
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
-
           </div>
         </div>
+
+        {/* DETALLES DEL DÍA */}
+        {(events[selectedDate.toDateString()] || []).length > 0 && (
+          <div className="bg-white rounded-2xl shadow-lg border border-orange-200 p-6 mb-10">
+            <h4 className="text-lg font-semibold mb-4 text-orange-700">
+              📄 Detalles del día
+            </h4>
+            <ul className="space-y-4">
+              {events[selectedDate.toDateString()].map((evento) => (
+                <li
+                  key={evento.id}
+                  className="bg-orange-50 rounded-xl p-4 shadow border border-orange-100"
+                >
+                  <p>
+                    <strong>Asunto:</strong> {evento.asunto}
+                  </p>
+                  <p>
+                    <strong>Fecha:</strong>{" "}
+                    {new Date(evento.fecha_hora).toLocaleString()}
+                  </p>
+                  <p>
+                    <strong>Lugar:</strong> {evento.lugar}
+                  </p>
+                  <p>
+                    <strong>Tipo:</strong>{" "}
+                    {evento.tipo === "visita" ? "Visita" : "Evento"}
+                  </p>
+                  {evento.tipo === "visita" && (
+                    <p>
+                      <strong>Adoptante:</strong>{" "}
+                      {adoptantesDisponibles.find(
+                        (adop) => adop.userId === evento.adoptante_id
+                      )
+                        ? `${
+                            adoptantesDisponibles.find(
+                              (adop) => adop.userId === evento.adoptante_id
+                            ).name
+                          } (ID: ${evento.adoptante_id})`
+                        : `ID: ${evento.adoptante_id || "Desconocido"}`}
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </main>
     </div>
   );

@@ -1,4 +1,3 @@
-// src/pages/empresa/CompanyStatistics.jsx
 import React, { useContext, useEffect, useState } from "react";
 import SidebarCompany from "../../components/SidebarCompany";
 import { UserContext } from "../../context/UserContext";
@@ -18,7 +17,6 @@ import {
 
 const COLORS = ["#ff7675", "#74b9ff", "#55efc4", "#ffe066", "#a29bfe"];
 
-// Helper to get last 4 weeks start labels
 const getLast4Weeks = () => {
   const weeks = [];
   const now = new Date();
@@ -54,7 +52,6 @@ export default function CompanyStatistics() {
     { title: "🤝 Matches Realizados", value: matches.length },
   ];
 
-  // 1) Chart: adopciones por semana (últimas 4 semanas)
   const chartData = (() => {
     const weeks = getLast4Weeks();
     const counts = adoptions.reduce((acc, a) => {
@@ -68,7 +65,6 @@ export default function CompanyStatistics() {
     return weeks.map(w => ({ semana: w, adopciones: counts[w] || 0 }));
   })();
 
-  // 2) Pie: adopciones por tamaño (garantizar categorías con 0)
   const pieData = (() => {
     const categories = ["Pequeño", "Mediano", "Grande"];
     const counts = adoptions.reduce((acc, a) => {
@@ -92,10 +88,12 @@ export default function CompanyStatistics() {
   })();
 
   return (
-    <div className="flex min-h-screen bg-[#fdf0df]">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#fdf0df]">
       <SidebarCompany />
-      <main className="flex-1 p-10 ml-64">
+      <main className="flex-1 w-full pt-[60px] md:pt-10 px-4 md:px-10 md:ml-64">
         <h1 className="text-3xl font-bold mb-8 text-[#2e2e2e]">Panel de Estadísticas</h1>
+
+        {/* Estadísticas principales */}
         <section className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
           {stats.map((item, idx) => (
             <div key={idx} className="flex flex-col items-center bg-white rounded-xl p-6 shadow hover:shadow-lg transition">
@@ -104,6 +102,8 @@ export default function CompanyStatistics() {
             </div>
           ))}
         </section>
+
+        {/* Gráficos */}
         <section className="grid md:grid-cols-2 gap-8 mb-12">
           <div className="bg-white rounded-xl shadow p-6">
             <h2 className="text-xl font-semibold mb-4 text-gray-700">📈 Adopciones por Semana (últimas 4 semanas)</h2>
@@ -119,6 +119,7 @@ export default function CompanyStatistics() {
               </ResponsiveContainer>
             </div>
           </div>
+
           <div className="bg-white rounded-xl shadow p-6">
             <h2 className="text-xl font-semibold mb-4 text-gray-700">🐶 Adopciones por Tamaño</h2>
             <div className="h-72 flex items-center justify-center">
@@ -135,6 +136,8 @@ export default function CompanyStatistics() {
             </div>
           </div>
         </section>
+
+        {/* Tabla de doggos top */}
         <section className="bg-white rounded-xl shadow p-6">
           <h2 className="text-xl font-semibold mb-4 text-gray-700">Top 5 Doggos por Matches</h2>
           <table className="w-full text-left">

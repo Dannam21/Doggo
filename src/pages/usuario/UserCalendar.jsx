@@ -5,10 +5,8 @@ import SidebarUser from "../../components/SidebarUser";
 import { UserContext } from "../../context/UserContext";
 
 export default function UserCalendar() {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [events, setEvents] = useState({});
-  const [selectedEvent, setSelectedEvent] = useState(null);
-
+  const [selectedDate] = useState(new Date()); // Día actual fijo
+  const [events, setEvents] = useState([]);
   const { user } = useContext(UserContext);
   const adoptanteId = user?.adoptante_id;
 
@@ -17,37 +15,17 @@ export default function UserCalendar() {
     try {
       const res = await fetch(`http://localhost:8000/calendario/dia/${fecha}`);
       const data = await res.json();
-      const dateKey = date.toDateString();
 
+      // Filtrar por adoptante y que venga del company (asumimos que eso se puede identificar)
       const eventosFiltrados = data.filter(
-        (evento) => evento.adoptante_id === adoptanteId
+        (evento) =>
+          evento.adoptante_id === adoptanteId &&
+          evento.emisor_tipo === "albergue" // Aquí filtramos los que vienen del company
       );
 
-      setEvents((prev) => ({
-        ...prev,
-        [dateKey]: eventosFiltrados,
-      }));
+      setEvents(eventosFiltrados);
     } catch (err) {
       console.error("Error cargando eventos:", err);
-    }
-  };
-
-  const fetchEventoById = async (id, date) => {
-    const fecha = date.toISOString().split("T")[0];
-    try {
-      const res = await fetch(`http://localhost:8000/calendario/dia/${fecha}`);
-      const data = await res.json();
-
-      const eventoEncontrado = data.find(
-        (e) => e.id === id && e.adoptante_id === adoptanteId
-      );
-      if (eventoEncontrado) {
-        setSelectedEvent(eventoEncontrado);
-      } else {
-        console.warn("No se encontró el evento");
-      }
-    } catch (err) {
-      console.error("Error al obtener el evento:", err);
     }
   };
 
@@ -66,34 +44,33 @@ export default function UserCalendar() {
         <div className="grid md:grid-cols-2 gap-10">
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
             <Calendar
-              onChange={(date) => {
-                setSelectedDate(date);
-                setSelectedEvent(null);
-              }}
               value={selectedDate}
-              className="w-full rounded-xl overflow-hidden"
-              tileClassName={({ date }) => {
-                const key = date.toDateString();
-                if (events[key] && events[key].length > 0)
-                  return "bg-orange-100 text-orange-800 font-semibold";
-              }}
+              className="w-full rounded-xl overflow-hidden pointer-events-none opacity-50"
+              tileDisabled={() => true} // evita interacción
             />
             <p className="mt-4 text-gray-700 text-center">
-              Día seleccionado:{" "}
-              <span className="font-medium">{selectedDate.toDateString()}</span>
-            </p>
+  Día actual:{" "}
+  <span className="font-medium">
+    {selectedDate.toLocaleDateString("es-PE", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })}
+  </span>
+</p>
+
           </div>
 
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
             <h2 className="text-2xl font-semibold mb-6 text-gray-800">📌 Mis Citas</h2>
 
-            {(events[selectedDate.toDateString()] || []).length > 0 ? (
+            {events.length > 0 ? (
               <ul className="space-y-2 text-gray-800">
-                {events[selectedDate.toDateString()].map((ev, idx) => (
+                {events.map((ev, idx) => (
                   <li
                     key={idx}
-                    className="bg-orange-100 px-4 py-2 rounded-lg shadow-sm cursor-pointer hover:bg-orange-200 transition"
-                    onClick={() => fetchEventoById(ev.id, selectedDate)}
+                    className="bg-orange-100 px-4 py-2 rounded-lg shadow-sm"
                   >
                     {ev.asunto}
                   </li>
@@ -103,24 +80,6 @@ export default function UserCalendar() {
               <p className="text-sm text-gray-400">
                 No tienes citas programadas para este día
               </p>
-            )}
-
-            {selectedEvent && (
-              <div className="mt-8 p-4 bg-orange-50 border border-orange-300 rounded-lg">
-                <h4 className="text-lg font-semibold mb-4 text-orange-700">
-                  Detalles de la cita
-                </h4>
-                <p>
-                  <strong>Asunto:</strong> {selectedEvent.asunto}
-                </p>
-                <p>
-                  <strong>Fecha:</strong>{" "}
-                  {new Date(selectedEvent.fecha_hora).toLocaleString()}
-                </p>
-                <p>
-                  <strong>Lugar:</strong> {selectedEvent.lugar}
-                </p>
-              </div>
             )}
           </div>
         </div>
