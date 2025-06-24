@@ -14,7 +14,7 @@ export default function DoggoUser() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    fetch(`http://localhost:8000/usuario/mascotas/${dogId}`, {
+    fetch(`http://34.195.195.173:8000/usuario/mascotas/${dogId}`, {
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     })
       .then(res => {
@@ -53,7 +53,7 @@ export default function DoggoUser() {
           {/* Imagen */}
           <div className="md:w-1/2 w-full h-64 md:h-auto">
             <img
-              src={`http://localhost:8000/imagenes/${dog.imagen_id}`}
+              src={`http://34.195.195.173:8000/imagenes/${dog.imagen_id}`}
               alt={dog.nombre}
               className="w-full h-full object-cover object-center"
             />
@@ -107,7 +107,7 @@ export default function DoggoUser() {
 
     const token = localStorage.getItem("token");
 
-    fetch("http://localhost:8000/donar", {
+    fetch("http://34.195.195.173:8000/donar", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

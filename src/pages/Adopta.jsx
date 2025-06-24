@@ -6,7 +6,7 @@ const Adopta = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:8000/mascotas")
+    fetch("http://34.195.195.173:8000/mascotas")
       .then((res) => {
         if (!res.ok) {
           throw new Error("No se pudieron obtener las mascotas");
@@ -125,7 +125,7 @@ const Adopta = () => {
                     className="bg-orange-300 text-white rounded-xl shadow-md p-6 text-center hover:scale-105 transition-transform duration-300 ease-in-out w-full"
                   >
                     <img
-                      src={`http://localhost:8000/imagenes/${pet.imagen_id}`}
+                      src={`http://34.195.195.173:8000/imagenes/${pet.imagen_id}`}
                       alt={pet.nombre}
                       className="max-h-40 w-full object-contain mb-2"
                       onError={(e) => {

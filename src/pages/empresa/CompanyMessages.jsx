@@ -29,7 +29,7 @@ export default function CompanyMessages() {
   const fetchChatList = async () => {
     try {
       const res = await fetch(
-        `http://localhost:8000/mensajes3/contactos?emisor_id=${emisorId}&emisor_tipo=albergue`,
+        `http://34.195.195.173:8000/mensajes3/contactos?emisor_id=${emisorId}&emisor_tipo=albergue`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -64,12 +64,12 @@ export default function CompanyMessages() {
   const fetchUserAvatar = async (userType, userId) => {
     try {
       const url = userType === "adoptante"
-        ? `http://localhost:8000/adoptante/${userId}`
-        : `http://localhost:8000/albergue/${userId}`;
+        ? `http://34.195.195.173:8000/adoptante/${userId}`
+        : `http://34.195.195.173:8000/albergue/${userId}`;
       const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
       const user = await res.json();
       const avatarUrl = user.imagen_perfil_id
-        ? `http://localhost:8000/imagenesProfile/${user.imagen_perfil_id}`
+        ? `http://34.195.195.173:8000/imagenesProfile/${user.imagen_perfil_id}`
         : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nombre)}`;
       return { name: user.nombre, avatar: avatarUrl };
     } catch {
@@ -84,7 +84,7 @@ export default function CompanyMessages() {
     if (isNaN(mascotaId)) return;
 
     try {
-      const url = `http://localhost:8000/mensajes3/conversacion?id1=${emisorId}&tipo1=albergue&id2=${userId}&tipo2=${userType}&mascota_id=${mascotaId}`;
+      const url = `http://34.195.195.173:8000/mensajes3/conversacion?id1=${emisorId}&tipo1=albergue&id2=${userId}&tipo2=${userType}&mascota_id=${mascotaId}`;
       const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       const userInfo = await fetchUserAvatar(userType, userId);
@@ -100,7 +100,7 @@ export default function CompanyMessages() {
       setMessagesByUser((prev) => ({ ...prev, [selectedUser]: formattedMessages }));
 
       // Obtener estado de la mascota
-      const mascotaRes = await fetch(`http://localhost:8000/usuario/mascotas/${mascotaId}`, {
+      const mascotaRes = await fetch(`http://34.195.195.173:8000/usuario/mascotas/${mascotaId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (mascotaRes.ok) {
@@ -141,7 +141,7 @@ export default function CompanyMessages() {
   };
 
   const setupWebSocket = () => {
-    const ws = new WebSocket(`ws://localhost:8000/ws/chat/${rolEmisor}/${emisorId}`);
+    const ws = new WebSocket(`ws://34.195.195.173:8000/ws/chat/${rolEmisor}/${emisorId}`);
     ws.onopen = () => (websocketRef.current = ws);
     ws.onmessage = async (event) => {
       const data = JSON.parse(event.data);
@@ -174,13 +174,13 @@ export default function CompanyMessages() {
     const [userType, adoptanteId, mascotaIdStr] = selectedUser.split("-");
     const mascotaId = parseInt(mascotaIdStr);
     try {
-      const matchRes = await fetch(`http://localhost:8000/matches/${adoptanteId}/${mascotaId}/complete`, {
+      const matchRes = await fetch(`http://34.195.195.173:8000/matches/${adoptanteId}/${mascotaId}/complete`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!matchRes.ok) throw new Error("Error al confirmar la adopción");
 
-      const patchRes = await fetch(`http://localhost:8000/mascotas/${mascotaId}/adoptar`, {
+      const patchRes = await fetch(`http://34.195.195.173:8000/mascotas/${mascotaId}/adoptar`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });

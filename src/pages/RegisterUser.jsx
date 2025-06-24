@@ -56,7 +56,7 @@ const handleSubmit = async (e) => {
       const imagePayload = new FormData();
       imagePayload.append("image", form.imagenFile);
 
-      const imgRes = await fetch("http://localhost:8000/imagenesProfile", {
+      const imgRes = await fetch("http://34.195.195.173:8000/imagenesProfile", {
         method: "POST",
         body: imagePayload,
       });

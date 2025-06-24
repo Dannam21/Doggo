@@ -23,7 +23,7 @@ export default function DashboardUser() {
       return;
     }
 
-    fetch("http://localhost:8000/adoptante/me", {
+    fetch("http://34.195.195.173:8000/adoptante/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => {
@@ -34,7 +34,7 @@ export default function DashboardUser() {
         setAdoptanteId(perfil.id);
 
         // 🟧 Obtener recomendaciones
-        const recomendacionesRes = await fetch(`http://localhost:8000/recomendaciones/${perfil.id}`, {
+        const recomendacionesRes = await fetch(`http://34.195.195.173:8000/recomendaciones/${perfil.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const recomendaciones = await recomendacionesRes.json();
@@ -43,7 +43,7 @@ export default function DashboardUser() {
 
         // 🟨 Obtener citas del día actual
         const today = new Date().toISOString().split("T")[0];
-        const citasRes = await fetch(`http://localhost:8000/calendario/dia/${today}`);
+        const citasRes = await fetch(`http://34.195.195.173:8000/calendario/dia/${today}`);
         const todasLasCitas = await citasRes.json();
         const citasDelAdoptante = todasLasCitas.filter(
           (cita) => cita.adoptante_id === perfil.id
@@ -144,14 +144,14 @@ export default function DashboardUser() {
         <div className="relative w-[320px] h-[500px] mb-10">
           {/* Carta siguiente */}
           <div className={`absolute inset-0 z-10 bg-[#ee9c70] text-white rounded-2xl shadow-2xl p-6 transition-all duration-400 ease-in-out transform ${cardClasses(currentDog)}`}>
-            <img src={`http://localhost:8000/imagenes/${currentDog.imagen_id}`} alt={currentDog.nombre} className="max-h-60 mx-auto mb-4" />
+            <img src={`http://34.195.195.173:8000/imagenes/${currentDog.imagen_id}`} alt={currentDog.nombre} className="max-h-60 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-center mb-2">{nextDog.nombre}</h3>
             <p className="text-sm text-center italic">Esperando...</p>
           </div>
 
           {/* Carta actual */}
           <div className={`absolute inset-0 z-10 bg-[#ee9c70] text-white rounded-2xl shadow-2xl p-6 transition-all duration-400 ease-in-out transform ${cardClasses(currentDog)}`}>
-            <img src={`http://localhost:8000/imagenes/${currentDog.imagen_id}`} alt={currentDog.nombre} className="max-h-60 mx-auto mb-4" />
+            <img src={`http://34.195.195.173:8000/imagenes/${currentDog.imagen_id}`} alt={currentDog.nombre} className="max-h-60 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-center mb-2">{currentDog.nombre}</h3>
             <ul className="text-sm leading-snug space-y-1 px-2 mb-4">
               <li><strong>Edad:</strong> {currentDog.edad}</li>

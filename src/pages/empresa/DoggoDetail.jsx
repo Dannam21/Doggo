@@ -14,7 +14,7 @@ export default function DoggoDetail() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    fetch(`http://localhost:8000/usuario/mascotas/${dogId}`, {
+    fetch(`http://34.195.195.173:8000/usuario/mascotas/${dogId}`, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -50,7 +50,7 @@ export default function DoggoDetail() {
           {/* Imagen */}
           <div className="w-full md:w-1/2 aspect-video md:aspect-auto">
             <img
-              src={`http://localhost:8000/imagenes/${dog.imagen_id}`}
+              src={`http://34.195.195.173:8000/imagenes/${dog.imagen_id}`}
               alt={dog.nombre}
               className="w-full h-full object-cover rounded-xl"
             />
@@ -99,7 +99,7 @@ export default function DoggoDetail() {
                   if (!monto || isNaN(monto)) return alert("Monto inválido");
                   const token = localStorage.getItem("token");
 
-                  fetch("http://localhost:8000/donar", {
+                  fetch("http://34.195.195.173:8000/donar", {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json",

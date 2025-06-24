@@ -25,8 +25,8 @@ const Login = () => {
 
     const endpoint =
       form.role === "user"
-        ? "http://localhost:8000/login/adoptante"
-        : "http://localhost:8000/login/albergue";
+        ? "http://34.195.195.173:8000/login/adoptante"
+        : "http://34.195.195.173:8000/login/albergue";
 
     const payload = {
       correo: form.email,
@@ -53,7 +53,7 @@ const Login = () => {
       console.log("Login exitoso:", { token, adoptanteId });
       if (form.role === "user") {
         // --- Perfil de adoptante ---
-        const profileRes = await fetch("http://localhost:8000/adoptante/me", {
+        const profileRes = await fetch("http://34.195.195.173:8000/adoptante/me", {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -73,7 +73,7 @@ const Login = () => {
         navigate("/home");
       } else {
         // --- Perfil de albergue ---
-        const profileRes = await fetch("http://localhost:8000/albergue/me", {
+        const profileRes = await fetch("http://34.195.195.173:8000/albergue/me", {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
