@@ -1,3 +1,5 @@
+// CompanyMessages.jsx
+
 import { useState, useRef, useEffect, useContext } from "react";
 import SidebarCompany from "../../components/SidebarCompany";
 import { FaPaperPlane } from "react-icons/fa";
@@ -9,104 +11,102 @@ export default function CompanyMessages() {
   const token = user?.token;
 
   const [chatList, setChatList] = useState([]);
-  const [selectedUser, setSelectedUser] = useState("");
+  const [selectedUser, setSelectedUser] = useState(() => localStorage.getItem("lastSelectedChat") || "");
   const [selectedUserInfo, setSelectedUserInfo] = useState(null);
   const [messagesByUser, setMessagesByUser] = useState({});
   const [newMessage, setNewMessage] = useState("");
+  const [estadoMascota, setEstadoMascota] = useState("");
   const messagesEndRef = useRef(null);
   const websocketRef = useRef(null);
 
-  const rolEmisor = "albergue"; // fijo
-  const rolReceptor = selectedUserInfo?.userType || ""; // puede ser "adoptante"
+  const rolEmisor = "albergue";
+  const rolReceptor = selectedUserInfo?.userType || "";
+
+  useEffect(() => {
+    if (selectedUser) localStorage.setItem("lastSelectedChat", selectedUser);
+  }, [selectedUser]);
 
   const fetchChatList = async () => {
     try {
       const res = await fetch(
-        `http://localhost:8000/mensajes/contactos?emisor_id=${emisorId}&emisor_tipo=albergue`,
+        `http://localhost:8000/mensajes3/contactos?emisor_id=${emisorId}&emisor_tipo=albergue`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
-      const enhancedChatList = await Promise.all(
-        data.map(async (chat) => {
-          const userInfo = await fetchUserAvatar(chat.userType, chat.userId);
-          return { ...chat, name: userInfo.name, avatar: userInfo.avatar };
-        })
-      );
-      setChatList(enhancedChatList);
-      
-      // ✅ Auto-seleccionar el primer chat si no hay ninguno seleccionado
-      if (enhancedChatList.length > 0 && !selectedUser) {
-        const firstChat = enhancedChatList[0];
-        setSelectedUser(`${firstChat.userType}-${firstChat.userId}`);
+      const grouped = {};
+
+      for (const chat of data) {
+        const key = `${chat.userType}-${chat.userId}`;
+        const userInfo = await fetchUserAvatar(chat.userType, chat.userId);
+
+        if (!grouped[key]) {
+          grouped[key] = {
+            name: userInfo.name,
+            avatar: userInfo.avatar,
+            userType: chat.userType,
+            userId: chat.userId,
+            chats: [],
+          };
+        }
+
+        grouped[key].chats.push({
+          mascota_id: chat.mascota_id,
+          lastMessage: chat.lastMessage,
+        });
       }
+
+      setChatList(Object.values(grouped));
     } catch (error) {
       console.error("Error al cargar contactos del chat:", error);
     }
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const fetchUserAvatar = async (userType, userId) => {
+    try {
+      const url = userType === "adoptante"
+        ? `http://localhost:8000/adoptante/${userId}`
+        : `http://localhost:8000/albergue/${userId}`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      const user = await res.json();
+      const avatarUrl = user.imagen_perfil_id
+        ? `http://localhost:8000/imagenesProfile/${user.imagen_perfil_id}`
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nombre)}`;
+      return { name: user.nombre, avatar: avatarUrl };
+    } catch {
+      return { name: "Usuario desconocido", avatar: "https://ui-avatars.com/api/?name=Usuario" };
+    }
   };
 
-  const fetchUserAvatar = async (userType, userId) => {
-    console.log("📡 Buscando avatar para:", userType, userId);
-    try {
-      let url = "";
-      if (userType === "adoptante") {
-        url = `http://localhost:8000/adoptante/${userId}`;
-      } else if (userType === "albergue") {
-        url = `http://localhost:8000/albergue/${userId}`;
-      }
-  
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log(`🧾 Respuesta ${userType}:`, res.status);
-  
-      if (!res.ok) throw new Error("Usuario no encontrado");
-  
-      const user = await res.json();
-      console.log("✅ Usuario encontrado:", user);
-  
-      const imagenId = user.imagen_perfil_id;
-      const avatarUrl = imagenId
-        ? `http://localhost:8000/imagenesProfile/${imagenId}`
-        : "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.nombre);
-  
-      return { name: user.nombre, avatar: avatarUrl };
-    } catch (error) {
-      console.error("❌ Error al obtener info del usuario:", error.message);
-    }
-  
-    return { name: "Usuario desconocido", avatar: "https://ui-avatars.com/api/?name=Usuario" };
-  };
-  
-  
-  
   const fetchMessages = async () => {
     if (!emisorId || !selectedUser) return;
-    const [userType, userId] = selectedUser.split("-");
+    const [userType, userId, mascotaIdStr] = selectedUser.split("-");
+    const mascotaId = parseInt(mascotaIdStr);
+    if (isNaN(mascotaId)) return;
+
     try {
-      const res = await fetch(
-        `http://localhost:8000/mensajes/conversacion?id1=${emisorId}&tipo1=albergue&id2=${userId}&tipo2=${userType}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const url = `http://localhost:8000/mensajes3/conversacion?id1=${emisorId}&tipo1=albergue&id2=${userId}&tipo2=${userType}&mascota_id=${mascotaId}`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       const userInfo = await fetchUserAvatar(userType, userId);
       setSelectedUserInfo({ ...userInfo, userType, userId });
 
       const formattedMessages = data.map((msg, index) => ({
-        id: `${msg.emisor_id}-${msg.contenido}-${index}`, // antes: id: index
+        id: `${msg.emisor_id}-${msg.contenido}-${index}`,
         text: msg.contenido,
         sender: msg.emisor_id === emisorId && msg.emisor_tipo === "albergue" ? "company" : "adopter",
         senderName: userInfo.name,
-
       }));
 
-      setMessagesByUser((prev) => ({
-        ...prev,
-        [selectedUser]: formattedMessages,
-      }));
+      setMessagesByUser((prev) => ({ ...prev, [selectedUser]: formattedMessages }));
+
+      // Obtener estado de la mascota
+      const mascotaRes = await fetch(`http://localhost:8000/usuario/mascotas/${mascotaId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (mascotaRes.ok) {
+        const mascotaData = await mascotaRes.json();
+        setEstadoMascota(mascotaData.estado || "");
+      }
     } catch (error) {
       console.error("Error al obtener mensajes:", error);
     }
@@ -114,21 +114,16 @@ export default function CompanyMessages() {
 
   const handleSend = async () => {
     if (!newMessage.trim()) return;
-  
-    if (!selectedUserInfo?.name || !selectedUserInfo?.avatar) {
-      const userInfo = await fetchUserAvatar(rolReceptor, selectedUserInfo?.userId);
-      setSelectedUserInfo({ ...userInfo, userType: rolReceptor, userId: selectedUserInfo?.userId });
-    }
-  
-    if (websocketRef.current && websocketRef.current.readyState === WebSocket.OPEN) {
-      websocketRef.current.send(
-        JSON.stringify({
-          receptor_id: selectedUserInfo.userId,
-          receptor_tipo: rolReceptor,
-          contenido: newMessage,
-        })
-      );
-  
+    const [userType, userId, mascotaId] = selectedUser.split("-");
+
+    if (websocketRef.current?.readyState === WebSocket.OPEN) {
+      websocketRef.current.send(JSON.stringify({
+        receptor_id: selectedUserInfo.userId,
+        receptor_tipo: rolReceptor,
+        contenido: newMessage,
+        mascota_id: mascotaId,
+      }));
+
       setMessagesByUser((prev) => ({
         ...prev,
         [selectedUser]: [
@@ -141,28 +136,18 @@ export default function CompanyMessages() {
           },
         ],
       }));
-  
       setNewMessage("");
-    } else {
-      console.warn("⚠️ WebSocket no está abierto");
     }
   };
-  
+
   const setupWebSocket = () => {
     const ws = new WebSocket(`ws://localhost:8000/ws/chat/${rolEmisor}/${emisorId}`);
-
-    ws.onopen = () => {
-      console.log("✅ WebSocket conectado");
-      websocketRef.current = ws;
-    };
-
+    ws.onopen = () => (websocketRef.current = ws);
     ws.onmessage = async (event) => {
       const data = JSON.parse(event.data);
-      const receptorKey = `${data.emisor_tipo}-${data.emisor_id}`;
-    
-      // Obtener nombre y avatar del emisor
+      const receptorKey = `${data.emisor_tipo}-${data.emisor_id}-${data.mascota_id}`;
       const userInfo = await fetchUserAvatar(data.emisor_tipo, data.emisor_id);
-    
+
       setMessagesByUser((prev) => ({
         ...prev,
         [receptorKey]: [
@@ -175,42 +160,38 @@ export default function CompanyMessages() {
           },
         ],
       }));
-    
-      fetchChatList();
     };
-
-    ws.onerror = (error) => {
-      console.error("❌ WebSocket error: ", error);
-    };
-
-    ws.onclose = () => {
-      console.log("🔌 WebSocket cerrado");
-    };
+    ws.onerror = (error) => console.error("WebSocket error:", error);
+    ws.onclose = () => console.log("WebSocket cerrado");
   };
 
-  useEffect(() => {
-    fetchChatList();
-  }, [emisorId]);
+  useEffect(() => { fetchChatList(); }, [emisorId]);
+  useEffect(() => { if (selectedUser?.split("-").length === 3) fetchMessages(); }, [selectedUser]);
+  useEffect(() => { if (token && emisorId) setupWebSocket(); return () => websocketRef.current?.close(); }, [token, emisorId]);
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messagesByUser, selectedUser]);
 
-  useEffect(() => {
-    if (selectedUser) {
-      fetchMessages();
+  const handleCompletarAdopcion = async () => {
+    const [userType, adoptanteId, mascotaIdStr] = selectedUser.split("-");
+    const mascotaId = parseInt(mascotaIdStr);
+    try {
+      const matchRes = await fetch(`http://localhost:8000/matches/${adoptanteId}/${mascotaId}/complete`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!matchRes.ok) throw new Error("Error al confirmar la adopción");
+
+      const patchRes = await fetch(`http://localhost:8000/mascotas/${mascotaId}/adoptar`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!patchRes.ok) throw new Error("Error al marcar como adoptado");
+
+      alert("✅ Adopción confirmada y mascota marcada como adoptada.");
+      setEstadoMascota("Adoptado");
+    } catch (err) {
+      alert("❌ " + err.message);
     }
-  }, [selectedUser]);
-
-  useEffect(() => {
-    if (token && emisorId) {
-      setupWebSocket();
-    }
-    return () => {
-      websocketRef.current?.close();
-    };
-  }, [token, emisorId]);
-  
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messagesByUser, selectedUser]);
+  };
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -219,64 +200,34 @@ export default function CompanyMessages() {
     }
   };
 
-  const handleCompletarAdopcion = async () => {
-    const [userType, adoptanteId, mascotaIdStr] = selectedUser.split("-");
-    const mascotaId = parseInt(mascotaIdStr);
-  
-    try {
-      // 1. Confirmar adopción
-      const matchRes = await fetch(`http://localhost:8000/matches/${adoptanteId}/${mascotaId}/complete`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!matchRes.ok) {
-        const err = await matchRes.json();
-        throw new Error(err.detail || "Error al confirmar la adopción");
-      }
-  
-      // 2. Cambiar estado a Adoptado
-      const patchRes = await fetch(`http://localhost:8000/mascotas/${mascotaId}/adoptar`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!patchRes.ok) {
-        const err = await patchRes.json();
-        throw new Error(err.detail || "Error al marcar como adoptado");
-      }
-  
-      alert("✅ Adopción confirmada y mascota marcada como adoptada.");
-    } catch (err) {
-      console.error("❌ Error en la adopción:", err.message);
-      alert("❌ " + err.message);
-    }
-  };
-  
-
   return (
     <div className="flex min-h-screen bg-[#fdf0df] ml-64">
       <SidebarCompany />
-
       {/* Chat List Sidebar */}
       <div className="w-72 bg-white flex flex-col shadow-md">
         <div className="px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">Mensajes</h2>
           <FaPaperPlane className="text-gray-600" />
         </div>
-
         <div className="overflow-y-auto max-h-[calc(100vh-5rem)]">
-          {chatList.map((chat) => (
-            <div
-              key={`${chat.userType}-${chat.userId}`}
-              onClick={() => setSelectedUser(`${chat.userType}-${chat.userId}`)}
-              className={`flex items-center px-4 py-3 cursor-pointer hover:bg-orange-100 ${
-                selectedUser === `${chat.userType}-${chat.userId}` ? "bg-orange-100" : ""
-              }`}
-            >
-              <img src={chat.avatar} alt={chat.name} className="w-10 h-10 rounded-full object-cover mr-3" />
-              <div>
-                <p className="font-semibold">{chat.name}</p>
-                <p className="text-sm text-gray-500 truncate w-40">{chat.lastMessage}</p>
+          {chatList.map((group) => (
+            <div key={`${group.userType}-${group.userId}`} className="border-b border-gray-200">
+              <div className="flex items-center px-4 py-3 bg-orange-50 font-bold text-sm text-orange-600">
+                <img src={group.avatar} alt={group.name} className="w-8 h-8 rounded-full object-cover mr-2" />
+                {group.name}
               </div>
+              {group.chats.map((chat) => {
+                const chatKey = `${group.userType}-${group.userId}-${chat.mascota_id}`;
+                return (
+                  <div key={chatKey} onClick={() => setSelectedUser(chatKey)}
+                    className={`flex items-center pl-12 pr-4 py-3 cursor-pointer hover:bg-orange-100 ${selectedUser === chatKey ? "bg-orange-100" : ""}`}>
+                    <div className="flex flex-col">
+                      <p className="font-semibold text-sm text-gray-800">Mascota ID: {chat.mascota_id}</p>
+                      <p className="text-xs text-gray-500 truncate w-40">{chat.lastMessage}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           ))}
         </div>
@@ -284,8 +235,7 @@ export default function CompanyMessages() {
 
       {/* Chat Area */}
       <main className="flex-1 p-6 flex flex-col">
-
-                {selectedUserInfo && (
+        {selectedUserInfo && (
           <>
             <div className="bg-white rounded-t-2xl shadow-sm">
               <div className="flex items-center gap-4 px-4 py-3">
@@ -296,43 +246,68 @@ export default function CompanyMessages() {
                 />
                 <h3 className="text-lg font-semibold">{selectedUserInfo.name}</h3>
 
-                <button
-          onClick={handleCompletarAdopcion}
-          className="bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-2 rounded font-semibold"
-        >
-          Confirmar adopción
-        </button>
+                {estadoMascota !== "Adoptado" ? (
+                  <button
+                    onClick={handleCompletarAdopcion}
+                    className="ml-auto bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-2 rounded font-semibold transition"
+                  >
+                    Confirmar adopción
+                  </button>
+                ) : (
+                  <div className="ml-auto bg-green-100 text-green-700 text-sm px-4 py-2 rounded font-semibold border border-green-300">
+                    ✅ ¡Adopción exitosa!
+                  </div>
+                )}
               </div>
-
-              
               <div className="h-[1px] bg-[#ccccd4] w-full" />
             </div>
 
-            
-
             <div className="flex flex-col bg-white rounded-b-2xl shadow-md flex-1 overflow-hidden">
               <div className="flex-1 overflow-y-auto px-6 py-6 space-y-3">
-                {(messagesByUser[selectedUser] || []).map((msg) => (
-                  <div key={msg.id}>
-                    <div className={`flex ${msg.sender === "company" ? "justify-end" : "justify-start"}`}>
-                      <div className="text-xs text-gray-500 mb-1">
-                        {msg.sender === "company" ? "Tú" : msg.senderName}
-                      </div>
-                    </div>
-
-                    <div className={`flex ${msg.sender === "company" ? "justify-end" : "justify-start"}`}>
+                {(messagesByUser[selectedUser] || []).map((msg) => {
+                  let content;
+                  try {
+                    const parsed = JSON.parse(msg.text);
+                    if (parsed.tipo === "card_perro") {
+                      content = (
+                        <div className="w-64 rounded-xl overflow-hidden shadow-lg bg-white border border-orange-300">
+                          <img src={parsed.imagen} alt={parsed.nombre} className="w-full h-40 object-cover" />
+                          <div className="p-4">
+                            <h3 className="text-lg font-bold text-gray-800">{parsed.nombre}</h3>
+                            <p className="text-sm text-gray-600">{parsed.descripcion}</p>
+                          </div>
+                        </div>
+                      );
+                    }
+                  } catch {
+                    content = (
                       <div
-                        className={`px-5 py-3 max-w-[65%] text-sm rounded-2xl whitespace-pre-wrap break-words shadow-sm ${
+                        className={`inline-block px-4 py-3 rounded-2xl text-sm shadow-md whitespace-pre-wrap break-words transition-transform duration-150 hover:scale-[1.01] ${
                           msg.sender === "company"
-                            ? "bg-orange-200 text-right rounded-br-none"
-                            : "bg-gray-200 text-left rounded-bl-none"
+                            ? "bg-[#f77534] text-white rounded-br-none self-end"
+                            : "bg-gray-100 text-gray-800 rounded-bl-none self-start"
                         }`}
                       >
                         {msg.text}
                       </div>
+                    );
+                  }
+
+                  return (
+                    <div key={msg.id} className={`flex ${msg.sender === "company" ? "justify-end" : "justify-start"}`}>
+                      <div className="flex flex-col max-w-[70%]">
+                        <div
+                          className={`text-xs mb-1 ${
+                            msg.sender === "company" ? "text-right text-orange-500" : "text-left text-gray-600"
+                          }`}
+                        >
+                          {msg.sender === "company" ? "Tú" : msg.senderName}
+                        </div>
+                        {content}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <div ref={messagesEndRef} />
               </div>
 

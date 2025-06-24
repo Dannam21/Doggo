@@ -35,21 +35,38 @@ export default function CompanyMatches() {
       year: "numeric",
     });
 
-  const handleAdopt = async (m) => {
+    const handleAdopt = async (m) => {
     if (!confirm(`¿Confirmas completar la adopción de ${m.mascota.nombre}?`)) return;
     try {
-      const token = localStorage.getItem("user")?.token;
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const token = storedUser.token;
+
       const res = await fetch(
         `http://localhost:8000/matches/${m.adoptante.id}/${m.mascota.id}/complete`,
-        { method: "POST", headers: { Authorization: `Bearer ${token}` } }
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
-      if (!res.ok) throw new Error();
-      alert("Adopción completada");
+      if (!res.ok) throw new Error("Error al completar adopción");
+
+      const res2 = await fetch(
+        `http://localhost:8000/mascotas/${m.mascota.id}/adoptar`,
+        {
+          method: "PATCH",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res2.ok) throw new Error("Error al actualizar estado de mascota");
+
+      alert("Adopción completada y mascota marcada como adoptada");
       setMatches(matches.filter(x => !(x.adoptante.id === m.adoptante.id && x.mascota.id === m.mascota.id)));
-    } catch {
-      alert("Error al completar adopción");
+    } catch (error) {
+      console.error(error);
+      alert("Ocurrió un error al completar la adopción");
     }
   };
+
 
   const handleDeny = async (m) => {
     if (!confirm(`¿Confirmas denegar la adopción de ${m.mascota.nombre}?`)) return;
