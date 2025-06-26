@@ -9,9 +9,7 @@ export default function CompanyMessages() {
   const token = user?.token;
 
   const [chatList, setChatList] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(() => {
-    return localStorage.getItem("lastSelectedChat") || "";
-  });
+  const [selectedUser, setSelectedUser] = useState("");
   const [selectedUserInfo, setSelectedUserInfo] = useState(null);
   const [messagesByUser, setMessagesByUser] = useState({});
   const [newMessage, setNewMessage] = useState("");

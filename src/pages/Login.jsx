@@ -22,7 +22,6 @@ const Login = () => {
     e.preventDefault();
     setError("");
 
-
     const endpoint =
       form.role === "user"
         ? "http://localhost:8000/login/adoptante"

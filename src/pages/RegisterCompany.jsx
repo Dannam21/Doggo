@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../layout/Navbar";
+import LocationPicker from "./LocationPicker";
 
 const RegisterCompany = () => {
   const navigate = useNavigate();
@@ -14,24 +15,38 @@ const RegisterCompany = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
+  // Estados para mapa
+  const [latitud, setLatitud] = useState(null);
+  const [longitud, setLongitud] = useState(null);
+  const [direccion, setDireccion] = useState("");
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    // Validar que contraseñas coincidan
     if (contrasena !== confirmPassword) {
       setError("Las contraseñas no coinciden.");
       return;
     }
 
-    // Payload según AlbergueRegister: { nombre, ruc, correo, contrasena, telefono }
+    if (!direccion || !latitud || !longitud) {
+      setError("Selecciona una ubicación en el mapa.");
+      return;
+    }
+
     const payload = {
       nombre: nombre.trim(),
       ruc: ruc.trim(),
       correo: correo.trim(),
       telefono: telefono.trim(),
       contrasena: contrasena,
+      direccion: direccion ? direccion.toString() : null,
+      latitud: latitud !== null ? latitud.toString() : null,
+      longitud: longitud !== null ? longitud.toString() : null,
     };
+    
+
+    console.log(payload);
 
     try {
       const res = await fetch("http://localhost:8000/register/albergue", {
@@ -45,7 +60,6 @@ const RegisterCompany = () => {
         throw new Error(errData.detail || "Error al registrar el albergue");
       }
 
-      // Registro exitoso: redirigir al login o dashboard
       navigate("/company/home");
     } catch (err) {
       setError(err.message);
@@ -68,11 +82,9 @@ const RegisterCompany = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Nombre */}
             <div>
-              <label
-                htmlFor="nombre"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
                 Nombre del refugio o empresa
               </label>
               <input
@@ -80,17 +92,15 @@ const RegisterCompany = () => {
                 id="nombre"
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
-                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm"
                 placeholder="Nombre de la organización"
                 required
               />
             </div>
 
+            {/* RUC */}
             <div>
-              <label
-                htmlFor="ruc"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="ruc" className="block text-sm font-medium text-gray-700">
                 RUC
               </label>
               <input
@@ -98,17 +108,15 @@ const RegisterCompany = () => {
                 id="ruc"
                 value={ruc}
                 onChange={(e) => setRuc(e.target.value)}
-                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm"
                 placeholder="Número de RUC"
                 required
               />
             </div>
 
+            {/* Correo */}
             <div>
-              <label
-                htmlFor="correo"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="correo" className="block text-sm font-medium text-gray-700">
                 Correo de contacto
               </label>
               <input
@@ -116,17 +124,15 @@ const RegisterCompany = () => {
                 id="correo"
                 value={correo}
                 onChange={(e) => setCorreo(e.target.value)}
-                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm"
                 placeholder="contacto@refugio.com"
                 required
               />
             </div>
 
+            {/* Teléfono */}
             <div>
-              <label
-                htmlFor="telefono"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
                 Celular (teléfono)
               </label>
               <input
@@ -134,17 +140,55 @@ const RegisterCompany = () => {
                 id="telefono"
                 value={telefono}
                 onChange={(e) => setTelefono(e.target.value)}
-                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm"
                 placeholder="+51987654321"
                 required
               />
             </div>
 
+            {/* Ubicación en el mapa */}
             <div>
-              <label
-                htmlFor="contrasena"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Ubicación en el mapa
+              </label>
+              <LocationPicker
+                setLatitud={setLatitud}
+                setLongitud={setLongitud}
+                setDireccion={setDireccion}
+              />
+              {direccion && (
+                <p className="text-xs text-gray-600 mt-2">
+                  Dirección seleccionada: <span className="font-semibold">{direccion}</span>
+                </p>
+              )}
+            </div>
+
+            {/* Lat / Lng */}
+            <div className="flex gap-4 mt-2">
+              <div className="w-1/2">
+                <label className="text-xs font-medium">Latitud</label>
+                <input
+                  type="text"
+                  value={latitud || ""}
+                  readOnly
+                  className="mt-1 w-full border border-gray-300 rounded-md p-2 bg-gray-100"
+                />
+              </div>
+
+              <div className="w-1/2">
+                <label className="text-xs font-medium">Longitud</label>
+                <input
+                  type="text"
+                  value={longitud || ""}
+                  readOnly
+                  className="mt-1 w-full border border-gray-300 rounded-md p-2 bg-gray-100"
+                />
+              </div>
+            </div>
+
+            {/* Contraseña */}
+            <div>
+              <label htmlFor="contrasena" className="block text-sm font-medium text-gray-700">
                 Contraseña
               </label>
               <input
@@ -152,17 +196,15 @@ const RegisterCompany = () => {
                 id="contrasena"
                 value={contrasena}
                 onChange={(e) => setContrasena(e.target.value)}
-                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm"
                 placeholder="••••••••"
                 required
               />
             </div>
 
+            {/* Confirmar contraseña */}
             <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                 Confirmar contraseña
               </label>
               <input
@@ -170,7 +212,7 @@ const RegisterCompany = () => {
                 id="confirmPassword"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm"
                 placeholder="••••••••"
                 required
               />
