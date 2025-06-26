@@ -91,7 +91,7 @@ export default function CompanyHome() {
   }, [user]);
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-[#fdf0df] pt-[60px] md:pt-0">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#FFF1DC] pt-[60px] md:pt-0">
       <SidebarCompany />
       <div className="flex-1 p-4 md:p-8 md:ml-64">
         <h1 className="text-2xl md:text-3xl font-bold mb-6">

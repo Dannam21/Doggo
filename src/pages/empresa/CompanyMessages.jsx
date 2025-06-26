@@ -268,8 +268,8 @@ export default function CompanyMessages() {
     <div className="flex min-h-screen bg-[#fdf0df] ml-64">
       <SidebarCompany />
       {/* Chat List Sidebar */}
-      <div className="w-72 bg-white flex flex-col shadow-md">
-        <div className="px-6 py-4 flex items-center justify-between">
+      <div className="w-full sm:w-72 bg-white flex flex-col shadow-md">
+      <div className="px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">Mensajes</h2>
           <FaPaperPlane className="text-gray-600" />
         </div>
@@ -304,8 +304,8 @@ export default function CompanyMessages() {
       </div>
 
       {/* Chat Area */}
-      <main className="flex-1 p-6 flex flex-col">
-        {selectedUserInfo && (
+      <main className="flex-1 p-4 sm:p-6 flex flex-col">
+      {selectedUserInfo && (
           <>
             <div className="bg-white rounded-t-2xl shadow-sm">
               <div className="flex items-center gap-4 px-4 py-3">
@@ -318,8 +318,8 @@ export default function CompanyMessages() {
 
                 <button
           onClick={handleCompletarAdopcion}
-          className="bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-2 rounded font-semibold"
-        >
+          className="flex-1 resize-none p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 h-12"
+          >
           Confirmar adopción
         </button>
               </div>
