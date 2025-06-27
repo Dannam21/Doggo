@@ -135,7 +135,7 @@ export default function DashboardUser() {
   }
 
   return (
-    <main className="flex-1 px-10 py-10 space-y-10">
+    <main className="min-h-screen bg-[#FFF1DC]">
       <Navbar />
       <div className="flex flex-col items-center justify-center px-4 py-10 text-[#2e2e2e]" >
         <p className="text-lg font-semibold">Tienes {mascotas.length} matches</p>

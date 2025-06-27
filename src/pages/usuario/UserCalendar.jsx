@@ -38,19 +38,20 @@ export default function UserCalendar() {
   return (
     <div className="flex min-h-screen bg-[#fdf0df] font-sans">
       <SidebarUser />
-      <main className="flex-1 p-10">
-        <h1 className="text-4xl font-bold text-[#2e2e2e] mb-10 flex items-center gap-3">
+
+      <main className="flex-1 px-4 py-6 sm:px-6 md:px-10 pl-0 md:pl-72 transition-all duration-300">
+      <h1 className="text-3xl sm:text-4xl font-bold text-[#2e2e2e] mb-8 text-center sm:text-left">
           Mi Calendario
         </h1>
 
-        <div className="grid md:grid-cols-2 gap-10">
-          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl shadow-lg border border-gray-200">
             <Calendar
               onChange={setSelectedDate}
               value={selectedDate}
               className="w-full rounded-xl overflow-hidden"
             />
-            <p className="mt-4 text-gray-700 text-center">
+            <p className="mt-4 text-gray-700 text-center text-sm sm:text-base">
               Día seleccionado:{" "}
               <span className="font-medium">
                 {selectedDate.toLocaleDateString("es-PE", {
@@ -63,8 +64,8 @@ export default function UserCalendar() {
             </p>
           </div>
 
-          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+          <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl shadow-lg border border-gray-200">
+            <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-gray-800 text-center sm:text-left">
               📌 Mis Citas
             </h2>
 
@@ -86,7 +87,7 @@ export default function UserCalendar() {
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-400 text-center sm:text-left">
                 No tienes citas programadas para este día
               </p>
             )}

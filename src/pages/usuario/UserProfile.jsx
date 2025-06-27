@@ -83,6 +83,7 @@ export default function UserProfile() {
       </div>
     );
   }
+
   if (loading) {
     return (
       <div className="p-6 text-center text-gray-600 font-medium">
@@ -92,14 +93,14 @@ export default function UserProfile() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#fdf0df]">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#fdf0df] pt-14 md:pt-0">
       <SidebarUser />
-      <div className="flex-1 p-8">
-        <div className="max-w-5xl mx-auto p-8 bg-white rounded-lg shadow-lg">
-          <h1 className="text-4xl font-bold text-orange-500 mb-8">Mi Perfil</h1>
+      <div className="flex-1 px-4 py-6 sm:px-6 md:px-8">
+        <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 md:p-8 bg-white rounded-lg shadow-lg">
+          <h1 className="text-3xl sm:text-4xl font-bold text-orange-500 mb-8 text-center sm:text-left">Mi Perfil</h1>
 
-          <div className="flex flex-col md:flex-row items-start gap-10 mb-10">
-            <div className="flex flex-col items-center w-40">
+          <div className="flex flex-col md:flex-row items-start gap-8 sm:gap-10 mb-10">
+            <div className="flex flex-col items-center w-full sm:w-40">
               {imagenUrl ? (
                 <img
                   src={imagenUrl}
@@ -109,13 +110,12 @@ export default function UserProfile() {
               ) : (
                 <div className="w-32 h-32 rounded-full bg-gray-300 mb-4" />
               )}
-              <button className="bg-orange-500 text-white text-sm px-4 py-2 rounded hover:bg-orange-600">
+              <button className="bg-orange-500 text-white text-sm px-4 py-2 rounded hover:bg-orange-600 w-full sm:w-auto">
                 Cambiar foto
               </button>
             </div>
 
             <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {/** Nombres */}
               <div>
                 <p className="text-sm font-semibold text-gray-500">Nombres</p>
                 {editMode ? (
@@ -130,7 +130,6 @@ export default function UserProfile() {
                 )}
               </div>
 
-              {/** Apellidos */}
               <div>
                 <p className="text-sm font-semibold text-gray-500">Apellidos</p>
                 {editMode ? (
@@ -145,11 +144,8 @@ export default function UserProfile() {
                 )}
               </div>
 
-              {/** Correo */}
               <div>
-                <p className="text-sm font-semibold text-gray-500">
-                  Correo electrónico
-                </p>
+                <p className="text-sm font-semibold text-gray-500">Correo electrónico</p>
                 {editMode ? (
                   <input
                     name="correo"
@@ -159,11 +155,10 @@ export default function UserProfile() {
                     className="w-full mt-1 px-3 py-2 border rounded"
                   />
                 ) : (
-                  <p className="text-lg break-all">{adoptante.correo}</p>
+                  <p className="text-lg break-words">{adoptante.correo}</p>
                 )}
               </div>
 
-              {/** Teléfono */}
               <div>
                 <p className="text-sm font-semibold text-gray-500">Teléfono</p>
                 {editMode ? (
@@ -178,20 +173,19 @@ export default function UserProfile() {
                 )}
               </div>
 
-              {/** DNI (solo lectura) */}
               <div className="sm:col-span-2">
                 <p className="text-sm font-semibold text-gray-500">DNI</p>
                 <input
                   type="text"
                   value={adoptante.dni}
                   disabled
-                  className="w-60 mt-1 px-3 py-2 bg-gray-100 rounded border border-gray-300 cursor-not-allowed"
+                  className="w-full sm:w-60 mt-1 px-3 py-2 bg-gray-100 rounded border border-gray-300 cursor-not-allowed"
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex justify-end gap-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-4">
             {editMode ? (
               <>
                 <button

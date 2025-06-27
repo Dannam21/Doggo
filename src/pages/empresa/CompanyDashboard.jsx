@@ -11,7 +11,6 @@ export default function CompanyDashboard() {
   return (
     <div className="flex h-screen bg-[#FFF1DC]">
       <Sidebar />
-
     
       <div className="flex-1 p-10">
         <div className="bg-white rounded-md shadow-md p-8 max-w-2xl mx-auto">

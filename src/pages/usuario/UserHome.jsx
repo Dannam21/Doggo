@@ -1,4 +1,3 @@
-// src/pages/empresa/UserHome.jsx
 import React, { useContext, useEffect, useState } from "react";
 import SidebarUser from "../../components/SidebarUser";
 import { UserContext } from "../../context/UserContext";
@@ -14,18 +13,12 @@ export default function UserHome() {
     if (!user?.token || !user?.adoptante_id) return;
     const headers = { Authorization: `Bearer ${user.token}` };
 
-    fetch(
-      `http://localhost:8000/matches/adoptante/${user.adoptante_id}`,
-      { headers }
-    )
+    fetch(`http://localhost:8000/matches/adoptante/${user.adoptante_id}`, { headers })
       .then((r) => (r.ok ? r.json() : []))
       .then(setMatches)
       .catch(() => setMatches([]));
 
-    fetch(
-      `http://localhost:8000/adopciones/adoptante/${user.adoptante_id}`,
-      { headers }
-    )
+    fetch(`http://localhost:8000/adopciones/adoptante/${user.adoptante_id}`, { headers })
       .then((r) => (r.ok ? r.json() : []))
       .then(setAdoptions)
       .catch(() => setAdoptions([]))
@@ -50,33 +43,33 @@ export default function UserHome() {
     }));
 
   return (
-    <div className="flex min-h-screen bg-[#fdf0df]">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#fdf0df] pt-14 md:pt-0 font-sans">
       <SidebarUser />
-      <div className="flex-1 p-8">
-        <h1 className="text-3xl font-bold mb-8">
+      <main className="flex-1 px-4 py-6 sm:px-6 md:px-10 md:pl-80 transition-all duration-300">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center sm:text-left">
           ¡Bienvenid@, {user?.name || "Adoptante"}!
         </h1>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-10">
-          <div className="bg-white p-6 rounded shadow text-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white p-6 rounded-2xl shadow text-center">
             <div className="text-3xl mb-2">🐶</div>
             <p className="text-xl font-bold">{adoptedCount}</p>
             <p className="text-sm text-gray-600">Doggos adoptados</p>
           </div>
-          <div className="bg-white p-6 rounded shadow text-center">
+          <div className="bg-white p-6 rounded-2xl shadow text-center">
             <div className="text-3xl mb-2">🔄</div>
             <p className="text-xl font-bold">{inProcessCount}</p>
             <p className="text-sm text-gray-600">Adopciones en proceso</p>
           </div>
-          <div className="bg-white p-6 rounded shadow text-center">
+          <div className="bg-white p-6 rounded-2xl shadow text-center">
             <div className="text-3xl mb-2">📩</div>
             <p className="text-xl font-bold">0</p>
             <p className="text-sm text-gray-600">Mensajes no leídos</p>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded shadow">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white p-6 rounded-2xl shadow">
             <h3 className="text-lg font-semibold mb-4">Últimos Matches</h3>
             {loading ? (
               <p className="text-sm text-gray-500">Cargando...</p>
@@ -103,12 +96,12 @@ export default function UserHome() {
             )}
           </div>
 
-          <div className="bg-white p-6 rounded shadow">
+          <div className="bg-white p-6 rounded-2xl shadow">
             <h3 className="text-lg font-semibold mb-4">Calendario</h3>
             <p className="text-sm text-gray-500">Aquí verás tus próximas citas.</p>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
