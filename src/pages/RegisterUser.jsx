@@ -2,10 +2,16 @@ import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../layout/Navbar";
 import { UserContext } from "../context/UserContext";
+import LocationPicker from "./LocationPicker";
 
 const RegisterUser = () => {
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
+  // justo debajo de const [loading, setLoading] = useState(false);
+  const [latitud, setLatitud]     = useState(null);
+  const [longitud, setLongitud]   = useState(null);
+  const [direccion, setDireccion] = useState("");
+
 
   const [form, setForm] = useState({
     nombre: "",
@@ -71,6 +77,11 @@ const handleSubmit = async (e) => {
       imagenPerfilId = imgData.id; // <--- ASIGNACIÓN A LA VARIABLE YA DECLARADA
     }
 
+    if (!direccion || !latitud || !longitud) {
+      setError("Selecciona una ubicación en el mapa.");
+      return;
+    }
+
     // AHORA ESTA LÍNEA DEBERÍA ESTAR FUERA DEL BLOQUE IF PARA ACCEDER A imagenPerfilId
     const registerPayload = {
       nombre: form.nombre,
@@ -79,7 +90,10 @@ const handleSubmit = async (e) => {
       correo: form.correo,
       telefono: form.telefono,
       contrasena: form.contrasena,
-      imagen_perfil_id: imagenPerfilId, // <--- USO DE LA VARIABLE
+      imagen_perfil_id: imagenPerfilId,
+      direccion: direccion ? direccion.toString() : null,
+      latitud: latitud !== null ? latitud.toString() : null,
+      longitud: longitud !== null ? longitud.toString() : null,
     };
 
     console.log("Payload de registro del adoptante:", registerPayload); // Esto también es útil
@@ -192,6 +206,46 @@ setUser({
                 placeholder="+51"
               />
             </div>
+
+            {/* Ubicación en el mapa */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Ubicación en el mapa
+                          </label>
+                          <LocationPicker
+                            setLatitud={setLatitud}
+                            setLongitud={setLongitud}
+                            setDireccion={setDireccion}
+                          />
+                          {direccion && (
+                            <p className="text-xs text-gray-600 mt-2">
+                              Dirección seleccionada: <span className="font-semibold">{direccion}</span>
+                            </p>
+                          )}
+                        </div>
+            
+                        {/* Lat / Lng */}
+                        <div className="flex gap-4 mt-2">
+                          <div className="w-1/2">
+                            <label className="text-xs font-medium">Latitud</label>
+                            <input
+                              type="text"
+                              value={latitud || ""}
+                              readOnly
+                              className="mt-1 w-full border border-gray-300 rounded-md p-2 bg-gray-100"
+                            />
+                          </div>
+            
+                          <div className="w-1/2">
+                            <label className="text-xs font-medium">Longitud</label>
+                            <input
+                              type="text"
+                              value={longitud || ""}
+                              readOnly
+                              className="mt-1 w-full border border-gray-300 rounded-md p-2 bg-gray-100"
+                            />
+                          </div>
+                        </div>
 
             <div>
               <label htmlFor="contrasena" className="block text-sm font-medium text-gray-700">

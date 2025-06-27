@@ -1,62 +1,97 @@
-import React, { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import React, { useCallback, useState } from "react";
+import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
+import usePlacesAutocomplete, { getGeocode, getLatLng } from "use-places-autocomplete";
 
-// Ícono corregido
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-});
+const libraries = ["places"];
+const mapContainerStyle = { width: "100%", height: "300px" };
+const center = { lat: -12.0464, lng: -77.0428 }; // Lima
 
-const LocationMarker = ({ setLatitud, setLongitud, setDireccion }) => {
-  const [position, setPosition] = useState(null);
-
-  const fetchDireccion = async (lat, lng) => {
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-      const data = await res.json();
-      if (data?.display_name) {
-        setDireccion(data.display_name);
-      }
-    } catch (err) {
-      console.error("Error obteniendo dirección:", err);
-      setDireccion("");
-    }
-  };
-
-  useMapEvents({
-    click(e) {
-      const { lat, lng } = e.latlng;
-      setPosition(e.latlng);
-      setLatitud(lat);
-      setLongitud(lng);
-      fetchDireccion(lat, lng);
-    },
+export default function LocationPicker(props) {
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY, // ⚠️ no quemes la key en código
+    libraries,
   });
 
-  return position ? <Marker position={position} /> : null;
-};
+  if (loadError) return <p>Error al cargar Google Maps</p>;
+  if (!isLoaded)  return <p>Cargando mapa…</p>;
 
-const LocationPicker = ({ setLatitud, setLongitud, setDireccion }) => {
+  return <LocationPickerInner {...props} />;
+}
+
+function LocationPickerInner({ setLatitud, setLongitud, setDireccion }) {
+  const [marker, setMarker] = useState(null);
+
+  const {
+    ready,
+    value,
+    setValue,
+    suggestions: { status, data },
+    clearSuggestions,
+  } = usePlacesAutocomplete();
+
+  const handleSelect = async (description) => {
+    setValue(description, false);
+    clearSuggestions();
+
+    const results = await getGeocode({ address: description });
+    const { lat, lng } = getLatLng(results[0]);
+
+    setMarker({ lat, lng });
+    setLatitud(lat);
+    setLongitud(lng);
+    setDireccion(description);
+  };
+
+  const onMapClick = useCallback((e) => {
+    const lat = e.latLng.lat();
+    const lng = e.latLng.lng();
+
+    setMarker({ lat, lng });
+    setLatitud(lat);
+    setLongitud(lng);
+
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+      if (status === "OK" && results[0]) {
+        setDireccion(results[0].formatted_address);
+      } else {
+        setDireccion("No se pudo encontrar la dirección");
+      }
+    });
+  }, [setLatitud, setLongitud, setDireccion]);
+
   return (
-    <div className="mt-4">
-      <MapContainer
-        center={[-12.0464, -77.0428]} // Lima por defecto
+    <div className="space-y-2">
+      <input
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        disabled={!ready}
+        placeholder="Buscar dirección…"
+        className="w-full border border-gray-300 rounded-md p-2 shadow-sm"
+      />
+
+      {status === "OK" && (
+        <ul className="bg-white border rounded shadow max-h-40 overflow-y-auto">
+          {data.map(({ place_id, description }) => (
+            <li
+              key={place_id}
+              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+              onClick={() => handleSelect(description)}
+            >
+              {description}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <GoogleMap
+        mapContainerStyle={mapContainerStyle}
         zoom={13}
-        style={{ height: "300px", width: "100%", borderRadius: "10px" }}
+        center={marker || center}
+        onClick={onMapClick}
       >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        <LocationMarker
-          setLatitud={setLatitud}
-          setLongitud={setLongitud}
-          setDireccion={setDireccion}
-        />
-      </MapContainer>
+        {marker && <Marker position={marker} />}
+      </GoogleMap>
     </div>
   );
-};
-
-export default LocationPicker;
+}

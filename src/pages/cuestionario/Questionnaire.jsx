@@ -76,6 +76,9 @@ const Questionnaire = () => {
       contrasena: user.contrasena,
       imagen_perfil_id: user.imagen_perfil_id,
       etiquetas: etiquetasObj,    // Ahora un objeto con todas las respuestas
+      direccion: user.direccion,
+      latitud:user.latitud,
+      longitud:user.longitud,
     };
 
     // Guardamos en contexto y navegamos a preferencias
