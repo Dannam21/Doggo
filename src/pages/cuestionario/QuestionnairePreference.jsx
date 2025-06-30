@@ -4,16 +4,16 @@ import Navbar from "../../layout/Navbar";
 import { UserContext } from "../../context/UserContext";
 
 const questions = [
-  { key: "vivienda", label: "Tipo de vivienda" },
-  { key: "tieneJardin", label: "¿Tiene jardín?" },
-  { key: "estiloVida", label: "Estilo de vida / actividad" },
-  { key: "experiencia", label: "Experiencia con perros" },
-  { key: "tiempo", label: "Disponibilidad de tiempo" },
-  { key: "convivencia", label: "Convivencia (¿Niños en casa?)" },
-  { key: "otrasMascotas", label: "Otras mascotas en casa" },
-  { key: "compromiso", label: "Compromiso de cuidado" },
-  { key: "fuera", label: "Tiempo fuera de casa" },
-  { key: "energia", label: "Nivel de energía deseado" },
+  { key: "vivienda", label: "¿Qué tan importante es para ti que el perrito se adapte bien a tu vivienda?" },
+  { key: "tieneJardin", label: "¿Qué tan importante es para ti que tu perrito tenga un jardín en casa?" },
+  { key: "estiloVida", label: "¿Qué tan importante es para ti que el perrito se adapte bien a tu estilo de vida/actividad?" },
+  { key: "experiencia", label: "¿Qué tan importante es para ti tener experiencia cuidando mascotas?" },
+  { key: "tiempo", label: "¿Qué tan importante es para ti tener tiempo para cuidar y compartir con tu perrito?" },
+  { key: "convivencia", label: "¿Qué tan importante es que el perrito conviva bien con los niños en tu hogar? Si no tienes niños marca 1"},
+  { key: "otrasMascotas", label: "¿Qué tan importante es que el perrito conviva bien con las otras mascotas en tu hogar? Si no tienes otras mascotas marca 1" },
+  { key: "compromiso", label: "¿Qué importancia le das al compromiso en el cuidado y bienestar del perrito?" },
+  { key: "fuera", label: "¿Qué tan importante es para ti que tu perrito no esté solo durante el día?" },
+  { key: "energia", label: "¿Qué importancia le das al nivel de energía que tenga tu perrito?" },
 ];
 
 const QuestionnairePreferences = () => {
@@ -106,21 +106,21 @@ const QuestionnairePreferences = () => {
             ← Atrás
           </button3>
           <h2 className="text-3xl font-bold text-center mb-4 text-black">
-            Ajusta tus preferencias de peso
+          Indica a qué atributos les das más importancia
           </h2>
           <div className="mb-6">
             <p className="text-gray-600">
-              <strong>Escala (1=No importa, 5=Muy importante):</strong>
+              <strong>Escala (1=No lo considero importante, 5= Es muy importante para mí):</strong>
             </p>
             <ul className="list-disc list-inside text-gray-600">
               <li>
-                <strong>1:</strong> No importa
+                <strong>1:</strong> No lo considero importante
               </li>
               <li>
                 <strong>2:</strong> Poco importante
               </li>
               <li>
-                <strong>3:</strong> Moderado
+                <strong>3:</strong> Moderadamente importante
               </li>
               <li>
                 <strong>4:</strong> Importante
