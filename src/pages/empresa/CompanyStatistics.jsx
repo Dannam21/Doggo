@@ -173,7 +173,7 @@ export default function CompanyStatistics() {
   return (
     <div className="flex min-h-screen bg-[#fdf0df]">
       <SidebarCompany />
-      <main className="flex-1 p-10 ml-64">
+      <main className="flex-1 min-h-screen bg-[#FFF1DC] p-4 sm:p-6 sm:ml-64 mt-20 sm:mt-0">
         <h1 className="text-3xl font-bold mb-8 text-[#2e2e2e]">Panel de Estadísticas</h1>
         {/* KPIs */}
         <section className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">

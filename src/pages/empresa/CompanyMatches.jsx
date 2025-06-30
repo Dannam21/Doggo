@@ -68,9 +68,12 @@ export default function CompanyMatches() {
   };
 
   return (
-    <div className="flex">
-      <SidebarCompany />
-      <main className="flex-1 min-h-screen bg-[#FFF9F2] p-6 ml-64">
+    <div className="flex flex-col sm:flex-row">
+      <div className="sm:fixed sm:top-0 sm:left-0 sm:h-full sm:w-64 z-10">
+        <SidebarCompany />
+      </div>
+      
+      <main className="flex-1 min-h-screen bg-[#FFF1DC] p-4 sm:p-6 sm:ml-64 mt-20 sm:mt-0">
         <h1 className="text-3xl font-bold mb-6">🧡 Matches</h1>
         {loading ? (
           <p className="text-lg text-gray-600">Cargando matches…</p>
@@ -83,7 +86,7 @@ export default function CompanyMatches() {
                 key={`${m.adoptante.id}-${m.mascota.id}`}
                 className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col items-center p-4"
               >
-                <div className="flex items-center justify-center gap-4 mb-4">
+                <div className="flex flex-col xs:flex-row sm:flex-row items-center justify-center gap-4 mb-4">
                   <img
                     src={`http://localhost:8000/imagenesProfile/${m.adoptante.imagen_perfil_id}`}
                     alt={m.adoptante.nombre}
@@ -102,16 +105,16 @@ export default function CompanyMatches() {
                 <p className="text-sm text-gray-500 flex items-center gap-1 mb-4">
                   <FaCalendarAlt /> {formatDate(m.fecha)}
                 </p>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2 w-full">
                   <button
                     onClick={() => handleAdopt(m)}
-                    className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg transition"
+                    className="w-full sm:flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg transition"
                   >
                     Adoptar
                   </button>
                   <button
                     onClick={() => handleDeny(m)}
-                    className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition"
+                    className="w-full sm:flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition"
                   >
                     Denegar
                   </button>
