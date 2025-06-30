@@ -15,12 +15,12 @@ const RegisterUser = () => {
     telefono: "",
     contrasena: "",
     confirmarContrasena: "",
-    imagenFile: null, // Nuevo estado para el archivo de imagen
+    imagenFile: null, 
   });
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); // Nuevo estado para manejar la carga
+  const [loading, setLoading] = useState(false); 
 
-  const defaultProfileImageId = 1; // Puedes cambiar este ID por el ID de tu imagen por defecto
+  const defaultProfileImageId = 1; 
 
   const handleChange = (e) => {
     setForm((prev) => ({

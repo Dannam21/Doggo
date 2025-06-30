@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
 import SidebarCompany from "../../components/SidebarCompany";
-import AddDoggoForm from "../../components/AddDoggoForm";
 import { UserContext } from "../../context/UserContext";
 
 
