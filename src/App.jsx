@@ -19,6 +19,7 @@ import DashboardCompany from "./pages/empresa/DashboardCompany";
 import Adddoggo from "./pages/empresa/Adddoggo";
 import DoggoDetail from "./pages/empresa/DoggoDetail";
 import CompanyMatches from "./pages/empresa/CompanyMatches";
+import CompanyDonations from "./pages/empresa/CompanyDonations";
 
 // Páginas de usuario
 import User from "./pages/usuario/DashboardUser";
@@ -42,6 +43,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/company/donations" element={<CompanyDonations />} />
 
           {/* Registro */}
           <Route path="/register" element={<Register />} />

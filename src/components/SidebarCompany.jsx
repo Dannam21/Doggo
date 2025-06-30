@@ -8,6 +8,7 @@ import {
   FaBars,
   FaTimes,
   FaHeart,
+  FaDonate,
 } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useContext, useState } from "react"; 
@@ -23,18 +24,20 @@ export default function SidebarCompany() {
   const isActive = (path) => location.pathname === path;
 
   const handleLogout = () => {
-    setUser({ name: null, email: null, token: null, albergue_id: null });
-    localStorage.removeItem("user");
+    // ✅ Cambiado: ya no borra el token
+    setUser({ name: null, email: null, albergue_id: null, token: localStorage.getItem("token") });
+    // localStorage.removeItem("user");  // ❌ Comentado para no borrar el token
     navigate("/login");
   };
 
   const menuItems = [
     { icon: <FaHome />, label: "Home", path: "/company/home" },
     { icon: <FaDog />, label: "Doggos", path: "/company/doggos" },
-    { icon: <FaHeart/>, label: "Doggos", path: "/company/matches" },
+    { icon: <FaHeart />, label: "Doggos", path: "/company/matches" },
     { icon: <FaEnvelope />, label: "Mensajes", path: "/company/messages" },
     { icon: <FaChartBar />, label: "Estadísticas", path: "/company/statistics" },
     { icon: <FaCalendarAlt />, label: "Calendario", path: "/company/calendar" },
+    { icon: <FaDonate />, label: "Donaciones", path: "/company/donations" },
   ];
 
   return (

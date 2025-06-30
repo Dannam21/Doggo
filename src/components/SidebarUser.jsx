@@ -36,35 +36,24 @@ export default function SidebarUser() {
   return (
     <>
       {/* Navbar solo para móvil */}
-      <div className="md:hidden flex justify-between items-center bg-[#FFF9F2] px-4 py-3 border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
-        <img src={doggoLogo} alt="Doggo Logo" className="w-36 h-10" />
-        <button2 onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-        </button2>
-      </div>
-
+     <div className="md:hidden flex justify-between items-center bg-[#FFF9F2] px-4 py-3 border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+             <img src={doggoLogo} alt="Doggo Logo" className="w-36 h-10" />
+             <button2 onClick={() => setIsOpen(!isOpen)}>
+               {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+             </button2>
+           </div>
       {/* Sidebar principal */}
       <div
-        className={`${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 transition-transform fixed top-0 left-0 h-full w-64 bg-[#FFF9F2] border-r border-gray-300 z-40 md:z-50 flex flex-col pt-14 md:pt-0`}
-      >
-        {/* Parte superior con logo y navegación */}
-        <div>
-          <div
-            className="px-6 py-4 cursor-pointer flex items-center"
-            onClick={() => navigate("/")}
-          >
-            <img
-  src={doggoLogo}
-  alt="Doggo Logo"
-  className={`w-36 h-10 transition-opacity duration-200 ${
-    isOpen ? "opacity-0 pointer-events-none" : "opacity-100"
-  }`}
-/>
-
-          </div>
-
+              className={`${
+                isOpen ? "translate-x-0" : "-translate-x-full"
+              } md:translate-x-0 transition-transform fixed top-0 left-0 h-full w-64 bg-[#FFF9F2] border-r border-gray-300 z-40 md:z-50 flex flex-col`}
+            >
+              {/* Parte superior: logo y navegación */}
+              <div>
+                <div className="px-6 py-4 cursor-pointer flex items-center" onClick={() => navigate("/home")}>
+                  <img src={doggoLogo} alt="Doggo Logo" className="w-42 h-12" />
+                </div>
+ 
           <nav className="mt-4 space-y-2 px-6 text-sm">
             {menuItems.map(({ label, icon, path }) => (
               <div
