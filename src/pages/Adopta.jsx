@@ -4,9 +4,25 @@ import { useNavigate } from "react-router-dom";
 const Adopta = () => {
   const [pets, setPets] = useState([]);
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  const headers = { "Content-Type": "application/json" };
 
   useEffect(() => {
-    fetch("http://localhost:8000/mascotas")
+    const token = localStorage.getItem("token");
+  
+    // Configurar headers básicos
+    const headers = {
+      "Content-Type": "application/json",
+    };
+  
+    // Si existe token, agregar Authorization
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+  
+    fetch("http://localhost:8000/mascotas", {
+      headers,
+    })
       .then((res) => {
         if (!res.ok) {
           throw new Error("No se pudieron obtener las mascotas");
@@ -21,6 +37,7 @@ const Adopta = () => {
         setPets([]);
       });
   }, []);
+
 
   const [filtros, setFiltros] = useState({
     genero: [],
@@ -44,11 +61,27 @@ const Adopta = () => {
     setFiltros({ genero: [], edad: [], especie: [] });
   };
 
+  const obtenerGrupoEdad = (valor, unidad) => {
+    let edadEnAnios = 0;
+    if (unidad === "meses") {
+      edadEnAnios = valor / 12;
+    } else {
+      edadEnAnios = valor;
+    }
+
+    if (edadEnAnios < 1) return "Cachorro";
+    if (edadEnAnios >= 1 && edadEnAnios < 3) return "Joven";
+    if (edadEnAnios >= 3 && edadEnAnios < 7) return "Adulto";
+    return "Adulto Mayor";
+  };
+
   const mascotasFiltradas = pets.filter((pet) => {
     const { genero, edad, especie } = filtros;
 
     const coincideGenero = genero.length === 0 || genero.includes(pet.genero);
-    const coincideEdad = edad.length === 0 || edad.includes(pet.edad);
+    const grupoEdad = obtenerGrupoEdad(pet.edad_valor, pet.edad_unidad);
+    const coincideEdad = edad.length === 0 || edad.includes(grupoEdad);
+
     const coincideEspecie =
       especie.length === 0 || especie.includes(pet.especie);
 
@@ -60,10 +93,9 @@ const Adopta = () => {
       <section className="relative w-full px-4 md:px-20 py-12">
         <div className="relative z-10">
           <h2 className="text-2xl font-bold text-center mb-8">🐾 Adopta</h2>
-  
+
           {/* Contenedor principal responsive con flex en md */}
           <div className="flex flex-col md:flex-row gap-8">
-  
             {/* Filtros */}
             <aside className="bg-white rounded-lg p-6 shadow-sm space-y-6 md:w-1/4">
               <div>
@@ -80,7 +112,7 @@ const Adopta = () => {
                   </label>
                 ))}
               </div>
-  
+
               <div>
                 <p className="font-bold mb-2">Edad</p>
                 {["Cachorro", "Joven", "Adulto", "Adulto Mayor"].map((age) => (
@@ -95,7 +127,7 @@ const Adopta = () => {
                   </label>
                 ))}
               </div>
-  
+
               <div>
                 <p className="font-bold mb-2">Especie</p>
                 {["Pequeño", "Grande", "Mediano"].map((especie) => (
@@ -111,7 +143,7 @@ const Adopta = () => {
                 ))}
               </div>
             </aside>
-  
+
             {/* Tarjetas */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:w-3/4">
               {mascotasFiltradas.length === 0 ? (
@@ -136,7 +168,7 @@ const Adopta = () => {
                     <h3 className="font-bold text-xl">{pet.nombre}</h3>
                     <div className="text-white space-y-1 text-sm mt-1">
                       <div>
-                        Edad: {pet.edad} {pet.edad === 1 ? "año" : "años"}
+                        Edad: {pet.edad_valor} {pet.edad_unidad}
                       </div>
                       <div>Tamaño: {pet.especie}</div>
                       <div>Género: {pet.genero || "No especificado"}</div>
@@ -156,5 +188,5 @@ const Adopta = () => {
       </section>
     </nav>
   );
-}
+};
 export default Adopta;

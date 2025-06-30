@@ -27,7 +27,7 @@ export default function Adddoggo() {
           .map((m) => ({
             id: m.id,
             nombre: m.nombre,
-            edad: m.edad,
+            edad: m.edad_valor && m.edad_unidad ? `${m.edad_valor} ${m.edad_unidad}` : "Sin edad",
             especie: m.especie,
             imageUrl: `http://localhost:8000/imagenes/${m.imagen_id}`,
             etiquetas: m.etiquetas || [],

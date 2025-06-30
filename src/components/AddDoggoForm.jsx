@@ -6,27 +6,29 @@ export default function AddDoggoForm({ onDogCreated }) {
   const { user } = useContext(UserContext);
   const token = user?.token;
   const albergueId = user?.albergue_id;
+  const [ageUnit, setAgeUnit] = useState("años");
 
   const [formData, setFormData] = useState({
     nombre: "",
     edad: "",
+    ageUnit: "años", 
     tamaño: "",
-    genero:"",
+    genero: "",
     vacunas: [],
     descripcion: "",
     imagenFile: null,
-    vivienda: [],               
-    jardin: [],                 
-    estilo_vida: [],            
-    experiencia: [],           
-    disponibilidad_tiempo: [],  
-    ninos: [],                 
-    otrasMascotas: [],          
-    compromiso: [],             
-    tiempoSolo: [],             
-    energia: [],                
-    temperamento: [],           
-    otrosAtributos: [],         
+    vivienda: [],
+    jardin: [],
+    estilo_vida: [],
+    experiencia: [],
+    disponibilidad_tiempo: [],
+    ninos: [],
+    otrasMascotas: [],
+    compromiso: [],
+    tiempoSolo: [],
+    energia: [],
+    temperamento: [],
+    otrosAtributos: [],
   });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -47,10 +49,13 @@ export default function AddDoggoForm({ onDogCreated }) {
     setFormData((prev) => {
       const actuales = prev[name];
       const limite =
-        name === "temperamento" ? 3 :
-        name === "jardin" ? 1 :
-        name === "vacunas" ? 5:
-        2;
+        name === "temperamento"
+          ? 3
+          : name === "jardin"
+          ? 1
+          : name === "vacunas"
+          ? 5
+          : 2;
 
       if (checked) {
         if (actuales.length < limite) {
@@ -138,7 +143,8 @@ export default function AddDoggoForm({ onDogCreated }) {
       // 4) Crear mascota, incluyendo la fecha de creación
       const payload = {
         nombre: formData.nombre.trim(),
-        edad: formData.edad.trim(),
+        edad_valor: parseInt(formData.edad, 10),  
+        edad_unidad: formData.ageUnit,   
         especie: formData.tamaño.trim(),
         genero: formData.genero.trim(),
         vacunas: formData.vacunas,
@@ -171,6 +177,7 @@ export default function AddDoggoForm({ onDogCreated }) {
       setFormData({
         nombre: "",
         edad: "",
+        ageUnit: "años",
         tamaño: "",
         genero: "",
         vacunas: [],
@@ -240,44 +247,68 @@ export default function AddDoggoForm({ onDogCreated }) {
                 required
               />
             </div>
-
             <div>
               <label className="block text-sm font-semibold mb-1 text-gray-700">
                 Edad
               </label>
-              <input
-                name="edad"
-                type="text"
-                value={formData.edad}
-                onChange={handleChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 text-sm"
-                placeholder="Ej. 2 "
-                required
-              />
+              <div className="flex gap-2">
+                <input
+                  name="edad"
+                  type="number"
+                  value={formData.edad}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    // Verificar si se seleccionó meses y limitar a 11
+                    if (formData.ageUnit === "meses") {
+                      if (val >= 0 && val <= 11) {
+                        setFormData((prev) => ({ ...prev, edad: val }));
+                      }
+                    } else {
+                      if (val >= 0) {
+                        setFormData((prev) => ({ ...prev, edad: val }));
+                      }
+                    }
+                  }}
+                  className="w-1/2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 text-sm"
+                  placeholder="Ej. 2"
+                  required
+                />
+                <select
+                  value={formData.ageUnit || "años"}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      ageUnit: e.target.value,
+                    }))
+                  }
+                  className="w-1/2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 text-sm"
+                >
+                  <option value="meses">Meses</option>
+                  <option value="años">Años</option>
+                </select>
+              </div>
             </div>
-
 
             <div>
               <label className="block text-sm font-semibold mb-1 text-gray-700">
-                Genero
+                Género
               </label>
-              <input
+              <select
                 name="genero"
-                type="text"
                 value={formData.genero}
                 onChange={handleChange}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 text-sm"
-                placeholder="Hembra o Macho"
                 required
-              />
+              >
+                <option value="">Selecciona género</option>
+                <option value="Macho">Macho</option>
+                <option value="Hembra">Hembra</option>
+              </select>
             </div>
 
-
-            
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
               <h3 className="text-md font-medium text-gray-800 mb-1">
-                Vacunas:{" "}
-                <span className="text-gray-500 text-sm">(Máx. 5)</span>
+                Vacunas: <span className="text-gray-500 text-sm">(Máx. 5)</span>
               </h3>
               <div className="flex flex-wrap gap-4 mt-2">
                 {[
@@ -285,7 +316,10 @@ export default function AddDoggoForm({ onDogCreated }) {
                   { val: "Vacuna 2", label: "v2" },
                   { val: "Vacuna 3", label: "v3" },
                 ].map((op) => (
-                  <label key={op.val} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={op.val}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <input
                       type="checkbox"
                       name="vacunas"
@@ -347,7 +381,10 @@ export default function AddDoggoForm({ onDogCreated }) {
                   { val: "casa", label: "Casa" },
                   { val: "departamento", label: "Departamento" },
                 ].map((op) => (
-                  <label key={op.val} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={op.val}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <input
                       type="checkbox"
                       name="vivienda"
@@ -375,7 +412,10 @@ export default function AddDoggoForm({ onDogCreated }) {
                   { val: "si_jardin", label: "Sí" },
                   { val: "no_jardin", label: "No" },
                 ].map((op) => (
-                  <label key={op.val} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={op.val}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <input
                       type="checkbox"
                       name="jardin"
@@ -404,7 +444,10 @@ export default function AddDoggoForm({ onDogCreated }) {
                   { val: "actividad_moderada", label: "Actividad Moderada" },
                   { val: "tranquilo", label: "Tranquilo" },
                 ].map((op) => (
-                  <label key={op.val} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={op.val}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <input
                       type="checkbox"
                       name="estilo_vida"
@@ -433,7 +476,10 @@ export default function AddDoggoForm({ onDogCreated }) {
                   { val: "poca_experiencia", label: "Poca experiencia" },
                   { val: "mucha_experiencia", label: "Mucha experiencia" },
                 ].map((op) => (
-                  <label key={op.val} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={op.val}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <input
                       type="checkbox"
                       name="experiencia"
@@ -461,9 +507,15 @@ export default function AddDoggoForm({ onDogCreated }) {
                   { val: "tiempo_completo", label: "Tiempo completo" },
                   { val: "medio_tiempo", label: "Medio tiempo" },
                   { val: "poco_tiempo", label: "Poco tiempo" },
-                  { val: "viaja_frecuentemente", label: "Viaja frecuentemente" },
+                  {
+                    val: "viaja_frecuentemente",
+                    label: "Viaja frecuentemente",
+                  },
                 ].map((op) => (
-                  <label key={op.val} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={op.val}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <input
                       type="checkbox"
                       name="disponibilidad_tiempo"
@@ -491,7 +543,10 @@ export default function AddDoggoForm({ onDogCreated }) {
                   { val: "familia_con_ninos", label: "Familia con niños" },
                   { val: "sin_ninos", label: "Sin niños" },
                 ].map((op) => (
-                  <label key={op.val} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={op.val}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <input
                       type="checkbox"
                       name="ninos"
@@ -521,7 +576,10 @@ export default function AddDoggoForm({ onDogCreated }) {
                   { val: "si_mascotas", label: "Sí" },
                   { val: "no_mascotas", label: "No" },
                 ].map((op) => (
-                  <label key={op.val} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={op.val}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <input
                       type="checkbox"
                       name="otrasMascotas"
@@ -546,12 +604,24 @@ export default function AddDoggoForm({ onDogCreated }) {
               </h3>
               <div className="flex flex-wrap gap-4 mt-2">
                 {[
-                  { val: "dispuesto_adiestrar", label: "Dispuesto a adiestrar" },
-                  { val: "puede_costear_veterinario", label: "Puede costear veterinario" },
-                  { val: "cuidado_baja_mantenimiento", label: "Cuidado baja mantenimiento" },
+                  {
+                    val: "dispuesto_adiestrar",
+                    label: "Dispuesto a adiestrar",
+                  },
+                  {
+                    val: "puede_costear_veterinario",
+                    label: "Puede costear veterinario",
+                  },
+                  {
+                    val: "cuidado_baja_mantenimiento",
+                    label: "Cuidado baja mantenimiento",
+                  },
                   { val: "cuidado_especial", label: "Cuidado especial" },
                 ].map((op) => (
-                  <label key={op.val} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={op.val}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <input
                       type="checkbox"
                       name="compromiso"
@@ -577,10 +647,16 @@ export default function AddDoggoForm({ onDogCreated }) {
               <div className="flex flex-wrap gap-4 mt-2">
                 {[
                   { val: "mucho_tiempo_fuera", label: "Mucho tiempo en casa" },
-                  { val: "tiempo_moderado_fuera", label: "Tiempo moderado fuera" },
+                  {
+                    val: "tiempo_moderado_fuera",
+                    label: "Tiempo moderado fuera",
+                  },
                   { val: "poco_tiempo_fuera", label: "Poco tiempo en casa" },
                 ].map((op) => (
-                  <label key={op.val} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={op.val}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <input
                       type="checkbox"
                       name="tiempoSolo"
@@ -609,7 +685,10 @@ export default function AddDoggoForm({ onDogCreated }) {
                   { val: "energia_media", label: "Energía media" },
                   { val: "energia_alta", label: "Energía alta" },
                 ].map((op) => (
-                  <label key={op.val} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={op.val}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <input
                       type="checkbox"
                       name="energia"
@@ -642,7 +721,10 @@ export default function AddDoggoForm({ onDogCreated }) {
                   { val: "protectivo", label: "Protector" },
                   { val: "miedoso", label: "Miedoso" },
                 ].map((op) => (
-                  <label key={op.val} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={op.val}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <input
                       type="checkbox"
                       name="temperamento"
@@ -674,7 +756,10 @@ export default function AddDoggoForm({ onDogCreated }) {
                   { val: "protector", label: "Protector" },
                   { val: "inquieto", label: "Inquieto" },
                 ].map((op) => (
-                  <label key={op.val} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={op.val}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <input
                       type="checkbox"
                       name="otrosAtributos"

@@ -61,7 +61,8 @@ export default function DoggoDetail() {
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-3">{dog.nombre}</h2>
               <p className="text-gray-700 mb-1">
-                <span className="font-semibold">Edad:</span> {dog.edad}
+              <span className="font-semibold">Edad:</span> {dog.edad_valor} {dog.edad_unidad}
+
               </p>
               <p className="text-gray-700 mb-3">
                 <span className="font-semibold">Tamaño:</span> {dog.especie}

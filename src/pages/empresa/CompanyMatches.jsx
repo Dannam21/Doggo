@@ -102,9 +102,6 @@ export default function CompanyMatches() {
                 <p className="font-semibold text-lg mb-2">
                   {m.adoptante.nombre} &amp; {m.mascota.nombre}
                 </p>
-                <p className="text-sm text-gray-500 flex items-center gap-1 mb-4">
-                  <FaCalendarAlt /> {formatDate(m.fecha)}
-                </p>
                 <div className="flex flex-col sm:flex-row gap-2 w-full">
                   <button
                     onClick={() => handleAdopt(m)}

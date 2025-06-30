@@ -10,15 +10,18 @@ export default function CompanyDonations() {
   const [error, setError] = useState("");
   const [qrSavedUrl, setQrSavedUrl] = useState(null);
 
-  // Siempre leer de localStorage (importante si se refresca la página)
+  // Leer user desde localStorage y asegurarse de que tiene token y albergue_id
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const parsed = JSON.parse(storedUser);
-      console.log("✅ User recuperado de localStorage:", parsed);
-      setUser(parsed);
-    } else {
-      console.log("⚠️ No hay user en localStorage");
+
+      // ✅ Verifica que tenga token y albergue_id
+      if (parsed.token && parsed.albergue_id) {
+        setUser(parsed);
+      } else {
+        console.warn("⚠️ User en localStorage no tiene token o albergue_id");
+      }
     }
   }, []);
 
@@ -27,8 +30,8 @@ export default function CompanyDonations() {
 
   useEffect(() => {
     const fetchAlbergueQR = async () => {
+      if (!albergueId) return;
       try {
-        if (!albergueId) return;
         const res = await fetch(`http://localhost:8000/albergue/${albergueId}`);
         if (res.ok) {
           const data = await res.json();
@@ -36,10 +39,10 @@ export default function CompanyDonations() {
             setQrSavedUrl(`http://localhost:8000/imagenes/${data.qr_imagen_id}`);
           }
         } else {
-          console.error("Error al obtener QR:", res.status);
+          console.error("Error al obtener albergue:", res.status);
         }
       } catch (err) {
-        console.error("Error al traer QR existente:", err);
+        console.error("Error al traer QR:", err);
       }
     };
 
@@ -57,22 +60,24 @@ export default function CompanyDonations() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!qrFile || !albergueId || !token) {
-      setError("Selecciona una imagen y asegúrate de estar logueado.");
+      setError("Selecciona una imagen y asegúrate de estar logueado como albergue.");
       return;
     }
-
-    console.log("🚀 Token que enviaré:", token);
 
     setSubmitting(true);
     setError("");
 
     try {
-      // Subir imagen
+      // ✅ Subir imagen
       const formData = new FormData();
       formData.append("image", qrFile);
 
       const res = await fetch("http://localhost:8000/imagenes", {
         method: "POST",
+        // ⚠️ Para multipart/form-data no se pone Content-Type manualmente
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       });
 
@@ -84,12 +89,12 @@ export default function CompanyDonations() {
       const data = await res.json();
       const qrImagenId = data.id;
 
-      //  Actualizar albergue con qr_imagen_id
+      // ✅ Actualizar albergue con qr_imagen_id
       const updateRes = await fetch(`http://localhost:8000/albergue/${albergueId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, 
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ qr_imagen_id: qrImagenId }),
       });
@@ -154,16 +159,6 @@ export default function CompanyDonations() {
             >
               {submitting ? "Guardando..." : "Guardar QR"}
             </button>
-
-            {previewUrl && (
-              <button
-                type="button"
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-lg flex justify-center items-center gap-2"
-                onClick={() => alert("Función de edición aún no implementada")}
-              >
-                <FaEdit /> Editar QR
-              </button>
-            )}
           </form>
 
           {qrSavedUrl && (
