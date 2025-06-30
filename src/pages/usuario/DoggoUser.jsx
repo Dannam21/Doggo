@@ -101,34 +101,11 @@ export default function DoggoUser() {
                 Regresar
               </button>
               <button
-  onClick={() => {
-    const monto = prompt("¿Cuánto deseas donar?");
-    if (!monto || isNaN(monto)) return alert("Monto inválido");
-
-    const token = localStorage.getItem("token");
-
-    fetch("http://localhost:8000/donar", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        mascota_id: dog.id,
-        monto: parseInt(monto),
-      }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Error al donar");
-        return res.json();
-      })
-      .then(() => alert("¡Gracias por tu donación!"))
-      .catch((err) => alert(err.message));
-  }}
-  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-lg transition"
->
-  Donar
-</button>
+                onClick={() => navigate("/donations", { state: { restoreIndex: fromIndex } })}
+                className="w-full sm:w-1/2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-lg transition"
+              >
+                Donar
+              </button>
 
             </div>
           </div>

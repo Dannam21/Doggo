@@ -33,6 +33,7 @@ import UserProfile from "./pages/usuario/UserProfile";
 import UserMessages from "./pages/usuario/UserMessages";
 import UserHome from "./pages/usuario/UserHome";
 import UserCalendar from "./pages/usuario/UserCalendar";
+import Donations from "./pages/usuario/Donations";
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/company/donations" element={<CompanyDonations />} />
+          <Route path="/donations" element={<Donations />} />
 
           {/* Registro */}
           <Route path="/register" element={<Register />} />
