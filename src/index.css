@@ -39,7 +39,7 @@ h1 {
   line-height: 1.1;
 }
 
-button {
+button:not(.swipe-btn) {
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
@@ -66,7 +66,7 @@ button:focus-visible {
   a:hover {
     color: #747bff;
   }
-  button {
+  button:not(.swipe-btn) {
     background-color: #f77534;
     /* font-size: 1.2em; */
   }

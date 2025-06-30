@@ -163,29 +163,28 @@ export default function DashboardUser() {
         </div>
 
         <div className="flex gap-10">
-          <button onClick={() => handleSwipe("left")} className="w-14 h-14 flex items-center justify-center rounded-full bg-[#ffe4c4] border-2 border-[#F25C5C] text-[#F25C5C] shadow hover:scale-110 transition" aria-label="No me interesa">
-            <FaTimes size={20} />
-          </button>
-          <button onClick={() => handleSwipe("right")} className="w-14 h-14 flex items-center justify-center rounded-full bg-[#ffe4c4] border-2 border-[#4FB286] text-[#4FB286] shadow hover:scale-110 transition" aria-label="Me interesa">
-            <FaHeart size={20} />
-          </button>
-        </div>
+  <button
+    onClick={() => handleSwipe("left")}
+    className="swipe-btn w-14 h-14 flex items-center justify-center rounded-full
+               bg-[#ffe4c4] border-2 border-[#F25C5C] text-[#F25C5C]
+               shadow hover:scale-110 transition"
+    aria-label="No me interesa"
+  >
+    <FaTimes size={20} />
+  </button>
 
-        {/* Citas del día */}
-        <div className="mt-10 text-center max-w-md mx-auto bg-white p-6 rounded-xl shadow">
-          <h2 className="text-lg font-bold mb-2 text-[#ee9c70]">📅 Citas para hoy</h2>
-          {citas.length > 0 ? (
-            <ul className="text-sm text-gray-800">
-              {citas.map(cita => (
-                <li key={cita.id} className="mb-2">
-                  <strong>{new Date(cita.fecha_hora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong> — {cita.asunto}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-gray-400">No tienes citas programadas para hoy</p>
-          )}
-        </div>
+  <button
+    onClick={() => handleSwipe("right")}
+    className="swipe-btn w-14 h-14 flex items-center justify-center rounded-full
+               bg-[#ffe4c4] border-2 border-[#4FB286] text-[#4FB286]
+               shadow hover:scale-110 transition"
+    aria-label="Me interesa"
+  >
+    <FaHeart size={20} />
+  </button>
+</div>
+
+
       </div>
     </main>
   );

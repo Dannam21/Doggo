@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import SidebarCompany from "../../components/SidebarCompany";
-import { FaPaperPlane } from "react-icons/fa";
+import { FaPaperPlane, FaTimes, FaBars } from "react-icons/fa";
 import { UserContext } from "../../context/UserContext";
 
 export default function CompanyMessages() {
@@ -13,6 +13,7 @@ export default function CompanyMessages() {
   const [selectedUserInfo, setSelectedUserInfo] = useState(null);
   const [messagesByUser, setMessagesByUser] = useState({});
   const [newMessage, setNewMessage] = useState("");
+  const [isChatListOpen, setIsChatListOpen] = useState(false);
   const messagesEndRef = useRef(null);
   const websocketRef = useRef(null);
 
@@ -262,140 +263,215 @@ export default function CompanyMessages() {
       alert("❌ " + err.message);
     }
   };
-  
+
+  const handleChatSelect = (chatKey) => {
+    setSelectedUser(chatKey);
+    setIsChatListOpen(false); // Cerrar sidebar en móvil después de seleccionar
+  };
 
   return (
-    <div className="flex min-h-screen bg-[#fdf0df] ml-64">
-      <SidebarCompany />
-      {/* Chat List Sidebar */}
-      <div className="w-full sm:w-72 bg-white flex flex-col shadow-md">
-      <div className="px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold">Mensajes</h2>
-          <FaPaperPlane className="text-gray-600" />
-        </div>
+    <div className="flex min-h-screen bg-[#fdf0df] lg:ml-64">
+      {/* Sidebar principal - Solo visible en desktop */}
+      <div className="hidden lg:block">
+        <SidebarCompany />
+      </div>
 
-        <div className="overflow-y-auto max-h-[calc(100vh-5rem)]">
-        {chatList.map((group) => (
-  <div key={`${group.userType}-${group.userId}`} className="border-b border-gray-200">
-    <div className="flex items-center px-4 py-3 bg-orange-50 font-bold text-sm text-orange-600">
-      <img src={group.avatar} alt={group.name} className="w-8 h-8 rounded-full object-cover mr-2" />
-      {group.name}
-    </div>
+      {/* Overlay para móvil */}
+      {isChatListOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setIsChatListOpen(false)}
+        />
+      )}
 
-    {group.chats.map((chat) => {
-      const chatKey = `${group.userType}-${group.userId}-${chat.mascota_id}`;
-      return (
-        <div
-          key={chatKey}
-          onClick={() => setSelectedUser(chatKey)}
-          className={`flex items-center pl-12 pr-4 py-3 cursor-pointer hover:bg-orange-100 ${selectedUser === chatKey ? "bg-orange-100" : ""}`}
-        >
-          <div className="flex flex-col">
-            <p className="font-semibold text-sm text-gray-800">Mascota ID: {chat.mascota_id}</p>
-            <p className="text-xs text-gray-500 truncate w-40">{chat.lastMessage}</p>
+      {/* Mobile/Tablet Sidebar with Navigation and Chats */}
+      <div className={`
+        fixed lg:relative top-0 left-0 h-full w-80 sm:w-72 bg-white flex flex-col shadow-md z-50 transform transition-transform duration-300 ease-in-out
+        ${isChatListOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        lg:w-72
+      `}>
+        {/* Header del sidebar móvil */}
+        <div className="px-4 sm:px-6 py-4 flex items-center justify-between border-b border-gray-200">
+          <h2 className="text-lg sm:text-xl font-bold lg:hidden">Navegación</h2>
+          <h2 className="text-lg sm:text-xl font-bold hidden lg:block">Mensajes</h2>
+          <div className="flex items-center gap-2">
+            <FaPaperPlane className="text-gray-600 hidden lg:block" />
+            <button
+              onClick={() => setIsChatListOpen(false)}
+              className="lg:hidden p-1 hover:bg-gray-100 rounded"
+            >
+              <FaTimes className="text-gray-600" />
+            </button>
           </div>
         </div>
-      );
-    })}
-  </div>
-))}
 
+        {/* Navegación principal - Solo visible en móvil/tablet */}
+        <div className="lg:hidden border-b border-gray-200">
+          <SidebarCompany />
+        </div>
+
+        {/* Sección de mensajes */}
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Header de mensajes para móvil */}
+          <div className="lg:hidden px-4 py-3 bg-orange-50 border-b border-gray-200">
+            <h3 className="font-bold text-sm text-orange-600 flex items-center">
+              <FaPaperPlane className="mr-2" />
+              Mensajes
+            </h3>
+          </div>
+
+          {/* Lista de chats */}
+          <div className="overflow-y-auto flex-1">
+            {chatList.map((group) => (
+              <div key={`${group.userType}-${group.userId}`} className="border-b border-gray-200">
+                <div className="flex items-center px-4 py-3 bg-orange-50 font-bold text-sm text-orange-600">
+                  <img src={group.avatar} alt={group.name} className="w-8 h-8 rounded-full object-cover mr-2 flex-shrink-0" />
+                  <span className="truncate">{group.name}</span>
+                </div>
+
+                {group.chats.map((chat) => {
+                  const chatKey = `${group.userType}-${group.userId}-${chat.mascota_id}`;
+                  return (
+                    <div
+                      key={chatKey}
+                      onClick={() => handleChatSelect(chatKey)}
+                      className={`flex items-center pl-8 sm:pl-12 pr-4 py-3 cursor-pointer hover:bg-orange-100 ${selectedUser === chatKey ? "bg-orange-100" : ""}`}
+                    >
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <p className="font-semibold text-sm text-gray-800">Mascota ID: {chat.mascota_id}</p>
+                        <p className="text-xs text-gray-500 truncate">{chat.lastMessage}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Chat Area */}
-      <main className="flex-1 p-4 sm:p-6 flex flex-col">
-      {selectedUserInfo && (
+      <main className="flex-1 flex flex-col min-w-0 lg:ml-0">
+        {selectedUserInfo ? (
           <>
-            <div className="bg-white rounded-t-2xl shadow-sm">
-              <div className="flex items-center gap-4 px-4 py-3">
+            {/* Header del chat */}
+            <div className="bg-white shadow-sm border-b border-gray-200">
+              <div className="flex items-center gap-3 sm:gap-4 px-4 py-3">
+                {/* Botón hamburguesa para móvil */}
+                <button
+                  onClick={() => setIsChatListOpen(true)}
+                  className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+                  title="Abrir navegación y mensajes"
+                >
+                  <FaBars className="text-gray-600" />
+                </button>
+
                 <img
                   src={selectedUserInfo.avatar}
                   alt={selectedUserInfo.name}
-                  className="w-10 h-10 rounded-full object-cover"
+                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover flex-shrink-0"
                 />
-                <h3 className="text-lg font-semibold">{selectedUserInfo.name}</h3>
+                <h3 className="text-base sm:text-lg font-semibold truncate flex-1 min-w-0">{selectedUserInfo.name}</h3>
 
                 <button
-          onClick={handleCompletarAdopcion}
-          className="flex-1 resize-none p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 h-12"
-          >
-          Confirmar adopción
-        </button>
+                  onClick={handleCompletarAdopcion}
+                  className="bg-green-500 hover:bg-green-600 text-white text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 rounded font-semibold whitespace-nowrap"
+                >
+                  <span className="hidden sm:inline">Confirmar adopción</span>
+                  <span className="sm:hidden">Confirmar</span>
+                </button>
               </div>
-
-              
-              <div className="h-[1px] bg-[#ccccd4] w-full" />
             </div>
 
-            
-
-            <div className="flex flex-col bg-white rounded-b-2xl shadow-md flex-1 overflow-hidden">
-              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-3">
+            {/* Área de mensajes */}
+            <div className="flex flex-col bg-white flex-1 overflow-hidden">
+              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 space-y-3">
                 {(messagesByUser[selectedUser] || []).map((msg) => {
                   let content;
                   try {
                     const parsed = JSON.parse(msg.text);
-                      if (parsed.tipo === "card_perro") {
-                        content = (
-                          <div className="w-64 rounded-xl overflow-hidden shadow-lg bg-white border border-orange-300">
-                            <img src={parsed.imagen} alt={parsed.nombre} className="w-full h-40 object-cover" />
-                            <div className="p-4">
-                              <h3 className="text-lg font-bold text-gray-800">{parsed.nombre}</h3>
-                              <p className="text-sm text-gray-600">{parsed.descripcion}</p>
-                            </div>
+                    if (parsed.tipo === "card_perro") {
+                      content = (
+                        <div className="w-full max-w-64 rounded-xl overflow-hidden shadow-lg bg-white border border-orange-300">
+                          <img src={parsed.imagen} alt={parsed.nombre} className="w-full h-32 sm:h-40 object-cover" />
+                          <div className="p-3 sm:p-4">
+                            <h3 className="text-base sm:text-lg font-bold text-gray-800">{parsed.nombre}</h3>
+                            <p className="text-xs sm:text-sm text-gray-600">{parsed.descripcion}</p>
                           </div>
-                        );
-                      }
-                  } catch (e){
+                        </div>
+                      );
+                    }
+                  } catch (e) {
                     content = (
-                    <div
-                      className={`inline-block px-4 py-3 rounded-2xl text-sm shadow-md whitespace-pre-wrap break-words transition-transform duration-150 hover:scale-[1.01] ${
-                        msg.sender === "company"
-                          ? "bg-[#f77534] text-white rounded-br-none self-end"
-                          : "bg-gray-100 text-gray-800 rounded-bl-none self-start"
-                      }`}
-                    >
-                      {msg.text}
-                    </div>
-                  );
-                }
+                      <div
+                        className={`inline-block px-3 sm:px-4 py-2 sm:py-3 rounded-2xl text-sm shadow-md whitespace-pre-wrap break-words transition-transform duration-150 hover:scale-[1.01] max-w-full ${
+                          msg.sender === "company"
+                            ? "bg-[#f77534] text-white rounded-br-none self-end"
+                            : "bg-gray-100 text-gray-800 rounded-bl-none self-start"
+                        }`}
+                      >
+                        {msg.text}
+                      </div>
+                    );
+                  }
 
                   return (
                     <div key={msg.id} className={`flex ${msg.sender === "company" ? "justify-end" : "justify-start"}`}>
-                        <div className="flex flex-col max-w-[70%]">
-                          <div
-                            className={`text-xs mb-1 ${
-                              msg.sender === "company" ? "text-right text-orange-500" : "text-left text-gray-600"
-                            }`}
-                          >
-                            {msg.sender === "company" ? "Tú" : msg.senderName}
-                          </div>
-                          {content}
+                      <div className="flex flex-col max-w-[85%] sm:max-w-[70%]">
+                        <div
+                          className={`text-xs mb-1 ${
+                            msg.sender === "company" ? "text-right text-orange-500" : "text-left text-gray-600"
+                          }`}
+                        >
+                          {msg.sender === "company" ? "Tú" : msg.senderName}
                         </div>
+                        {content}
+                      </div>
                     </div>
                   );
                 })}
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="px-4 py-3 bg-white flex items-center gap-2">
-                <textarea
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Escribe tu mensaje..."
-                  className="flex-1 resize-none p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 h-12"
-                />
-                <button
-                  onClick={handleSend}
-                  className="bg-[#f77534] text-white px-5 py-2 rounded-lg hover:bg-orange-500 transition font-semibold"
-                >
-                  Enviar
-                </button>
+              {/* Input de mensaje */}
+              <div className="px-4 py-3 bg-white border-t border-gray-200">
+                <div className="flex items-end gap-2 max-w-4xl mx-auto">
+                  <textarea
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Escribe tu mensaje..."
+                    className="flex-1 resize-none p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 h-12 text-sm"
+                    rows="1"
+                  />
+                  <button
+                    onClick={handleSend}
+                    className="bg-[#f77534] text-white px-4 sm:px-5 py-3 rounded-lg hover:bg-orange-500 transition font-semibold text-sm whitespace-nowrap"
+                  >
+                    <span className="hidden sm:inline">Enviar</span>
+                    <FaPaperPlane className="sm:hidden" />
+                  </button>
+                </div>
               </div>
             </div>
           </>
+        ) : (
+          // Estado vacío cuando no hay chat seleccionado
+          <div className="flex-1 flex items-center justify-center bg-white">
+            <div className="text-center px-4">
+              <button
+                onClick={() => setIsChatListOpen(true)}
+                className="lg:hidden mb-4 bg-[#f77534] text-white px-4 py-2 rounded-lg hover:bg-orange-500 transition font-semibold"
+              >
+                Abrir navegación
+              </button>
+              <div className="text-gray-500">
+                <FaPaperPlane className="mx-auto text-4xl mb-4 text-gray-300" />
+                <p className="text-lg font-medium">Selecciona una conversación</p>
+                <p className="text-sm mt-2">Elige un chat de la lista para comenzar a conversar</p>
+              </div>
+            </div>
+          </div>
         )}
       </main>
     </div>
