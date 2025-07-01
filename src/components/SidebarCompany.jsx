@@ -33,7 +33,7 @@ export default function SidebarCompany() {
   const menuItems = [
     { icon: <FaHome />, label: "Home", path: "/company/home" },
     { icon: <FaDog />, label: "Doggos", path: "/company/doggos" },
-    { icon: <FaHeart />, label: "Doggos", path: "/company/matches" },
+    { icon: <FaHeart />, label: "Matches", path: "/company/matches" },
     { icon: <FaEnvelope />, label: "Mensajes", path: "/company/messages" },
     { icon: <FaChartBar />, label: "Estadísticas", path: "/company/statistics" },
     { icon: <FaCalendarAlt />, label: "Calendario", path: "/company/calendar" },
