@@ -60,6 +60,20 @@ const handleSubmit = async (e) => {
     return;
   }
 
+  if (!/^\d{9}$/.test(form.telefono)) {
+    setError("El número de celular debe tener exactamente 9 dígitos.");
+    setLoading(false);
+    return;
+  }
+
+  if (!/^\d{8}$/.test(form.dni)) {
+    setError("El DNI debe tener exactamente 8 dígitos.");
+    setLoading(false);
+    return;
+  }
+  
+  
+
   try {
     let imagenPerfilId = defaultProfileImageId; // <--- DECLARACIÓN INICIAL
 
@@ -169,9 +183,13 @@ setUser({
                 name="dni"
                 type="text"
                 value={form.dni}
-                onChange={handleChange}
+                onChange={(e) => {
+                  const valor = e.target.value.replace(/\D/g, "").slice(0, 8); // solo números, máx 8
+                  setForm((prev) => ({ ...prev, dni: valor }));
+                  setError("");
+                }}
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                placeholder="Ingresa tu DNI"
+                placeholder="Ej: 12345678"
                 required
               />
             </div>
@@ -196,13 +214,19 @@ setUser({
                 Celular
               </label>
               <input
-                name="telefono"
-                type="text"
-                value={form.telefono}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                placeholder="+51"
-              />
+              name="telefono"
+              type="text"
+              value={form.telefono}
+              onChange={(e) => {
+                // solo permite números y hasta 9 dígitos
+                const valor = e.target.value.replace(/\D/g, "").slice(0, 9);
+                setForm((prev) => ({ ...prev, telefono: valor }));
+                setError("");
+              }}
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+              placeholder="Ej: 987654321"
+              required
+            />            
             </div>
 
             <div>

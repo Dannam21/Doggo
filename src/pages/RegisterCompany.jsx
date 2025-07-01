@@ -24,15 +24,35 @@ const RegisterCompany = () => {
     e.preventDefault();
     setError("");
 
-    if (contrasena !== confirmPassword) {
-      setError("Las contraseñas no coinciden.");
-      return;
-    }
-
     if (!direccion || !latitud || !longitud) {
       setError("Selecciona una ubicación en el mapa.");
       return;
     }
+
+    if (!/^\d{11}$/.test(ruc)) {
+      setError("El RUC debe tener exactamente 11 dígitos.");
+      return;
+    }
+    if (!/^\d{9}$/.test(telefono)) {
+      setError("El número de celular debe tener exactamente 9 dígitos.");
+      return;
+    }
+        
+    const contraseñaSegura = (password) => {
+      const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+      return regex.test(password);
+    };
+    
+    if (!contraseñaSegura(contrasena)) {
+      setError("La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.");
+      return;
+    }
+    
+    if (contrasena !== confirmPassword) {
+      setError("Las contraseñas no coinciden.");
+      return;
+    }    
+
 
     const payload = {
       nombre: nombre.trim(),
@@ -107,7 +127,11 @@ const RegisterCompany = () => {
                 type="text"
                 id="ruc"
                 value={ruc}
-                onChange={(e) => setRuc(e.target.value)}
+                onChange={(e) => {
+                  const valor = e.target.value.replace(/\D/g, "").slice(0, 11);
+                  setRuc(valor);
+                  setError("");
+                }}
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm"
                 placeholder="Número de RUC"
                 required
@@ -139,9 +163,13 @@ const RegisterCompany = () => {
                 type="tel"
                 id="telefono"
                 value={telefono}
-                onChange={(e) => setTelefono(e.target.value)}
+                onChange={(e) => {
+                  const valor = e.target.value.replace(/\D/g, "").slice(0, 9);
+                  setTelefono(valor);
+                  setError("");
+                }}
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm"
-                placeholder="+51987654321"
+                placeholder="Ej: 987654321"
                 required
               />
             </div>
@@ -200,6 +228,9 @@ const RegisterCompany = () => {
                 placeholder="••••••••"
                 required
               />
+              <p className="text-xs text-gray-500 mt-1">
+                La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula, un número y un carácter especial.
+              </p>
             </div>
 
             {/* Confirmar contraseña */}
