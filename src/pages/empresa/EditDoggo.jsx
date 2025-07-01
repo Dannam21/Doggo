@@ -60,7 +60,7 @@ export default function EditDoggo() {
     setLoading(true);
     setError(null);
 
-    fetch(`http://localhost:8000/mascotas/albergue/${albergueId}`, {
+    fetch(`http://34.195.195.173:8000/mascotas/albergue/${albergueId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -77,7 +77,7 @@ export default function EditDoggo() {
           especie: m.especie,
           descripcion: m.descripcion || "",
           etiquetas: m.etiquetas || [],
-          imageUrl: `http://localhost:8000/imagenes/${m.imagen_id}`,
+          imageUrl: `http://34.195.195.173:8000/imagenes/${m.imagen_id}`,
         }));
         setDogs(enriched);
       })
@@ -102,7 +102,7 @@ export default function EditDoggo() {
     e.preventDefault();
     if (!editDog || !token) return;
 
-    fetch(`http://localhost:8000/mascotas/${editDog.id}`, {
+    fetch(`http://34.195.195.173:8000/mascotas/${editDog.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

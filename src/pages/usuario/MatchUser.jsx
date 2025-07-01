@@ -22,7 +22,7 @@ export default function MatchUser() {
 
     try {
       // 1️⃣ Registrar en matches
-      const matchRes = await fetch("http://localhost:8000/matches/", {
+      const matchRes = await fetch("http://34.195.195.173:8000/matches/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -37,7 +37,7 @@ export default function MatchUser() {
       console.log("✅ Match registrado correctamente");
 
       // 2️⃣ Registrar en match_totales
-      const totalRes = await fetch("http://localhost:8000/match_totales/", {
+      const totalRes = await fetch("http://34.195.195.173:8000/match_totales/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -58,14 +58,14 @@ export default function MatchUser() {
 
     try {
       // 3️⃣ Obtener datos de la mascota (para el albergue_id, si no lo tenías)
-      const res = await fetch(`http://localhost:8000/usuario/mascotas/${dog.id}`);
+      const res = await fetch(`http://34.195.195.173:8000/usuario/mascotas/${dog.id}`);
       if (!res.ok) throw new Error("No se encontró la mascota");
       const mascota = await res.json();
       const albergueId = mascota.albergue_id;
 
       // 4️⃣ Abrir WebSocket y enviar mensajes
       const socket = new WebSocket(
-        `ws://localhost:8000/ws/chat/adoptante/${user.adoptante_id}`
+        `ws://34.195.195.173:8000/ws/chat/adoptante/${user.adoptante_id}`
       );
 
       socket.onopen = () => {
@@ -92,7 +92,7 @@ export default function MatchUser() {
                 tipo: "card_perro",
                 nombre: dog.nombre,
                 descripcion: dog.descripcion,
-                imagen: `http://localhost:8000/imagenes/${dog.imagen_id}`,
+                imagen: `http://34.195.195.173:8000/imagenes/${dog.imagen_id}`,
               }),
             };
             socket.send(JSON.stringify(mensajeCard));
@@ -131,7 +131,7 @@ export default function MatchUser() {
           <h1 className="text-2xl font-bold mb-4">¡Es un Match!</h1>
           <div className="bg-white rounded-full overflow-hidden w-40 h-40 mx-auto mb-4">
             <img
-              src={`http://localhost:8000/imagenes/${dog.imagen_id}`}
+              src={`http://34.195.195.173:8000/imagenes/${dog.imagen_id}`}
               alt={dog.nombre}
               className="w-full h-full object-cover"
             />

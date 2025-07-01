@@ -14,7 +14,7 @@ export default function UserCalendar() {
     const fecha = date.toISOString().split("T")[0];
     try {
       const res = await fetch(
-        `http://localhost:8000/calendario/dia/${fecha}?adoptante_id=${adoptanteId}`
+        `http://34.195.195.173:8000/calendario/dia/${fecha}?adoptante_id=${adoptanteId}`
       );
       const data = await res.json();
 

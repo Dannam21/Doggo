@@ -13,7 +13,7 @@ export default function CompanyMatches() {
       try {
         const token = localStorage.getItem("user")?.token;
         const res = await fetch(
-          `http://localhost:8000/matches/albergue/${user.albergue_id}`,
+          `http://34.195.195.173:8000/matches/albergue/${user.albergue_id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) throw new Error("Failed to fetch matches");
@@ -40,7 +40,7 @@ export default function CompanyMatches() {
     try {
       const token = localStorage.getItem("user")?.token;
       const res = await fetch(
-        `http://localhost:8000/matches/${m.adoptante.id}/${m.mascota.id}/complete`,
+        `http://34.195.195.173:8000/matches/${m.adoptante.id}/${m.mascota.id}/complete`,
         { method: "POST", headers: { Authorization: `Bearer ${token}` } }
       );
       if (!res.ok) throw new Error();
@@ -56,7 +56,7 @@ export default function CompanyMatches() {
     try {
       const token = localStorage.getItem("user")?.token;
       const res = await fetch(
-        `http://localhost:8000/matches/${m.adoptante.id}/${m.mascota.id}/deny`,
+        `http://34.195.195.173:8000/matches/${m.adoptante.id}/${m.mascota.id}/deny`,
         { method: "POST", headers: { Authorization: `Bearer ${token}` } }
       );
       if (!res.ok) throw new Error();
@@ -88,13 +88,13 @@ export default function CompanyMatches() {
               >
                 <div className="flex flex-col xs:flex-row sm:flex-row items-center justify-center gap-4 mb-4">
                   <img
-                    src={`http://localhost:8000/imagenesProfile/${m.adoptante.imagen_perfil_id}`}
+                    src={`http://34.195.195.173:8000/imagenesProfile/${m.adoptante.imagen_perfil_id}`}
                     alt={m.adoptante.nombre}
                     className="w-24 h-24 object-cover rounded-md"
                   />
                   <FaHeart className="text-red-500 text-3xl" />
                   <img
-                    src={`http://localhost:8000/imagenes/${m.mascota.imagen_id}`}
+                    src={`http://34.195.195.173:8000/imagenes/${m.mascota.imagen_id}`}
                     alt={m.mascota.nombre}
                     className="w-24 h-24 object-cover rounded-md"
                   />

@@ -25,12 +25,12 @@ const Donations = () => {
         return;
       }
       try {
-        const res = await fetch(`http://localhost:8000/albergue/${albergueId}`);
+        const res = await fetch(`http://34.195.195.173:8000/albergue/${albergueId}`);
         if (res.ok) {
           const data = await res.json();
 
           if (data.qr_imagen_id) {
-            setQrUrl(`http://localhost:8000/imagenes/${data.qr_imagen_id}`);
+            setQrUrl(`http://34.195.195.173:8000/imagenes/${data.qr_imagen_id}`);
 
           }
         } else {
