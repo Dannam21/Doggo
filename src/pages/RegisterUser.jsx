@@ -42,6 +42,18 @@ const handleSubmit = async (e) => {
   setError("");
   setLoading(true);
 
+  const contraseñaSegura = (password) => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    return regex.test(password);
+  };
+
+  if (!contraseñaSegura(form.contrasena)) {
+    setError("La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.");
+    setLoading(false);
+    return;
+  }
+  
+
   if (form.contrasena !== form.confirmarContrasena) {
     setError("Las contraseñas no coinciden.");
     setLoading(false);
@@ -206,6 +218,9 @@ setUser({
                 placeholder="••••••••"
                 required
               />
+              <p className="text-xs text-gray-500 mt-1">
+                La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula, un número y un carácter especial.
+              </p>
             </div>
 
             <div>
