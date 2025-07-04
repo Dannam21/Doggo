@@ -35,36 +35,42 @@ export default function CompanyMatches() {
       year: "numeric",
     });
 
-  const handleAdopt = async (m) => {
-    if (!confirm(`¿Confirmas completar la adopción de ${m.mascota.nombre}?`)) return;
-    try {
-      const token = localStorage.getItem("user")?.token;
+const handleAdopt = async (m) => {
+  if (!confirm(`¿Confirmas completar la adopción de ${m.mascota.nombre}?`)) return;
 
-      const res = await fetch(
-        `http://localhost:8000/matches/${m.adoptante.id}/${m.mascota.id}/complete`,
-        { method: "POST", headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (!res.ok) throw new Error();
+  try {
+    const token = JSON.parse(localStorage.getItem("user"))?.token;
 
-      const patchRes = await fetch(
-        `http://localhost:8000/mascotas/${m.mascota.id}/adoptar`,
-        {
-          method: "PATCH",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (!patchRes.ok) {
-        const err = await patchRes.json();
-        throw new Error(err.detail || "Error al marcar como adoptado");
+    if (!token) throw new Error("Token no encontrado");
+
+    const res = await fetch(
+      `http://localhost:8000/matches/${m.adoptante.id}/${m.mascota.id}/complete`,
+      { method: "POST", headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!res.ok) throw new Error("Error completando match");
+
+    const patchRes = await fetch(
+      `http://localhost:8000/mascotas/${m.mascota.id}/adoptar`,
+      {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
       }
-
-      alert("Adopción completada");
-      setMatches(matches.filter(x => !(x.adoptante.id === m.adoptante.id && x.mascota.id === m.mascota.id)));
-    } catch (err) {
-      console.error(err);
-      alert("Error al completar adopción");
+    );
+    if (!patchRes.ok) {
+      const err = await patchRes.json();
+      throw new Error(err.detail || "Error al marcar como adoptado");
     }
-  };
+
+    alert("Adopción completada");
+    setMatches(matches.filter(
+      x => !(x.adoptante.id === m.adoptante.id && x.mascota.id === m.mascota.id)
+    ));
+  } catch (err) {
+    console.error(err);
+    alert("Error al completar adopción");
+  }
+};
+
 
 
   const handleDeny = async (m) => {

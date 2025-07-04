@@ -15,12 +15,12 @@ const RegisterUser = () => {
     telefono: "",
     contrasena: "",
     confirmarContrasena: "",
-    imagenFile: null, 
+    imagenFile: null,
   });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); 
+  const [errores, setErrores] = useState({});
+  const [loading, setLoading] = useState(false);
 
-  const defaultProfileImageId = 1; 
+  const defaultProfileImageId = 1;
   const [mostrarContrasena, setMostrarContrasena] = useState(false);
 
   const handleChange = (e) => {
@@ -28,130 +28,105 @@ const RegisterUser = () => {
       ...prev,
       [e.target.name]: e.target.value,
     }));
-    setError("");
+    setErrores({});
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0] || null;
     setForm((prev) => ({ ...prev, imagenFile: file }));
-    setError("");
+    setErrores({});
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrores({});
+    setLoading(true);
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
-  setLoading(true);
+    const contraseñaSegura = (password) => /^.{7,}$/.test(password);
 
-  const contraseñaSegura = (password) => {
-    const regex = /^(?=.*\d)[A-Za-z\d]{6,}$/;
-    return regex.test(password);
-  };
-
-  if (!contraseñaSegura(form.contrasena)) {
-    setError("La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.");
-    setLoading(false);
-    return;
-  }
-  
-
-  if (form.contrasena !== form.confirmarContrasena) {
-    setError("Las contraseñas no coinciden.");
-    setLoading(false);
-    return;
-  }
-
-  if (!/^\d{9}$/.test(form.telefono)) {
-    setError("El número de celular debe tener exactamente 9 dígitos.");
-    setLoading(false);
-    return;
-  }
-
-  if (!/^\d{8}$/.test(form.dni)) {
-    setError("El DNI debe tener exactamente 8 dígitos.");
-    setLoading(false);
-    return;
-  }
-  
-  
-
-  try {
-    let imagenPerfilId = defaultProfileImageId; // <--- DECLARACIÓN INICIAL
-
-    if (form.imagenFile) {
-      // Si el usuario subió una imagen, la subimos primero
-      const imagePayload = new FormData();
-      imagePayload.append("image", form.imagenFile);
-
-      const imgRes = await fetch("http://localhost:8000/imagenesProfile", {
-        method: "POST",
-        body: imagePayload,
-      });
-
-      if (!imgRes.ok) {
-        const errJson = await imgRes.json();
-        console.error("Error al subir la imagen:", errJson);
-        throw new Error(errJson.detail || "Error al subir la imagen de perfil.");
-      }
-      const imgData = await imgRes.json();
-      console.log("Datos de la imagen subida:", imgData);
-      imagenPerfilId = imgData.id; // <--- ASIGNACIÓN A LA VARIABLE YA DECLARADA
-    }else {
-      // Si no subió imagen, cargamos la predeterminada desde /public/assets/avatar-default.png
-      const respuesta = await fetch("../../public/avatar-default.png"); // carga la imagen local
-      const blob = await respuesta.blob();
-      const archivo = new File([blob], "avatar-default.png", { type: blob.type });
-    
-      const imagePayload = new FormData();
-      imagePayload.append("image", archivo);
-    
-      const imgRes = await fetch("http://localhost:8000/imagenesProfile", {
-        method: "POST",
-        body: imagePayload,
-      });
-    
-      if (!imgRes.ok) {
-        const errJson = await imgRes.json();
-        console.error("Error al subir imagen por defecto:", errJson);
-        throw new Error(errJson.detail || "Error al subir imagen predeterminada.");
-      }
-    
-      const imgData = await imgRes.json();
-      console.log("Avatar por defecto asignado:", imgData);
-      imagenPerfilId = imgData.id;
+    if (!contraseñaSegura(form.contrasena)) {
+      setErrores({ contrasena: "La contraseña debe tener al menos 7 caracteres." });
+      setLoading(false);
+      return;
     }
 
-    // AHORA ESTA LÍNEA DEBERÍA ESTAR FUERA DEL BLOQUE IF PARA ACCEDER A imagenPerfilId
-    const registerPayload = {
-      nombre: form.nombre,
-      apellido: form.apellido,
-      dni: form.dni,
-      correo: form.correo,
-      telefono: form.telefono,
-      contrasena: form.contrasena,
-      imagen_perfil_id: imagenPerfilId, // <--- USO DE LA VARIABLE
-    };
+    if (form.contrasena !== form.confirmarContrasena) {
+      setErrores({ confirmarContrasena: "Las contraseñas no coinciden." });
+      setLoading(false);
+      return;
+    }
 
-    console.log("Payload de registro del adoptante:", registerPayload); // Esto también es útil
+    if (!/^\d{9}$/.test(form.telefono)) {
+      setErrores({ telefono: "El número de celular debe tener exactamente 9 dígitos." });
+      setLoading(false);
+      return;
+    }
 
-    // Guardamos los datos en el contexto sin registrar todavía
-setUser({
-  nombre: form.nombre,
-  apellido: form.apellido,
-  dni: form.dni,
-  correo: form.correo,
-  telefono: form.telefono,
-  contrasena: form.contrasena,
-  imagen_perfil_id: imagenPerfilId,
-});
+    if (!/^\d{8}$/.test(form.dni)) {
+      setErrores({ dni: "El DNI debe tener exactamente 8 dígitos." });
+      setLoading(false);
+      return;
+    }
 
-    navigate("/cuestionario");
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      let imagenPerfilId = defaultProfileImageId;
+
+      if (form.imagenFile) {
+        const imagePayload = new FormData();
+        imagePayload.append("image", form.imagenFile);
+
+        const imgRes = await fetch("http://localhost:8000/imagenesProfile", {
+          method: "POST",
+          body: imagePayload,
+        });
+
+        if (!imgRes.ok) {
+          const errJson = await imgRes.json();
+          throw new Error(errJson.detail || "Error al subir la imagen de perfil.");
+        }
+
+        const imgData = await imgRes.json();
+        imagenPerfilId = imgData.id;
+      } else {
+        const respuesta = await fetch("../../public/avatar-default.png");
+        const blob = await respuesta.blob();
+        const archivo = new File([blob], "avatar-default.png", { type: blob.type });
+
+        const imagePayload = new FormData();
+        imagePayload.append("image", archivo);
+
+        const imgRes = await fetch("http://localhost:8000/imagenesProfile", {
+          method: "POST",
+          body: imagePayload,
+        });
+
+        if (!imgRes.ok) {
+          const errJson = await imgRes.json();
+          throw new Error(errJson.detail || "Error al subir imagen predeterminada.");
+        }
+
+        const imgData = await imgRes.json();
+        imagenPerfilId = imgData.id;
+      }
+
+      const registerPayload = {
+        nombre: form.nombre,
+        apellido: form.apellido,
+        dni: form.dni,
+        correo: form.correo,
+        telefono: form.telefono,
+        contrasena: form.contrasena,
+        imagen_perfil_id: imagenPerfilId,
+      };
+
+      setUser(registerPayload);
+      navigate("/cuestionario");
+    } catch (err) {
+      setErrores({ general: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main>
@@ -161,12 +136,6 @@ setUser({
           <h2 className="text-3xl font-bold text-center mb-6 text-black">
             Regístrate como Usuario
           </h2>
-
-          {error && (
-            <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4">
-              {error}
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -182,6 +151,7 @@ setUser({
                 placeholder="Ingresa tu nombre"
                 required
               />
+              {errores.nombre && <p className="text-sm text-red-600 mt-1">{errores.nombre}</p>}
             </div>
 
             <div>
@@ -197,6 +167,7 @@ setUser({
                 placeholder="Ingresa tu apellido"
                 required
               />
+              {errores.apellido && <p className="text-sm text-red-600 mt-1">{errores.apellido}</p>}
             </div>
 
             <div>
@@ -208,14 +179,15 @@ setUser({
                 type="text"
                 value={form.dni}
                 onChange={(e) => {
-                  const valor = e.target.value.replace(/\D/g, "").slice(0, 8); // solo números, máx 8
+                  const valor = e.target.value.replace(/\D/g, "").slice(0, 8);
                   setForm((prev) => ({ ...prev, dni: valor }));
-                  setError("");
+                  setErrores({});
                 }}
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 placeholder="Ej: 12345678"
                 required
               />
+              {errores.dni && <p className="text-sm text-red-600 mt-1">{errores.dni}</p>}
             </div>
 
             <div>
@@ -231,6 +203,7 @@ setUser({
                 placeholder="Ingresa tu correo"
                 required
               />
+              {errores.correo && <p className="text-sm text-red-600 mt-1">{errores.correo}</p>}
             </div>
 
             <div>
@@ -238,19 +211,19 @@ setUser({
                 Celular <span className="text-red-500">*</span>
               </label>
               <input
-              name="telefono"
-              type="text"
-              value={form.telefono}
-              onChange={(e) => {
-                // solo permite números y hasta 9 dígitos
-                const valor = e.target.value.replace(/\D/g, "").slice(0, 9);
-                setForm((prev) => ({ ...prev, telefono: valor }));
-                setError("");
-              }}
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-              placeholder="Ej: 987654321"
-              required
-            />            
+                name="telefono"
+                type="text"
+                value={form.telefono}
+                onChange={(e) => {
+                  const valor = e.target.value.replace(/\D/g, "").slice(0, 9);
+                  setForm((prev) => ({ ...prev, telefono: valor }));
+                  setErrores({});
+                }}
+                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                placeholder="Ej: 987654321"
+                required
+              />
+              {errores.telefono && <p className="text-sm text-red-600 mt-1">{errores.telefono}</p>}
             </div>
 
             <div>
@@ -275,10 +248,7 @@ setUser({
                   {mostrarContrasena ? "Ocultar" : "Mostrar"}
                 </button>
               </div>
-
-              <p className="text-xs text-gray-500 mt-1">
-                La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula, un número y un carácter especial.
-              </p>
+              {errores.contrasena && <p className="text-sm text-red-600 mt-1">{errores.contrasena}</p>}
             </div>
 
             <div>
@@ -294,9 +264,9 @@ setUser({
                 placeholder="••••••••"
                 required
               />
+              {errores.confirmarContrasena && <p className="text-sm text-red-600 mt-1">{errores.confirmarContrasena}</p>}
             </div>
 
-            {/* Campo para subir imagen de perfil */}
             <div className="flex flex-col items-center">
               <label htmlFor="imagenFile" className="block text-sm font-medium text-gray-700 mb-2">
                 Imagen de Perfil (OPCIONAL)
@@ -307,7 +277,7 @@ setUser({
                 name="imagenFile"
                 accept="image/*"
                 onChange={handleFileChange}
-                className="hidden" // Ocultamos el input original para estilizarlo
+                className="hidden"
               />
               <label
                 htmlFor="imagenFile"
@@ -337,21 +307,25 @@ setUser({
             <button
               type="submit"
               className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-md transition"
-              disabled={loading} // Deshabilitar el botón mientras se procesa
+              disabled={loading}
             >
               {loading ? "Registrando..." : "Registrar"}
             </button>
+
+            {errores.general && (
+              <p className="text-sm text-red-600 text-center mt-2">{errores.general}</p>
+            )}
           </form>
 
           <p className="mt-4 text-sm text-center text-gray-600">
-            ¿Eres Albergue?{" "}
+            ¿Eres Albergue?{' '}
             <Link to="/register/company" className="text-orange-500 hover:underline">
               Regístrate
             </Link>
           </p>
 
           <p className="mt-2 text-sm text-center text-gray-600">
-            ¿Ya tienes cuenta?{" "}
+            ¿Ya tienes cuenta?{' '}
             <Link to="/login" className="text-orange-500 hover:underline">
               Inicia sesión
             </Link>
