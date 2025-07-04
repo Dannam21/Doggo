@@ -175,7 +175,7 @@ const Adopta = () => {
                     </div>
                     <button
                       onClick={() => navigate(`/detail/${pet.id}`)}
-                      className="mt-3 text-sm bg-white text-white hover:bg-orange-100 font-semibold py-1 px-4 rounded transition"
+                      className="mt-3 text-sm bg-[#f77534] text-white hover:bg-orange-100 font-semibold py-1 px-4 rounded transition"
                     >
                       Más info
                     </button>

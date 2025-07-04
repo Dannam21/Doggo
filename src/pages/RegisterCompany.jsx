@@ -39,7 +39,7 @@ const RegisterCompany = () => {
     }
         
     const contraseñaSegura = (password) => {
-      const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+      const regex = /^(?=.*\d)[A-Za-z\d]{6,}$/;
       return regex.test(password);
     };
     
@@ -105,7 +105,7 @@ const RegisterCompany = () => {
             {/* Nombre */}
             <div>
               <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
-                Nombre del refugio o empresa
+                Nombre del refugio o empresa <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -121,7 +121,7 @@ const RegisterCompany = () => {
             {/* RUC */}
             <div>
               <label htmlFor="ruc" className="block text-sm font-medium text-gray-700">
-                RUC
+                RUC <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -141,7 +141,7 @@ const RegisterCompany = () => {
             {/* Correo */}
             <div>
               <label htmlFor="correo" className="block text-sm font-medium text-gray-700">
-                Correo de contacto
+                Correo de contacto <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
@@ -157,7 +157,7 @@ const RegisterCompany = () => {
             {/* Teléfono */}
             <div>
               <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
-                Celular (teléfono)
+                Celular (teléfono) <span className="text-red-500">*</span>
               </label>
               <input
                 type="tel"
@@ -177,7 +177,7 @@ const RegisterCompany = () => {
             {/* Ubicación en el mapa */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ubicación en el mapa
+                Ubicación en el mapa <span className="text-red-500">*</span>
               </label>
               <LocationPicker
                 setLatitud={setLatitud}
@@ -194,7 +194,9 @@ const RegisterCompany = () => {
             {/* Lat / Lng */}
             <div className="flex gap-4 mt-2">
               <div className="w-1/2">
-                <label className="text-xs font-medium">Latitud</label>
+                <label className="text-xs font-medium">
+                  Latitud <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   value={latitud || ""}
@@ -204,7 +206,9 @@ const RegisterCompany = () => {
               </div>
 
               <div className="w-1/2">
-                <label className="text-xs font-medium">Longitud</label>
+                <label className="text-xs font-medium">
+                  Longitud <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   value={longitud || ""}
@@ -217,7 +221,7 @@ const RegisterCompany = () => {
             {/* Contraseña */}
             <div>
               <label htmlFor="contrasena" className="block text-sm font-medium text-gray-700">
-                Contraseña
+                Contraseña <span className="text-red-500">*</span>
               </label>
               <input
                 type="password"
@@ -236,7 +240,7 @@ const RegisterCompany = () => {
             {/* Confirmar contraseña */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirmar contraseña
+                Confirmar contraseña <span className="text-red-500">*</span>
               </label>
               <input
                 type="password"

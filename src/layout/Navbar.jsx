@@ -36,12 +36,12 @@ const Navbar = () => {
         </Link>
 
         {/* Botón de hamburguesa */}
-        <button2
+        <button
           className="md:hidden text-2xl text-gray-700"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           ☰
-        </button2>
+        </button>
 
         {/* Opciones en escritorio */}
         <div className="hidden md:flex space-x-4 font-semibold items-center">
@@ -55,17 +55,17 @@ const Navbar = () => {
               </span>
               <button
                 onClick={handleLogout}
-                className="bg-sky-500 hover:bg-sky-700 text-white py-1 px-3 rounded"
+                className="bg-[#f77534] hover:bg-[#f77534] text-white py-1 px-3 rounded"
               >
                 Cerrar sesión
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="text-[#6366f1] hover:text-orange-500 transition">
+              <Link to="/login" className="text-black hover:text-orange-500 transition">
                 Iniciar sesión
               </Link>
-              <Link to="/register/user" className="text-[#6366f1] hover:text-orange-500 transition">
+              <Link to="/register/user" className="text-black hover:text-orange-500 transition">
                 Regístrate
               </Link>
             </>
@@ -93,10 +93,10 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link to="/login" className="text-[#6366f1] hover:text-orange-500 transition">
+              <Link to="/login" className="text-black hover:text-orange-500 transition">
                 Iniciar sesión
               </Link>
-              <Link to="/register/user" className="text-[#6366f1] hover:text-orange-500 transition">
+              <Link to="/register/user" className="text-black hover:text-orange-500 transition">
                 Regístrate
               </Link>
             </>

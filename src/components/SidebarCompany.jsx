@@ -24,11 +24,11 @@ export default function SidebarCompany() {
   const isActive = (path) => location.pathname === path;
 
   const handleLogout = () => {
-    // ✅ Cambiado: ya no borra el token
-    setUser({ name: null, email: null, albergue_id: null, token: localStorage.getItem("token") });
-    // localStorage.removeItem("user");  // ❌ Comentado para no borrar el token
+    setUser({ name: null, email: null, token: null, adoptante_id: null });
+    localStorage.removeItem("user");
     navigate("/login");
   };
+
 
   const menuItems = [
     { icon: <FaHome />, label: "Home", path: "/company/home" },
@@ -87,7 +87,7 @@ export default function SidebarCompany() {
         <div className="px-6 py-4 mt-auto">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 w-full bg-red-500 hover:bg-red-700 text-white py-2 px-3 rounded transition"
+            className="flex items-center bg-[#f77534] gap-2 w-full hover:bg-red-700 text-white py-2 px-3 rounded transition"
           >
             <FaSignOutAlt /> Cerrar sesión
           </button>

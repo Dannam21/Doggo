@@ -21,6 +21,7 @@ const RegisterUser = () => {
   const [loading, setLoading] = useState(false); 
 
   const defaultProfileImageId = 1; 
+  const [mostrarContrasena, setMostrarContrasena] = useState(false);
 
   const handleChange = (e) => {
     setForm((prev) => ({
@@ -43,7 +44,7 @@ const handleSubmit = async (e) => {
   setLoading(true);
 
   const contraseñaSegura = (password) => {
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    const regex = /^(?=.*\d)[A-Za-z\d]{6,}$/;
     return regex.test(password);
   };
 
@@ -95,6 +96,29 @@ const handleSubmit = async (e) => {
       const imgData = await imgRes.json();
       console.log("Datos de la imagen subida:", imgData);
       imagenPerfilId = imgData.id; // <--- ASIGNACIÓN A LA VARIABLE YA DECLARADA
+    }else {
+      // Si no subió imagen, cargamos la predeterminada desde /public/assets/avatar-default.png
+      const respuesta = await fetch("../../public/avatar-default.png"); // carga la imagen local
+      const blob = await respuesta.blob();
+      const archivo = new File([blob], "avatar-default.png", { type: blob.type });
+    
+      const imagePayload = new FormData();
+      imagePayload.append("image", archivo);
+    
+      const imgRes = await fetch("http://localhost:8000/imagenesProfile", {
+        method: "POST",
+        body: imagePayload,
+      });
+    
+      if (!imgRes.ok) {
+        const errJson = await imgRes.json();
+        console.error("Error al subir imagen por defecto:", errJson);
+        throw new Error(errJson.detail || "Error al subir imagen predeterminada.");
+      }
+    
+      const imgData = await imgRes.json();
+      console.log("Avatar por defecto asignado:", imgData);
+      imagenPerfilId = imgData.id;
     }
 
     // AHORA ESTA LÍNEA DEBERÍA ESTAR FUERA DEL BLOQUE IF PARA ACCEDER A imagenPerfilId
@@ -147,7 +171,7 @@ setUser({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
-                Nombres
+                Nombres <span className="text-red-500">*</span>
               </label>
               <input
                 name="nombre"
@@ -162,7 +186,7 @@ setUser({
 
             <div>
               <label htmlFor="apellido" className="block text-sm font-medium text-gray-700">
-                Apellidos
+                Apellidos <span className="text-red-500">*</span>
               </label>
               <input
                 name="apellido"
@@ -177,7 +201,7 @@ setUser({
 
             <div>
               <label htmlFor="dni" className="block text-sm font-medium text-gray-700">
-                DNI
+                DNI <span className="text-red-500">*</span>
               </label>
               <input
                 name="dni"
@@ -196,7 +220,7 @@ setUser({
 
             <div>
               <label htmlFor="correo" className="block text-sm font-medium text-gray-700">
-                Correo electrónico
+                Correo electrónico <span className="text-red-500">*</span>
               </label>
               <input
                 name="correo"
@@ -211,7 +235,7 @@ setUser({
 
             <div>
               <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
-                Celular
+                Celular <span className="text-red-500">*</span>
               </label>
               <input
               name="telefono"
@@ -231,17 +255,27 @@ setUser({
 
             <div>
               <label htmlFor="contrasena" className="block text-sm font-medium text-gray-700">
-                Contraseña
+                Contraseña <span className="text-red-500">*</span>
               </label>
-              <input
-                name="contrasena"
-                type="password"
-                value={form.contrasena}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                placeholder="••••••••"
-                required
-              />
+              <div className="relative">
+                <input
+                  name="contrasena"
+                  type={mostrarContrasena ? "text" : "password"}
+                  value={form.contrasena}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setMostrarContrasena(!mostrarContrasena)}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-sm text-gray-600"
+                >
+                  {mostrarContrasena ? "Ocultar" : "Mostrar"}
+                </button>
+              </div>
+
               <p className="text-xs text-gray-500 mt-1">
                 La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula, un número y un carácter especial.
               </p>
@@ -249,7 +283,7 @@ setUser({
 
             <div>
               <label htmlFor="confirmarContrasena" className="block text-sm font-medium text-gray-700">
-                Confirmar contraseña
+                Confirmar contraseña <span className="text-red-500">*</span>
               </label>
               <input
                 name="confirmarContrasena"
@@ -265,7 +299,7 @@ setUser({
             {/* Campo para subir imagen de perfil */}
             <div className="flex flex-col items-center">
               <label htmlFor="imagenFile" className="block text-sm font-medium text-gray-700 mb-2">
-                Imagen de Perfil (opcional)
+                Imagen de Perfil (OPCIONAL)
               </label>
               <input
                 type="file"

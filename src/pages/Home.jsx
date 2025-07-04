@@ -51,14 +51,14 @@ export default function Home() {
                 window.scrollTo({ top: y, behavior: "smooth" });
               }
             }}
-            className="px-8 py-2 bg-orange-400 text-white rounded-full font-bold hover:bg-orange-500 transition text-2xl mr-4"
+            className="px-8 py-3 bg-[#f77534] text-white rounded-2xl font-bold hover:bg-orange-500 transition text-xl mr-4"
           >
             Mascotas
           </button>
 
           <button
             onClick={handleAdoptaClick}
-            className="px-6 py-2 bg-orange-400 text-white rounded-full font-bold hover:bg-orange-500 transition"
+            className="px-8 py-3 bg-[#f77534] text-white rounded-2xl font-bold hover:bg-orange-500 transition text-xl"
           >
             Adopta
           </button>

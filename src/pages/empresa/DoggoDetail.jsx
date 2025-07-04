@@ -45,30 +45,29 @@ export default function DoggoDetail() {
   return (
     <>
       <Navbar />
-      <div className="bg-orange-50 min-h-screen pt-8 px-4">
-        <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-md overflow-hidden flex flex-col md:flex-row gap-6 p-4 md:p-6">
+      <div className="bg-orange-50 min-h-screen pt-8">
+        <div className="container mx-auto p-6 flex flex-col md:flex-row bg-white rounded-xl shadow-lg overflow-hidden">
           {/* Imagen */}
-          <div className="w-full md:w-1/2 aspect-video md:aspect-auto">
+          <div className="md:w-1/2 w-full h-64 md:h-auto">
             <img
               src={`http://localhost:8000/imagenes/${dog.imagen_id}`}
               alt={dog.nombre}
-              className="w-full h-full object-cover rounded-xl"
+              className="w-full h-full object-cover object-center"
             />
           </div>
 
           {/* Info */}
-          <div className="w-full md:w-1/2 flex flex-col justify-between">
+          <div className="md:w-1/2 w-full p-8 flex flex-col justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">{dog.nombre}</h2>
-              <p className="text-gray-700 mb-1">
-              <span className="font-semibold">Edad:</span> {dog.edad_valor} {dog.edad_unidad}
-
+              <h2 className="text-3xl font-bold mb-4">{dog.nombre}</h2>
+              <p className="text-gray-700 mb-2">
+                <span className="font-semibold">Edad:</span> {dog.edad_valor} {dog.edad_unidad}
               </p>
-              <p className="text-gray-700 mb-3">
+              <p className="text-gray-700 mb-4">
                 <span className="font-semibold">Tamaño:</span> {dog.especie}
               </p>
               {dog.descripcion && (
-                <p className="text-gray-800 mb-4">{dog.descripcion}</p>
+                <p className="text-gray-800 mb-6 leading-relaxed">{dog.descripcion}</p>
               )}
 
               {/* Etiquetas */}
@@ -96,7 +95,12 @@ export default function DoggoDetail() {
               </button>
 
               <button
-                onClick={() => navigate("/donations", { state: { restoreIndex: fromIndex } })}
+                onClick={() => navigate("/donations", { 
+                  state: { 
+                    restoreIndex: fromIndex,
+                    albergueId: dog.albergue_id // 🔥 Pasar el albergue_id
+                  } 
+                })}
                 className="w-full sm:w-1/2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-lg transition"
               >
                 Donar

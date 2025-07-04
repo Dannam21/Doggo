@@ -21,24 +21,24 @@ const CompanyDoggos = () => {
 
         <div className="space-y-4 max-w-xl">
         <button
-            className="flex items-center gap-2 px-4 py-3 bg-[#FCFCFA] text-white rounded shadow text-left w-full hover:bg-[#f6f6f6]"
+            className="flex items-center gap-2 px-4 py-3 bg-[#f77534] text-white rounded shadow text-left w-full hover:bg-[#f77534]"
             onClick={() => navigate("/company/adddoggo")}
           >
-            <FaPlus className="text-[#FCFCFA]" /> Añadir Doggos
+            <FaPlus className="text-white" /> Añadir Doggos
           </button>
 
           <button
-            className="flex items-center gap-2 px-4 py-3 bg-[#FCFCFA] text-white rounded shadow text-left w-full hover:bg-[#f6f6f6]"
+            className="flex items-center gap-2 px-4 py-3 bg-[#f77534] text-white rounded shadow text-left w-full hover:bg-[#f77534]"
             onClick={() => navigate("/company/listdoggo")}
           >
-            <FaListUl className="text-[#FCFCFA]" /> Listado de Doggos
+            <FaListUl className="text-white" /> Listado de Doggos
           </button>
 
           <button
-            className="flex items-center gap-2 px-4 py-3 bg-[#FCFCFA] text-white rounded shadow text-left w-full hover:bg-[#f6f6f6]"
+            className="flex items-center gap-2 px-4 py-3 bg-[#f77534] text-white rounded shadow text-left w-full hover:bg-[#f77534]"
             onClick={() => navigate("/company/editdoggos")}
           >
-            <FaEdit className="text-[#FCFCFA]" /> Editar Doggos
+            <FaEdit className="text-white" /> Editar Doggos
           </button>
         </div>
       </div>
