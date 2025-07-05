@@ -2,15 +2,28 @@ import React, { useContext, useEffect, useState } from "react";
 import SidebarCompany from "../../components/SidebarCompany";
 import { UserContext } from "../../context/UserContext";
 import { useNavigate } from "react-router-dom";
+import {
+  ResponsiveContainer,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Bar,
+} from "recharts";
 
 export default function CompanyHome() {
   const { user } = useContext(UserContext);
   const [publicados, setPublicados] = useState(0);
   const [ultimasMascotas, setUltimasMascotas] = useState([]);
-  const [matchesCount, setMatchesCount] = useState(0);      
-  const [adoptionsCount, setAdoptionsCount] = useState(0);   
+  const [matchesCount, setMatchesCount] = useState(0);
+  const [adoptionsCount, setAdoptionsCount] = useState(0);
+  const [adopcionesPorMes, setAdopcionesPorMes] = useState([]);            // 🆕
   const navigate = useNavigate();
 
+  /* ------------------------------------------------ */
+  /* Helper para “hace X tiempo”                      */
+  /* ------------------------------------------------ */
   const formatTimeAgo = (timestamp) => {
     if (!timestamp) return "";
     const parts = timestamp.split(".");
@@ -37,10 +50,13 @@ export default function CompanyHome() {
     return `${diffYears} año${diffYears > 1 ? "s" : ""}`;
   };
 
-  // 1) Mascotas publicadas y últimas
+  /* ------------------------------------------------ */
+  /* 1) Mascotas publicadas y últimos registros       */
+  /* ------------------------------------------------ */
   useEffect(() => {
+    if (!user?.token || !user?.albergue_id) return;
+
     const fetchPublicados = async () => {
-      if (!user?.token || !user?.albergue_id) return;
       try {
         const res = await fetch(
           `http://34.195.195.173:8000/mascotas/albergue/${user.albergue_id}`,
@@ -54,6 +70,7 @@ export default function CompanyHome() {
         if (!res.ok) throw new Error();
         const mascotas = await res.json();
         setPublicados(mascotas.length);
+
         const ordenadas = [...mascotas].sort((a, b) => {
           const toIso = (raw) => {
             const [partFecha] = raw.split(".");
@@ -69,85 +86,115 @@ export default function CompanyHome() {
         setUltimasMascotas([]);
       }
     };
+
     fetchPublicados();
   }, [user]);
 
-  // 2) Matches pendientes y Adopciones logradas
+  /* ------------------------------------------------ */
+  /* 2) Matches pendientes + Adopciones               */
+  /*    y genera datos para el gráfico                */
+  /* ------------------------------------------------ */
   useEffect(() => {
     if (!user?.token || !user?.albergue_id) return;
     const headers = { Authorization: `Bearer ${user.token}` };
 
-    // Pending matches
-    fetch(`http://34.195.195.173:8000/matches/albergue/${user.albergue_id}`, { headers })
+    // pending matches
+    fetch(`http://34.195.195.173:8000/matches/albergue/${user.albergue_id}`, {
+      headers,
+    })
       .then((r) => (r.ok ? r.json() : []))
       .then((data) => setMatchesCount(data.length))
       .catch(() => setMatchesCount(0));
 
-    // Completed adoptions
-    fetch(`http://34.195.195.173:8000/adopciones/albergue/${user.albergue_id}`, { headers })
+    // completed adoptions
+    fetch(`http://34.195.195.173:8000/adopciones/albergue/${user.albergue_id}`, {
+      headers,
+    })
       .then((r) => (r.ok ? r.json() : []))
-      .then((data) => setAdoptionsCount(data.length))
-      .catch(() => setAdoptionsCount(0));
+      .then((data) => {
+        setAdoptionsCount(data.length);
+        setAdopcionesPorMes(buildSeries(data));           // 🆕
+      })
+      .catch(() => {
+        setAdoptionsCount(0);
+        setAdopcionesPorMes(buildSeries([]));             // 🆕 mantiene 12 meses en cero
+      });
   }, [user]);
 
+  /* ------------------------------------------------ */
+  /* Helper para agrupar adopciones por mes            */
+  /* ------------------------------------------------ */
+  const buildSeries = (adopciones) => {
+    const monthsEs = [
+      "Ene",
+      "Feb",
+      "Mar",
+      "Abr",
+      "May",
+      "Jun",
+      "Jul",
+      "Ago",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dic",
+    ];
+    const now = new Date();
+    const counts = {};
+
+    adopciones.forEach((a) => {
+      const fecha = new Date(a.fecha);
+      const key = `${fecha.getFullYear()}-${fecha.getMonth()}`; // ej. 2025-0
+      counts[key] = (counts[key] || 0) + 1;
+    });
+
+    const series = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      series.push({
+        mes: `${monthsEs[d.getMonth()]} ${String(d.getFullYear()).slice(-2)}`,
+        adopciones: counts[key] || 0,
+      });
+    }
+    return series;
+  };
+
+  /* ------------------------------------------------ */
+  /*                   RENDER                         */
+  /* ------------------------------------------------ */
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-[#FFF1DC] pt-[60px] md:pt-0">
       <SidebarCompany />
+
       <div className="flex-1 p-4 md:p-8 md:ml-64">
         <h1 className="text-2xl md:text-3xl font-bold mb-6">
           ¡Bienvenido, {user?.name || "Tu Albergue"}!
         </h1>
 
-        {/* Estadísticas */}
+        {/* ---------- Estadísticas rápidas ---------- */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-          <div className="bg-white p-6 rounded shadow text-center">
-            <div className="text-3xl mb-2">🐾</div>
-            <p className="text-xl font-bold">{publicados}</p>
-            <p className="text-sm text-gray-600">Doggos publicados</p>
-          </div>
-          <div className="bg-white p-6 rounded shadow text-center">
-            <div className="text-3xl mb-2">💛</div>
-            <p className="text-xl font-bold">{matchesCount}</p>
-            <p className="text-sm text-gray-600">En espera de aprobación</p>
-          </div>
-          <div className="bg-white p-6 rounded shadow text-center">
-            <div className="text-3xl mb-2">📩</div>
-            <p className="text-xl font-bold">5</p>
-            <p className="text-sm text-gray-600">Mensajes no leídos</p>
-          </div>
-          <div className="bg-white p-6 rounded shadow text-center">
-            <div className="text-3xl mb-2">🔄</div>
-            <p className="text-xl font-bold">{adoptionsCount}</p>
-            <p className="text-sm text-gray-600">Adopciones logradas</p>
-          </div>
+          <StatCard icon="🐾" label="Doggos publicados" value={publicados} />
+          <StatCard icon="💛" label="En espera de aprobación" value={matchesCount} />
+          <StatCard
+            icon="📩"
+            label="Mensajes no leídos (próximamente)"
+            value="0"
+          />
+          <StatCard icon="🔄" label="Adopciones logradas" value={adoptionsCount} />
         </div>
 
-        {/* Acciones rápidas */}
+        {/* ---------- Acciones rápidas ---------- */}
         <h2 className="text-xl font-semibold mb-4">Acciones rápidas</h2>
         <div className="flex flex-wrap gap-4 mb-10">
-          <button
-            className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition"
-            onClick={() => navigate("/company/adddoggo")}
-          >
-            Añadir doggo
-          </button>
-          <button
-            className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition"
-            onClick={() => navigate("/company/listdoggo")}
-          >
-            Ver listado
-          </button>
-          
-          <button
-            className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition"
-            onClick={() => navigate("/company/messages")}
-          >
-            Revisar mensajes
-          </button>
+          <ActionBtn text="Añadir doggo" onClick={() => navigate("/company/adddoggo")} />
+          <ActionBtn text="Ver listado" onClick={() => navigate("/company/listdoggo")} />
+          <ActionBtn text="Revisar mensajes" onClick={() => navigate("/company/messages")} />
         </div>
 
-        {/* Últimos registros y otra estadística */}
+        {/* ---------- Últimos registros + gráfico ---------- */}
         <div className="grid md:grid-cols-2 gap-6">
+          {/* Últimos registros */}
           <div className="bg-white p-6 rounded shadow">
             <h3 className="text-lg font-semibold mb-4">Últimos registros</h3>
             {ultimasMascotas.length === 0 ? (
@@ -170,14 +217,51 @@ export default function CompanyHome() {
               ))
             )}
           </div>
+
+          {/* Adopciones por mes */}
           <div className="bg-white p-6 rounded shadow">
-            <h3 className="text-lg font-semibold mb-4">Estadísticas</h3>
-            <div className="flex justify-center">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-yellow-300 to-teal-400 opacity-60" />
+            <h3 className="text-lg font-semibold mb-4">
+              Adopciones del último año
+            </h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={adopcionesPorMes}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="mes" />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="adopciones" fill="#f77534" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+/* =================================================================== */
+/*  COMPONENTES AUXILIARES: tarjeta y botón de acción                   */
+/* =================================================================== */
+
+function StatCard({ icon, value, label }) {
+  return (
+    <div className="bg-white p-6 rounded shadow text-center">
+      <div className="text-3xl mb-2">{icon}</div>
+      <p className="text-xl font-bold">{value}</p>
+      <p className="text-sm text-gray-600">{label}</p>
+    </div>
+  );
+}
+
+function ActionBtn({ text, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="bg-[#f77534] text-white px-4 py-2 rounded shadow hover:bg-orange-500 transition"
+    >
+      {text}
+    </button>
   );
 }

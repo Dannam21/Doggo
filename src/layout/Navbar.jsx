@@ -16,6 +16,10 @@ const Navbar = () => {
       albergue_id: null,
     });
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("postAuthRedirect");
+
+    console.log("Después de logout:", sessionStorage.getItem("postAuthRedirect"));
     navigate("/login");
   };
 

@@ -10,13 +10,22 @@ export default function Home() {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
 
+  // Home.jsx
   const handleAdoptaClick = () => {
     if (user && user.token) {
+      // Ya está logueado → directo al dashboard
       navigate("/dashboard/user");
     } else {
+      /* 🆕 1️⃣  guarda a dónde queremos llegar tras el login */
+      sessionStorage.setItem(
+        "postAuthRedirect",
+        JSON.stringify({ pathname: "/dashboard/user", state: null })
+      );
+      /* 2️⃣  envía al formulario */
       navigate("/login");
     }
   };
+
 
   return (
     <main className="min-h-screen flex flex-col w-full bg-orange-50 text-gray-900 font-sans">

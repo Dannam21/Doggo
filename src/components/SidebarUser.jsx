@@ -23,6 +23,10 @@ export default function SidebarUser() {
   const handleLogout = () => {
     setUser({ name: null, email: null, token: null, adoptante_id: null });
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("postAuthRedirect");
+
+    console.log("Después de logout:", sessionStorage.getItem("postAuthRedirect"));
     navigate("/login");
   };
 
@@ -38,9 +42,9 @@ export default function SidebarUser() {
       {/* Navbar solo para móvil */}
      <div className="md:hidden flex justify-between items-center bg-[#FFF9F2] px-4 py-3 border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
              <img src={doggoLogo} alt="Doggo Logo" className="w-36 h-10" />
-             <button2 onClick={() => setIsOpen(!isOpen)}>
+             <button onClick={() => setIsOpen(!isOpen)}>
                {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-             </button2>
+             </button>
            </div>
       {/* Sidebar principal */}
       <div

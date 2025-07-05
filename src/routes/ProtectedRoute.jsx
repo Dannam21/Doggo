@@ -6,6 +6,7 @@ export default function ProtectedRoute({ children }) {
   const { user, loading } = useContext(UserContext);
   const location = useLocation();
 
+  /* pantalla de carga mientras se verifica la sesión */
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -14,11 +15,23 @@ export default function ProtectedRoute({ children }) {
     );
   }
 
+  /* 1️⃣  Si no hay token */
   if (!user?.token) {
-    /* ⚠️ guarda TODO el objeto location (puede incluir state con dog, fromIndex…) */
-    sessionStorage.setItem("postAuthRedirect", JSON.stringify(location));
+    const shouldRemember =
+      !location.pathname.startsWith("/company") &&           // descarta /company…
+      !location.pathname.startsWith("/user") &&  
+      location.pathname !== "/dashboard/user";               // …y /dashboard/user
+
+    if (shouldRemember) {
+      sessionStorage.setItem(
+        "postAuthRedirect",
+        JSON.stringify({ pathname: location.pathname, state: location.state })
+      );
+    }
+
     return <Navigate to="/login" replace />;
   }
 
+  /* 2️⃣  Con sesión válida */
   return children;
 }

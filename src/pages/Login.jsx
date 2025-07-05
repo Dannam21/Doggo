@@ -99,8 +99,8 @@ export default function Login() {
         redirect = JSON.parse(fromSaved);
         sessionStorage.removeItem("postAuthRedirect");
       }
-      const fallback = form.role === "user" ? "/dashboard/user"
-                                            : "/company/home";
+      // justo antes del navigate()
+      const fallback = form.role === "user" ? "/home" : "/company/home";
 
       navigate(redirect?.pathname || fallback, {
         replace: true,

@@ -15,24 +15,39 @@ export default function DoggoDetail() {
 
   /* ───────── FETCH (público o con token) ───────── */
   useEffect(() => {
-    const token   = localStorage.getItem("token");   // puede no existir
-    const headers = { "Content-Type": "application/json" };
-    if (token) headers.Authorization = `Bearer ${token}`;
+  const fetchDog = async () => {
+    try {
+      const token   = localStorage.getItem("token");
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers.Authorization = `Bearer ${token}`;
 
-    // Si hay token usamos el endpoint protegido; si no, el público
-    const url = token
-      ? `http://34.195.195.173:8000/usuario/mascotas/${dogId}`
-      : `http://34.195.195.173:8000/mascotas/${dogId}`;
+      // 1) intenta primero la ruta pública
+      let res = await fetch(
+        `http://34.195.195.173:8000/mascotas/${dogId}/`, // ← nota la barra final
+        { headers }
+      );
 
-    fetch(url, { headers })
-      .then((r) => {
-        if (!r.ok) throw new Error("No se pudo obtener detalles");
-        return r.json();
-      })
-      .then(setDog)
-      .catch((err) => setError(err.message))
-      .finally(() => setLoad(false));
-  }, [dogId]);
+      // 2) Si la pública responde 401, reintenta la privada
+      if (res.status === 401) {
+        res = await fetch(
+          `http://34.195.195.173:8000/usuario/mascotas/${dogId}/`,
+          { headers }
+        );
+      }
+
+      if (!res.ok) throw new Error("Mascota no encontrada");
+
+      const data = await res.json();
+      setDog(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoad(false);
+    }
+  };
+
+  fetchDog();
+}, [dogId]);
 
   /* ───────── MENSAJES DE CARGA / ERROR ───────── */
   if (loading) {

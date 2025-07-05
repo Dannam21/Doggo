@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import RegisterUser from "./pages/RegisterUser";
 import RegisterCompany from "./pages/RegisterCompany";
+import DonationDoggo from "./pages/DonationDoggo";
 
 // Páginas de empresa
 import CompanyDoggos from "./pages/empresa/CompanyDoggos";
@@ -20,7 +21,6 @@ import Adddoggo from "./pages/empresa/Adddoggo";
 import DoggoDetail from "./pages/empresa/DoggoDetail";
 import CompanyMatches from "./pages/empresa/CompanyMatches";
 import CompanyDonations from "./pages/empresa/CompanyDonations";
-
 // Páginas de usuario
 import User from "./pages/usuario/DashboardUser";
 import Questionnaire from "./pages/cuestionario/Questionnaire";
@@ -46,7 +46,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/company/donations" element={<CompanyDonations />} />
           <Route path="/donations" element={<Donations />} />
-
+          <Route path="/donacion" element={<DonationDoggo />} />
           {/* Registro */}
           <Route path="/register" element={<Register />} />
           <Route path="/register/user" element={<RegisterUser />} />
