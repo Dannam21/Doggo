@@ -1,19 +1,21 @@
 // src/pages/Login.jsx
 import React, { useState, useContext } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import Navbar from "../layout/Navbar";
 
+const API_URL = "http://34.195.195.173:8000";      // cambia si tu backend vive en otro host
+
 export default function Login() {
   const navigate  = useNavigate();
-  const location  = useLocation();          // ← para leer `state.from`
+  const location  = useLocation();
   const { setUser } = useContext(UserContext);
 
-  /* ───────── Estado del formulario ───────── */
+  /* ---------- estado del formulario ---------- */
   const [form, setForm] = useState({
-    email: "",
+    email:    "",
     password: "",
-    role: "user",          // "user" = adoptante, "company" = albergue
+    role:     "user",      // "user" = adoptante, "company" = albergue
   });
   const [error, setError] = useState("");
 
@@ -22,83 +24,94 @@ export default function Login() {
     setError("");
   };
 
-  /* ───────── Submit ───────── */
+  /* ---------- submit ---------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    /* Endpoint según rol */
-    const endpoint =
+    const loginUrl =
       form.role === "user"
-        ? "http://34.195.195.173:8000/login/adoptante"
-        : "http://34.195.195.173:8000/login/albergue";
+        ? `${API_URL}/login/adoptante`
+        : `${API_URL}/login/albergue`;
 
-    /* Credenciales */
     const payload = { correo: form.email, contrasena: form.password };
 
     try {
-      /* 1️⃣  Login */
-      const res = await fetch(endpoint, {
-        method: "POST",
+      /* 1️⃣  login */
+      const res = await fetch(loginUrl, {
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body:    JSON.stringify(payload),
       });
       if (!res.ok) {
         const msg = (await res.json()).detail || "Credenciales inválidas";
         throw new Error(msg);
       }
-      const { access_token: token, id: identityId } = await res.json();
+      const { access_token: token, id } = await res.json();
 
-      /* 2️⃣  Persistir token */
+      /* 2️⃣  token → localStorage */
       localStorage.setItem("token", token);
 
-      /* 3️⃣  Obtener perfil */
+      /* 3️⃣  perfil */
       const headersAuth = {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization:  `Bearer ${token}`,
       };
 
+      let userObj;
+
       if (form.role === "user") {
-        const pRes = await fetch("http://34.195.195.173:8000/adoptante/me", {
+        const pRes = await fetch(`${API_URL}/adoptante/me`, {
           headers: headersAuth,
         });
         if (!pRes.ok) throw new Error("No se pudo obtener perfil");
         const p = await pRes.json();
-        setUser({
-          name:  `${p.nombre} ${p.apellido}`,
-          email: p.correo,
+
+        userObj = {
+          name:          `${p.nombre} ${p.apellido}`,
+          email:         p.correo,
           token,
-          adoptante_id: identityId,
-        });
+          adoptante_id:  p.id,        // id devuelto por /login/adoptante
+        };
       } else {
-        const pRes = await fetch("http://34.195.195.173:8000/albergue/me", {
+        const pRes = await fetch(`${API_URL}/albergue/me`, {
           headers: headersAuth,
         });
         if (!pRes.ok) throw new Error("No se pudo obtener perfil");
         const p = await pRes.json();
-        setUser({
-          name:  p.nombre,
-          email: p.correo,
+
+        userObj = {
+          name:         p.nombre,
+          email:        p.correo,
           token,
-          albergue_id: identityId,
-        });
+          albergue_id:  p.id,         // id devuelto por /login/albergue
+        };
       }
 
-      /* 4️⃣  Redirección inteligente */
-      const from   = location.state?.from;                      // { pathname, state }
-      const fallback =
-        form.role === "user" ? "/home" : "/company/home";
+      /* 4️⃣  guarda en contexto + localStorage (reemplaza cualquier valor anterior) */
+      localStorage.setItem("user", JSON.stringify(userObj));
+      setUser(userObj);
 
-      navigate(from?.pathname || fallback, {
+      /* 5️⃣  redirección inteligente */
+      const fromSaved = sessionStorage.getItem("postAuthRedirect");
+      let   redirect  = null;
+      if (fromSaved) {
+        redirect = JSON.parse(fromSaved);
+        sessionStorage.removeItem("postAuthRedirect");
+      }
+      const fallback = form.role === "user" ? "/dashboard/user"
+                                            : "/company/home";
+
+      navigate(redirect?.pathname || fallback, {
         replace: true,
-        state:   from?.state,   // ← re-envía el mismo `state` (dog, fromIndex…)
+        state:   redirect?.state,       // conserva el state (dog, fromIndex…)
       });
     } catch (err) {
       setError(err.message);
     }
   };
 
-  /* ───────── UI ───────── */
+  /* ---------- ui ---------- */
   return (
     <main>
       <Navbar />
@@ -178,13 +191,21 @@ export default function Login() {
           <p className="mt-4 text-sm text-center text-gray-600">
             ¿No tienes cuenta?{" "}
             <span className="block mt-1">
-              <a href="/register/user" className="text-orange-500 hover:underline">
+              <Link
+                to="/register/user"
+                state={{ fromPending: sessionStorage.getItem("postAuthRedirect") }}
+                className="text-orange-500 hover:underline"
+              >
                 Registrarme como usuario
-              </a>{" "}
+              </Link>{" "}
               |{" "}
-              <a href="/register/company" className="text-orange-500 hover:underline ml-2">
+              <Link
+                to="/register/company"
+                state={{ fromPending: sessionStorage.getItem("postAuthRedirect") }}
+                className="text-orange-500 hover:underline ml-2"
+              >
                 como empresa
-              </a>
+              </Link>
             </span>
           </p>
         </div>

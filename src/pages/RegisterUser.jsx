@@ -1,11 +1,18 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../layout/Navbar";
 import { UserContext } from "../context/UserContext";
+import { useLocation } from "react-router-dom";
 
 const RegisterUser = () => {
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
+  const location = useLocation();
+    useEffect(() => {
+    if (location.state?.fromPending) {
+      sessionStorage.setItem("postAuthRedirect", location.state.fromPending);
+    }
+  }, [location]);
 
   const [form, setForm] = useState({
     nombre: "",

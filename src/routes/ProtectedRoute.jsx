@@ -4,8 +4,8 @@ import { UserContext } from "../context/UserContext";
 
 export default function ProtectedRoute({ children }) {
   const { user, loading } = useContext(UserContext);
-  const location = useLocation();         
-  
+  const location = useLocation();
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -15,7 +15,9 @@ export default function ProtectedRoute({ children }) {
   }
 
   if (!user?.token) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    /* ⚠️ guarda TODO el objeto location (puede incluir state con dog, fromIndex…) */
+    sessionStorage.setItem("postAuthRedirect", JSON.stringify(location));
+    return <Navigate to="/login" replace />;
   }
 
   return children;
