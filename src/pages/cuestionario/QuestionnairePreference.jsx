@@ -108,7 +108,7 @@ const QuestionnairePreferences = () => {
     };
 
     try {
-      const regRes = await fetch("http://localhost:8000/register/adoptante", {
+      const regRes = await fetch("http://34.195.195.173:8000/register/adoptante", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -121,7 +121,7 @@ const QuestionnairePreferences = () => {
 
       const { access_token, id } = await regRes.json();
 
-      const perfilRes = await fetch(`http://localhost:8000/adoptante/${id}`, {
+      const perfilRes = await fetch(`http://34.195.195.173:8000/adoptante/${id}`, {
         method: "GET",
         headers: { Authorization: `Bearer ${access_token}` },
       });

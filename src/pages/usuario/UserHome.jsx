@@ -13,12 +13,12 @@ export default function UserHome() {
     if (!user?.token || !user?.adoptante_id) return;
     const headers = { Authorization: `Bearer ${user.token}` };
 
-    fetch(`http://localhost:8000/matches/adoptante/${user.adoptante_id}`, { headers })
+    fetch(`http://34.195.195.173:8000/matches/adoptante/${user.adoptante_id}`, { headers })
       .then((r) => (r.ok ? r.json() : []))
       .then(setMatches)
       .catch(() => setMatches([]));
 
-    fetch(`http://localhost:8000/adopciones/adoptante/${user.adoptante_id}`, { headers })
+    fetch(`http://34.195.195.173:8000/adopciones/adoptante/${user.adoptante_id}`, { headers })
       .then((r) => (r.ok ? r.json() : []))
       .then(setAdoptions)
       .catch(() => setAdoptions([]))
@@ -34,7 +34,7 @@ export default function UserHome() {
     .map((m) => ({
       id: m.mascota.id,
       nombre: m.mascota.nombre,
-      imagen: `http://localhost:8000/imagenes/${m.mascota.imagen_id}`,
+      imagen: `http://34.195.195.173:8000/imagenes/${m.mascota.imagen_id}`,
       fecha: new Date(m.fecha).toLocaleDateString("es-PE", {
         day: "2-digit",
         month: "short",

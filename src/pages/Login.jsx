@@ -1,15 +1,19 @@
+// src/pages/Login.jsx
 import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import Navbar from "../layout/Navbar";
 
-const Login = () => {
-  const navigate = useNavigate();
+export default function Login() {
+  const navigate  = useNavigate();
+  const location  = useLocation();          // ← para leer `state.from`
   const { setUser } = useContext(UserContext);
+
+  /* ───────── Estado del formulario ───────── */
   const [form, setForm] = useState({
     email: "",
     password: "",
-    role: "user", // "user" = adoptante, "company" = albergue
+    role: "user",          // "user" = adoptante, "company" = albergue
   });
   const [error, setError] = useState("");
 
@@ -18,84 +22,83 @@ const Login = () => {
     setError("");
   };
 
+  /* ───────── Submit ───────── */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
+    /* Endpoint según rol */
     const endpoint =
       form.role === "user"
-        ? "http://localhost:8000/login/adoptante"
-        : "http://localhost:8000/login/albergue";
+        ? "http://34.195.195.173:8000/login/adoptante"
+        : "http://34.195.195.173:8000/login/albergue";
 
-    const payload = {
-      correo: form.email,
-      contrasena: form.password,
-    };
+    /* Credenciales */
+    const payload = { correo: form.email, contrasena: form.password };
 
     try {
+      /* 1️⃣  Login */
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.detail || "Credenciales inválidas");
+        const msg = (await res.json()).detail || "Credenciales inválidas";
+        throw new Error(msg);
       }
-      const data = await res.json();
-      const token = data.access_token;
-      const adoptanteId = data.id; 
+      const { access_token: token, id: identityId } = await res.json();
 
-      // **Guardar token en localStorage** para que persista entre recargas
+      /* 2️⃣  Persistir token */
       localStorage.setItem("token", token);
 
-      console.log("Login exitoso:", { token, adoptanteId });
+      /* 3️⃣  Obtener perfil */
+      const headersAuth = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+
       if (form.role === "user") {
-        // --- Perfil de adoptante ---
-        const profileRes = await fetch("http://localhost:8000/adoptante/me", {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+        const pRes = await fetch("http://34.195.195.173:8000/adoptante/me", {
+          headers: headersAuth,
         });
-        if (!profileRes.ok) {
-          const errProf = await profileRes.json();
-          throw new Error(errProf.detail || "No se pudo obtener perfil de adoptante");
-        }
-        const perfil = await profileRes.json();
+        if (!pRes.ok) throw new Error("No se pudo obtener perfil");
+        const p = await pRes.json();
         setUser({
-          name: `${perfil.nombre} ${perfil.apellido}`,
-          email: perfil.correo,
+          name:  `${p.nombre} ${p.apellido}`,
+          email: p.correo,
           token,
-          adoptante_id: adoptanteId
+          adoptante_id: identityId,
         });
-        navigate("/home");
       } else {
-        // --- Perfil de albergue ---
-        const profileRes = await fetch("http://localhost:8000/albergue/me", {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+        const pRes = await fetch("http://34.195.195.173:8000/albergue/me", {
+          headers: headersAuth,
         });
-        if (!profileRes.ok) {
-          const errProf = await profileRes.json();
-          throw new Error(errProf.detail || "No se pudo obtener perfil de albergue");
-        }
-        const perfilAlbergue = await profileRes.json();
+        if (!pRes.ok) throw new Error("No se pudo obtener perfil");
+        const p = await pRes.json();
         setUser({
-          name: perfilAlbergue.nombre,
-          email: perfilAlbergue.correo,
+          name:  p.nombre,
+          email: p.correo,
           token,
-          albergue_id: perfilAlbergue.id,
+          albergue_id: identityId,
         });
-        navigate("/company/home");
       }
+
+      /* 4️⃣  Redirección inteligente */
+      const from   = location.state?.from;                      // { pathname, state }
+      const fallback =
+        form.role === "user" ? "/home" : "/company/home";
+
+      navigate(from?.pathname || fallback, {
+        replace: true,
+        state:   from?.state,   // ← re-envía el mismo `state` (dog, fromIndex…)
+      });
     } catch (err) {
       setError(err.message);
     }
   };
 
+  /* ───────── UI ───────── */
   return (
     <main>
       <Navbar />
@@ -115,16 +118,13 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* email */}
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Correo electrónico
               </label>
               <input
+                id="email"
                 name="email"
                 type="email"
-                id="email"
                 value={form.email}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
@@ -135,16 +135,13 @@ const Login = () => {
 
             {/* password */}
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Contraseña
               </label>
               <input
+                id="password"
                 name="password"
                 type="password"
-                id="password"
                 value={form.password}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
@@ -155,15 +152,12 @@ const Login = () => {
 
             {/* role */}
             <div>
-              <label
-                htmlFor="role"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
                 Tipo de cuenta
               </label>
               <select
-                name="role"
                 id="role"
+                name="role"
                 value={form.role}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
@@ -184,17 +178,11 @@ const Login = () => {
           <p className="mt-4 text-sm text-center text-gray-600">
             ¿No tienes cuenta?{" "}
             <span className="block mt-1">
-              <a
-                href="/register/user"
-                className="text-orange-500 hover:underline"
-              >
+              <a href="/register/user" className="text-orange-500 hover:underline">
                 Registrarme como usuario
               </a>{" "}
               |{" "}
-              <a
-                href="/register/company"
-                className="text-orange-500 hover:underline ml-2"
-              >
+              <a href="/register/company" className="text-orange-500 hover:underline ml-2">
                 como empresa
               </a>
             </span>
@@ -203,6 +191,4 @@ const Login = () => {
       </div>
     </main>
   );
-};
-
-export default Login;
+}

@@ -1,28 +1,47 @@
 // src/pages/user/MatchUser.jsx
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../../layout/Navbar";
 import { UserContext } from "../../context/UserContext";
+
+// 👉  Si ya tienes un archivo de configuración de tu API, reemplaza la URL fija.
+const API_URL = "http://34.195.195.173:8000";
 
 export default function MatchUser() {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
   const { state } = useLocation();
-  const { dog, fromIndex } = state || {};
+  const {
+    dog,
+    fromIndex = 0,
+    origin = "/dashboard/user", // ruta desde la que llegaste
+  } = state || {};
 
-  // Si no viene dog en el state, redirige de vuelta
-  if (!dog) {
-    navigate("/dashboard/user");
-    return null;
-  }
+  /* ───────── REDIRECCIÓN SEGURA ───────── */
+  useEffect(() => {
+    if (!dog) navigate("/dashboard/user");
+  }, [dog, navigate]);
+  if (!dog) return null;
 
+  /* ───────── FUNCIÓN “REGRESAR” ───────── */
+  const handleBack = () => {
+    if (origin === "/dashboard/user") {
+      // vuelve al carrusel y restaura el índice
+      navigate(origin, { state: { restoreIndex: fromIndex } });
+    } else {
+      // vuelve al detalle u otra página
+      navigate(origin);
+    }
+  };
+
+  /* ───────── CHAT AUTOMÁTICO ───────── */
   const iniciarChatAutomatico = async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
     try {
-      // 1️⃣ Registrar en matches
-      const matchRes = await fetch("http://localhost:8000/matches/", {
+      /* 1️⃣  Registrar match */
+      await fetch(`${API_URL}/matches/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -33,11 +52,9 @@ export default function MatchUser() {
           mascota_id: dog.id,
         }),
       });
-      if (!matchRes.ok) throw new Error("Error al registrar el match");
-      console.log("✅ Match registrado correctamente");
 
-      // 2️⃣ Registrar en match_totales
-      const totalRes = await fetch("http://localhost:8000/match_totales/", {
+      /* 2️⃣  Registrar match_totales */
+      await fetch(`${API_URL}/match_totales/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -49,29 +66,24 @@ export default function MatchUser() {
           mascota_id: dog.id,
         }),
       });
-      if (!totalRes.ok) throw new Error("Error al registrar match_totales");
-      console.log("✅ MatchTotal registrado correctamente");
     } catch (err) {
       console.error("❌ No se pudo registrar los matches:", err);
       return;
     }
 
     try {
-      // 3️⃣ Obtener datos de la mascota (para el albergue_id, si no lo tenías)
-      const res = await fetch(`http://localhost:8000/usuario/mascotas/${dog.id}`);
-      if (!res.ok) throw new Error("No se encontró la mascota");
+      /* 3️⃣  Obtener datos de la mascota */
+      const res = await fetch(`${API_URL}/usuario/mascotas/${dog.id}`);
+      if (!res.ok) throw new Error();
       const mascota = await res.json();
       const albergueId = mascota.albergue_id;
 
-      // 4️⃣ Abrir WebSocket y enviar mensajes
+      /* 4️⃣  WebSocket para enviar mensajes */
       const socket = new WebSocket(
-        `ws://localhost:8000/ws/chat/adoptante/${user.adoptante_id}`
+        `ws://34.195.195.173:8000/ws/chat/adoptante/${user.adoptante_id}`
       );
 
       socket.onopen = () => {
-        console.log("✅ WebSocket abierto");
-
-        // Mensaje de texto
         const mensajeTexto = {
           receptor_id: albergueId,
           receptor_tipo: "albergue",
@@ -79,9 +91,7 @@ export default function MatchUser() {
           contenido: `Hola, ¿${dog.nombre} sigue disponible?`,
         };
         socket.send(JSON.stringify(mensajeTexto));
-        console.log("📤 MensajeTexto enviado");
 
-        // Mensaje de tarjeta con delay
         setTimeout(() => {
           if (socket.readyState === WebSocket.OPEN) {
             const mensajeCard = {
@@ -92,17 +102,14 @@ export default function MatchUser() {
                 tipo: "card_perro",
                 nombre: dog.nombre,
                 descripcion: dog.descripcion,
-                imagen: `http://localhost:8000/imagenes/${dog.imagen_id}`,
+                imagen: `${API_URL}/imagenes/${dog.imagen_id}`,
               }),
             };
             socket.send(JSON.stringify(mensajeCard));
-            console.log("📤 MensajeCard enviado");
           }
 
-          // Cerrar socket y navegar a la lista de mensajes
           setTimeout(() => {
             socket.close();
-            console.log("❌ WebSocket cerrado manualmente");
             localStorage.setItem(
               "lastUserChat",
               `albergue-${albergueId}-${dog.id}`
@@ -112,44 +119,47 @@ export default function MatchUser() {
         }, 200);
       };
 
-      socket.onerror = (e) => {
-        console.error("🛑 WebSocket error:", e);
-      };
-      socket.onclose = (e) => {
-        console.warn("⚠️ WebSocket cerrado", e);
-      };
+      socket.onerror = (e) => console.error("🛑 WebSocket error:", e);
+      socket.onclose = (e) => console.warn("⚠️ WebSocket cerrado", e);
     } catch (err) {
       console.error("❌ Error iniciando chat automático:", err);
     }
   };
 
+  /* ───────── UI ───────── */
   return (
     <>
       <Navbar />
       <main className="bg-[#FFF1DC] min-h-screen flex items-center justify-center p-6">
         <div className="bg-[#ee9c70] rounded-2xl p-6 max-w-sm w-full text-center text-white">
           <h1 className="text-2xl font-bold mb-4">¡Es un Match!</h1>
+
           <div className="bg-white rounded-full overflow-hidden w-40 h-40 mx-auto mb-4">
             <img
-              src={`http://localhost:8000/imagenes/${dog.imagen_id}`}
+              src={`${API_URL}/imagenes/${dog.imagen_id}`}
               alt={dog.nombre}
               className="w-full h-full object-cover"
             />
           </div>
+
           <p className="mb-6">
-            Has dado like a{" "}
-            <span className="font-semibold">{dog.nombre}</span> y también te ha
-            dado like.
+            Has dado like a <span className="font-semibold">{dog.nombre}</span>{" "}
+            y también te ha dado like.
           </p>
+
+          {/* ───────── Nuevo mensaje de confirmación ───────── */}
+          <p className="mb-6 font-medium">
+            ¿Quieres confirmar el Match? Presiona <span className="italic">Continuar</span>.
+          </p>
+
           <div className="flex gap-4 justify-center">
             <button
-              onClick={() =>
-                navigate("/dashboard/user", { state: { restoreIndex: fromIndex } })
-              }
+              onClick={handleBack}
               className="flex-1 bg-[#4FB286] text-white font-semibold py-2 rounded-lg hover:bg-green-600 transition"
             >
               Regresar
             </button>
+
             <button
               onClick={iniciarChatAutomatico}
               className="flex-1 bg-[#4FB286] text-white font-semibold py-2 rounded-lg hover:bg-green-600 transition"

@@ -1,47 +1,62 @@
+// src/pages/usuario/DoggoDetail.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import Navbar from "../../layout/Navbar";
 
 export default function DoggoDetail() {
-  const navigate = useNavigate();
-  const { dogId } = useParams();
-  const location = useLocation();
-  const fromIndex = location.state?.fromIndex ?? 0;
+  const navigate   = useNavigate();
+  const { dogId }  = useParams();
+  const location   = useLocation();
+  const fromIndex  = location.state?.fromIndex ?? 0;
 
-  const [dog, setDog] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [dog, setDog]       = useState(null);
+  const [loading, setLoad]  = useState(true);
+  const [error, setError]   = useState("");
 
+  /* ───────── FETCH (público o con token) ───────── */
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    fetch(`http://localhost:8000/usuario/mascotas/${dogId}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("No se pudo obtener detalles");
-        return res.json();
+    const token   = localStorage.getItem("token");   // puede no existir
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    // Si hay token usamos el endpoint protegido; si no, el público
+    const url = token
+      ? `http://34.195.195.173:8000/usuario/mascotas/${dogId}`
+      : `http://34.195.195.173:8000/mascotas/${dogId}`;
+
+    fetch(url, { headers })
+      .then((r) => {
+        if (!r.ok) throw new Error("No se pudo obtener detalles");
+        return r.json();
       })
       .then(setDog)
       .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+      .finally(() => setLoad(false));
   }, [dogId]);
 
-  if (loading || error || !dog) {
+  /* ───────── MENSAJES DE CARGA / ERROR ───────── */
+  if (loading) {
     return (
       <>
         <Navbar />
         <main className="p-6 bg-orange-50 min-h-screen flex items-center justify-center">
-          <p className={error ? "text-red-600" : ""}>
-            {error || "Cargando..."}
-          </p>
+          <p>Cargando…</p>
+        </main>
+      </>
+    );
+  }
+  if (error || !dog) {
+    return (
+      <>
+        <Navbar />
+        <main className="p-6 bg-orange-50 min-h-screen flex items-center justify-center">
+          <p className="text-red-600">{error || "Mascota no encontrada"}</p>
         </main>
       </>
     );
   }
 
+  /* ───────── UI ───────── */
   return (
     <>
       <Navbar />
@@ -50,7 +65,7 @@ export default function DoggoDetail() {
           {/* Imagen */}
           <div className="md:w-1/2 w-full h-64 md:h-auto">
             <img
-              src={`http://localhost:8000/imagenes/${dog.imagen_id}`}
+              src={`http://34.195.195.173:8000/imagenes/${dog.imagen_id}`}
               alt={dog.nombre}
               className="w-full h-full object-cover object-center"
             />
@@ -88,19 +103,22 @@ export default function DoggoDetail() {
             {/* Botones */}
             <div className="flex flex-col sm:flex-row gap-3 mt-6">
               <button
-                onClick={() => navigate("/", { state: { restoreIndex: fromIndex } })}
-                className="w-full sm:w-1/2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-lg transition"
+                onClick={() =>
+                  navigate(`/doggoMatch/${dog.id}`, {
+                    state: { dog, fromIndex, origin: location.pathname },
+                  })
+                }
+                className="w-full sm:w-1/2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition"
               >
-                Regresar
+                Adoptar
               </button>
 
               <button
-                onClick={() => navigate("/donations", { 
-                  state: { 
-                    restoreIndex: fromIndex,
-                    albergueId: dog.albergue_id // 🔥 Pasar el albergue_id
-                  } 
-                })}
+                onClick={() =>
+                  navigate("/donations", {
+                    state: { restoreIndex: fromIndex, albergueId: dog.albergue_id },
+                  })
+                }
                 className="w-full sm:w-1/2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-lg transition"
               >
                 Donar

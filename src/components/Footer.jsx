@@ -71,7 +71,7 @@ export default function Footer() {
             if (!monto || isNaN(monto)) return alert("Monto inválido");
             const token = localStorage.getItem("token");
 
-            fetch("http://localhost:8000/donar", {
+            fetch("http://34.195.195.173:8000/donar", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",

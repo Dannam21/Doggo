@@ -1,22 +1,22 @@
 import React, { useContext } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 
-const ProtectedRoute = ({ children }) => {
+export default function ProtectedRoute({ children }) {
   const { user, loading } = useContext(UserContext);
-
-  // Mientras se carga el usuario desde localStorage, no renderizar nada (o un loader si prefieres)
+  const location = useLocation();         
+  
   if (loading) {
-    return <div>Cargando...</div>; // Aquí puedes poner un spinner si quieres
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Cargando…</p>
+      </div>
+    );
   }
 
-  // Si no hay sesión, redirigir al home
-  if (!user || !user.token) {
-    return <Navigate to="/home" replace />;
+  if (!user?.token) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Si hay sesión, permitir acceso
   return children;
-};
-
-export default ProtectedRoute;
+}

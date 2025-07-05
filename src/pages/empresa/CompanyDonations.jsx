@@ -32,11 +32,11 @@ export default function CompanyDonations() {
     const fetchAlbergueQR = async () => {
       if (!albergueId) return;
       try {
-        const res = await fetch(`http://localhost:8000/albergue/${albergueId}`);
+        const res = await fetch(`http://34.195.195.173:8000/albergue/${albergueId}`);
         if (res.ok) {
           const data = await res.json();
           if (data.qr_imagen_id) {
-            setQrSavedUrl(`http://localhost:8000/imagenes/${data.qr_imagen_id}`);
+            setQrSavedUrl(`http://34.195.195.173:8000/imagenes/${data.qr_imagen_id}`);
           }
         } else {
           console.error("Error al obtener albergue:", res.status);
@@ -72,7 +72,7 @@ export default function CompanyDonations() {
       const formData = new FormData();
       formData.append("image", qrFile);
 
-      const res = await fetch("http://localhost:8000/imagenes", {
+      const res = await fetch("http://34.195.195.173:8000/imagenes", {
         method: "POST",
         // ⚠️ Para multipart/form-data no se pone Content-Type manualmente
         headers: {
@@ -90,7 +90,7 @@ export default function CompanyDonations() {
       const qrImagenId = data.id;
 
       // ✅ Actualizar albergue con qr_imagen_id
-      const updateRes = await fetch(`http://localhost:8000/albergue/${albergueId}`, {
+      const updateRes = await fetch(`http://34.195.195.173:8000/albergue/${albergueId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -104,7 +104,7 @@ export default function CompanyDonations() {
         throw new Error(errorData.detail || "Error al actualizar albergue");
       }
 
-      setQrSavedUrl(`http://localhost:8000/imagenes/${qrImagenId}`);
+      setQrSavedUrl(`http://34.195.195.173:8000/imagenes/${qrImagenId}`);
       setPreviewUrl(null);
       setQrFile(null);
       setError("");
