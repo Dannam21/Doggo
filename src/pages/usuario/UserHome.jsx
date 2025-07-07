@@ -115,8 +115,8 @@ export default function UserHome() {
           {/* mensajes */}
           <div className="bg-white p-6 rounded-2xl shadow text-center">
             <div className="text-3xl mb-2">📩</div>
-            <p className="text-xl font-bold">0 (próximamente)</p>
-            <p className="text-sm text-gray-600">Mensajes no leídos</p>
+            <p className="text-xl font-bold">0</p>
+            <p className="text-sm text-gray-600">Mensajes no leídos (próximamente)</p>
           </div>
         </div>
 

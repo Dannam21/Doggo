@@ -59,15 +59,16 @@ const questions = [
 ];
 
 const QuestionnairePreferences = () => {
+  
+
   const navigate = useNavigate();
   const { user, setUser } = useContext(UserContext);
-
   const [registroFinalizado, setRegistroFinalizado] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showValidation, setShowValidation] = useState(false);
 
   useEffect(() => {
-    if (!registroFinalizado && !user?.payloadRegistro) {
+    if (!registroFinalizado && !user?.questionnaire) {
       navigate("/cuestionario");
     }
   }, [user, navigate, registroFinalizado]);
@@ -91,67 +92,40 @@ const QuestionnairePreferences = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!isFormValid()) {
-      setShowValidation(true);
-      // Scroll to top to show validation message
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-
+    // validaciones…
     setIsSubmitting(true);
 
-    const payload = {
-      ...user.payloadRegistro,
+    // 1) Montas sólo los dos campos que faltan
+    const updatePayload = {
+      etiquetas: user.questionnaire,  // vienen del paso anterior
+      pesos:     weights,             // vendrán de este formulario
+    };
+
+    // 2) Haces el PATCH
+    const res = await fetch(`http://34.195.195.173:8000/adoptante/${user.adoptante_id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${user.token}`,
+      },
+      body: JSON.stringify(updatePayload),
+    });
+    if (!res.ok) throw new Error((await res.json()).detail);
+
+    // 3) Actualizas el contexto UNIFICANDO las claves
+    setUser(prev => {
+    const next = {
+      ...prev,
       etiquetas: user.questionnaire,
       pesos: weights,
     };
+    localStorage.setItem("user", JSON.stringify(next));
+    return next;
+  });
+    console.log("Stored user:", JSON.parse(localStorage.getItem("user")));
 
-    try {
-      const regRes = await fetch("http://34.195.195.173:8000/register/adoptante", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!regRes.ok) {
-        const err = await regRes.json();
-        throw new Error(err.detail || "Error en registro");
-      }
-
-      const { access_token, id } = await regRes.json();
-
-      const perfilRes = await fetch(`http://34.195.195.173:8000/adoptante/${id}`, {
-        method: "GET",
-        headers: { Authorization: `Bearer ${access_token}` },
-      });
-
-      if (!perfilRes.ok) {
-        const err2 = await perfilRes.json();
-        throw new Error(err2.detail || "Error al obtener perfil");
-      }
-
-      const perfil = await perfilRes.json();
-      const fullName = `${perfil.nombre} ${perfil.apellido}`;
-
-      const newUser = {
-        name: fullName,
-        email: perfil.correo,
-        token: access_token,
-        id: perfil.id,
-        pesos: weights,
-      };
-
-      setUser(null);
-      localStorage.removeItem("user");
-
-      setRegistroFinalizado(true);
-      navigate("/login");
-    } catch (err) {
-      alert(`Error: ${err.message}`);
-    } finally {
-      setIsSubmitting(false);
-    }
+    // 5) Vas al dashboard directamente
+    navigate("/dashboard/user");
   };
 
   const answeredCount = getAnsweredCount();

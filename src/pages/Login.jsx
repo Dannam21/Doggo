@@ -1,21 +1,20 @@
-// src/pages/Login.jsx
 import React, { useState, useContext } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import Navbar from "../layout/Navbar";
 
-const API_URL = "http://34.195.195.173:8000";      // cambia si tu backend vive en otro host
+const API_URL = "http://34.195.195.173:8000"; // ajusta si tu backend está en otro host
 
 export default function Login() {
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { setUser } = useContext(UserContext);
 
   /* ---------- estado del formulario ---------- */
   const [form, setForm] = useState({
-    email:    "",
+    email: "",
     password: "",
-    role:     "user",      // "user" = adoptante, "company" = albergue
+    role: "user", // "user" = adoptante, "company" = albergue
   });
   const [error, setError] = useState("");
 
@@ -39,13 +38,24 @@ export default function Login() {
     try {
       /* 1️⃣  login */
       const res = await fetch(loginUrl, {
-        method:  "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify(payload),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        const msg = (await res.json()).detail || "Credenciales inválidas";
-        throw new Error(msg);
+        const errBody = await res.json().catch(() => ({}));
+        switch (res.status) {
+          case 400:
+            throw new Error(errBody.detail || "Solicitud inválida");
+          case 401:
+            throw new Error("Correo o contraseña incorrecta");
+          case 404:
+            throw new Error("Usuario no encontrado");
+          case 422:
+            throw new Error("Cuenta no creada. Verifica tus datos");
+          default:
+            throw new Error(errBody.detail || "Error desconocido al iniciar sesión");
+        }
       }
       const { access_token: token, id } = await res.json();
 
@@ -55,36 +65,43 @@ export default function Login() {
       /* 3️⃣  perfil */
       const headersAuth = {
         "Content-Type": "application/json",
-        Authorization:  `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       };
 
       let userObj;
-
       if (form.role === "user") {
         const pRes = await fetch(`${API_URL}/adoptante/me`, {
           headers: headersAuth,
         });
-        if (!pRes.ok) throw new Error("No se pudo obtener perfil");
+        if (!pRes.ok) {
+          if (pRes.status === 401)
+            throw new Error("Sesión expirada, por favor inicia sesión de nuevo");
+          throw new Error("No se pudo obtener perfil de adoptante");
+        }
         const p = await pRes.json();
-
         userObj = {
-          name:          `${p.nombre} ${p.apellido}`,
-          email:         p.correo,
+          name: `${p.nombre} ${p.apellido}`,
+          email: p.correo,
           token,
-          adoptante_id:  p.id,        // id devuelto por /login/adoptante
+          adoptante_id: p.id,
+          etiquetas: p.etiquetas,
+          pesos: p.pesos,
         };
       } else {
         const pRes = await fetch(`${API_URL}/albergue/me`, {
           headers: headersAuth,
         });
-        if (!pRes.ok) throw new Error("No se pudo obtener perfil");
+        if (!pRes.ok) {
+          if (pRes.status === 401)
+            throw new Error("Sesión expirada, por favor inicia sesión de nuevo");
+          throw new Error("No se pudo obtener perfil de albergue");
+        }
         const p = await pRes.json();
-
         userObj = {
-          name:         p.nombre,
-          email:        p.correo,
+          name: p.nombre,
+          email: p.correo,
           token,
-          albergue_id:  p.id,         // id devuelto por /login/albergue
+          albergue_id: p.id,
         };
       }
 
@@ -94,24 +111,21 @@ export default function Login() {
 
       /* 5️⃣  redirección inteligente */
       const fromSaved = sessionStorage.getItem("postAuthRedirect");
-      let   redirect  = null;
+      let redirect = null;
       if (fromSaved) {
         redirect = JSON.parse(fromSaved);
         sessionStorage.removeItem("postAuthRedirect");
       }
-      // justo antes del navigate()
       const fallback = form.role === "user" ? "/home" : "/company/home";
-
       navigate(redirect?.pathname || fallback, {
         replace: true,
-        state:   redirect?.state,       // conserva el state (dog, fromIndex…)
+        state: redirect?.state,
       });
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Ha ocurrido un error inesperado");
     }
   };
 
-  /* ---------- ui ---------- */
   return (
     <main>
       <Navbar />
@@ -138,6 +152,7 @@ export default function Login() {
                 id="email"
                 name="email"
                 type="email"
+                autoComplete="email"
                 value={form.email}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"
@@ -155,6 +170,7 @@ export default function Login() {
                 id="password"
                 name="password"
                 type="password"
+                autoComplete="current-password"
                 value={form.password}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-orange-500 focus:border-orange-500"

@@ -1,26 +1,30 @@
 // src/pages/usuario/DashboardUser.jsx
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../../layout/Navbar";
 import { FaHeart, FaTimes } from "react-icons/fa";
+import { UserContext } from "../../context/UserContext";
 
 export default function DashboardUser() {
   const navigate = useNavigate();
   const location = useLocation();
   const initialIndex = location.state?.restoreIndex ?? 0;
 
+  const { user } = useContext(UserContext);
+
   const [mascotas, setMascotas] = useState([]);
   const [index, setIndex] = useState(initialIndex);
   const [loading, setLoading] = useState(true);
-  const [adoptanteId, setAdoptanteId] = useState(null);
   const [citas, setCitas] = useState([]);
   const [animationDirection, setAnimationDirection] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
 
   /* ───────── FETCH DE DATOS ───────── */
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    const token = user.token;
+    const adoptanteId = user.adoptante_id;
+
+    if (!token || !adoptanteId) {
       setLoading(false);
       return;
     }
@@ -28,14 +32,12 @@ export default function DashboardUser() {
     fetch("http://34.195.195.173:8000/adoptante/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => {
+      .then(res => {
         if (!res.ok) throw new Error();
         return res.json();
       })
-      .then(async (perfil) => {
-        setAdoptanteId(perfil.id);
-
-        /* Recomendaciones */
+      .then(async perfil => {
+        // Recomendaciones
         const recRes = await fetch(
           `http://34.195.195.173:8000/recomendaciones/${perfil.id}`,
           { headers: { Authorization: `Bearer ${token}` } }
@@ -43,27 +45,27 @@ export default function DashboardUser() {
         const recomendaciones = await recRes.json();
         setMascotas(recomendaciones);
 
-        /* Citas de hoy */
+        // Citas de hoy
         const today = new Date().toISOString().split("T")[0];
         const citasRes = await fetch(
           `http://34.195.195.173:8000/calendario/dia/${today}`
         );
         const todas = await citasRes.json();
-        setCitas(todas.filter((c) => c.adoptante_id === perfil.id));
+        setCitas(todas.filter(c => c.adoptante_id === perfil.id));
       })
       .catch(() => {
         setMascotas([]);
         setCitas([]);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [user.token, user.adoptante_id]);
 
   /* ───────── LÓGICA DE SWIPE ───────── */
   const currentDog = mascotas[index];
   const nextDog =
     mascotas.length > 1 ? mascotas[(index + 1) % mascotas.length] : null;
 
-  const handleSwipe = (dir) => {
+  const handleSwipe = dir => {
     if (isAnimating) return;
     setAnimationDirection(dir);
     setIsAnimating(true);
@@ -74,18 +76,18 @@ export default function DashboardUser() {
           state: {
             dog: currentDog,
             fromIndex: index,
-            origin: location.pathname, // 👈  para volver correctamente
+            origin: location.pathname,
           },
         });
       } else {
-        setIndex((i) => i + 1);
+        setIndex(i => i + 1);
       }
       setAnimationDirection("");
       setIsAnimating(false);
     }, 400);
   };
 
-  const cardClasses = (dog) => {
+  const cardClasses = dog => {
     if (dog === currentDog) {
       if (animationDirection === "left")
         return "translate-x-[-120%] -rotate-12 opacity-0";
@@ -107,7 +109,7 @@ export default function DashboardUser() {
       </>
     );
   }
-  if (!adoptanteId) {
+  if (!user?.adoptante_id) {
     return (
       <>
         <Navbar />
@@ -192,7 +194,8 @@ export default function DashboardUser() {
             </h3>
             <ul className="text-sm leading-snug space-y-1 px-2 mb-4">
               <li>
-                <strong>Edad:</strong> {currentDog.edad_valor} {currentDog.edad_unidad}
+                <strong>Edad:</strong> {currentDog.edad_valor}{" "}
+                {currentDog.edad_unidad}
               </li>
               <li>
                 <strong>Tamaño:</strong> {currentDog.especie}
@@ -207,7 +210,7 @@ export default function DashboardUser() {
                 navigate(`/doggoUser/${currentDog.id}`, {
                   state: {
                     fromIndex: index,
-                    origin: location.pathname, // 👈  para volver desde DoggoUser
+                    origin: location.pathname,
                   },
                 })
               }

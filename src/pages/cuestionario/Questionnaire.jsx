@@ -8,10 +8,10 @@ const Questionnaire = () => {
   const { user, setUser } = useContext(UserContext);
 
   useEffect(() => {
-    if (!user?.nombre) {
-      navigate("/register/user");
-    }
-  }, [user, navigate]);
+    if (!user?.token) {
+     navigate("/login");
+  }
+}, [user, navigate]);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({

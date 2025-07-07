@@ -8,7 +8,8 @@ const RegisterUser = () => {
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
   const location = useLocation();
-    useEffect(() => {
+
+  useEffect(() => {
     if (location.state?.fromPending) {
       sessionStorage.setItem("postAuthRedirect", location.state.fromPending);
     }
@@ -26,9 +27,9 @@ const RegisterUser = () => {
   });
   const [errores, setErrores] = useState({});
   const [loading, setLoading] = useState(false);
+  const [mostrarContrasena, setMostrarContrasena] = useState(false);
 
   const defaultProfileImageId = 1;
-  const [mostrarContrasena, setMostrarContrasena] = useState(false);
 
   const handleChange = (e) => {
     setForm((prev) => ({
@@ -50,84 +51,101 @@ const RegisterUser = () => {
     setLoading(true);
 
     const contraseñaSegura = (password) => /^.{7,}$/.test(password);
-
     if (!contraseñaSegura(form.contrasena)) {
       setErrores({ contrasena: "La contraseña debe tener al menos 7 caracteres." });
       setLoading(false);
       return;
     }
-
     if (form.contrasena !== form.confirmarContrasena) {
       setErrores({ confirmarContrasena: "Las contraseñas no coinciden." });
       setLoading(false);
       return;
     }
-
     if (!/^\d{9}$/.test(form.telefono)) {
       setErrores({ telefono: "El número de celular debe tener exactamente 9 dígitos." });
       setLoading(false);
       return;
     }
-
     if (!/^\d{8}$/.test(form.dni)) {
       setErrores({ dni: "El DNI debe tener exactamente 8 dígitos." });
       setLoading(false);
       return;
     }
 
-    try {
-      let imagenPerfilId = defaultProfileImageId;
+      try {
+    // 1) Subir imagen igual que antes...
+    let imagenPerfilId = defaultProfileImageId;
+    if (form.imagenFile) {
+      // subir perfil
+      const imagePayload = new FormData();
+      imagePayload.append("image", form.imagenFile);
+      const imgRes = await fetch("http://34.195.195.173:8000/imagenesProfile", {
+        method: "POST",
+        body: imagePayload,
+      });
+      if (!imgRes.ok) throw new Error((await imgRes.json()).detail);
+      imagenPerfilId = (await imgRes.json()).id;
+    } else {
+      // subir default
+      const blob = await (await fetch("/avatar-default.png")).blob();
+      const archivo = new File([blob], "avatar-default.png", { type: blob.type });
+      const imagePayload = new FormData();
+      imagePayload.append("image", archivo);
+      const imgRes = await fetch("http://34.195.195.173:8000/imagenesProfile", {
+        method: "POST",
+        body: imagePayload,
+      });
+      if (!imgRes.ok) throw new Error((await imgRes.json()).detail);
+      imagenPerfilId = (await imgRes.json()).id;
+    }
 
-      if (form.imagenFile) {
-        const imagePayload = new FormData();
-        imagePayload.append("image", form.imagenFile);
+    // 2) Registrar adoptante (etiquetas y pesos en null)
+    const registerPayload = {
+      nombre: form.nombre,
+      apellido: form.apellido,
+      dni: form.dni,
+      correo: form.correo,
+      telefono: form.telefono,
+      contrasena: form.contrasena,
+      imagen_perfil_id: imagenPerfilId,
+      etiquetas: null,
+      pesos: null,
+    };
+    const res = await fetch("http://34.195.195.173:8000/register/adoptante", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(registerPayload),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Error al registrar adoptante");
+    }
+    const { access_token, id } = await res.json();
 
-        const imgRes = await fetch("http://34.195.195.173:8000/imagenesProfile", {
-          method: "POST",
-          body: imagePayload,
-        });
+    // 3) Obtener perfil completo
+    const perfilRes = await fetch("http://34.195.195.173:8000/adoptante/me", {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
+    if (!perfilRes.ok) throw new Error("No autorizado al obtener perfil");
+    const perfil = await perfilRes.json();
+      
+    const fullName = `${perfil.nombre} ${perfil.apellido}`;
+    const newUser = {
+      name: fullName,
+      email: perfil.correo,
+      token: access_token,
+      adoptante_id: perfil.id,       // <- aquí
+      albergue_id: null, // no es albergue
+      imagen_perfil_id: perfil.imagen_perfil_id,
+    };
+    setUser(newUser);
+    localStorage.setItem("user", JSON.stringify(newUser));
 
-        if (!imgRes.ok) {
-          const errJson = await imgRes.json();
-          throw new Error(errJson.detail || "Error al subir la imagen de perfil.");
-        }
-
-        const imgData = await imgRes.json();
-        imagenPerfilId = imgData.id;
-      } else {
-        const respuesta = await fetch("../../public/avatar-default.png");
-        const blob = await respuesta.blob();
-        const archivo = new File([blob], "avatar-default.png", { type: blob.type });
-
-        const imagePayload = new FormData();
-        imagePayload.append("image", archivo);
-
-        const imgRes = await fetch("http://34.195.195.173:8000/imagenesProfile", {
-          method: "POST",
-          body: imagePayload,
-        });
-
-        if (!imgRes.ok) {
-          const errJson = await imgRes.json();
-          throw new Error(errJson.detail || "Error al subir imagen predeterminada.");
-        }
-
-        const imgData = await imgRes.json();
-        imagenPerfilId = imgData.id;
-      }
-
-      const registerPayload = {
-        nombre: form.nombre,
-        apellido: form.apellido,
-        dni: form.dni,
-        correo: form.correo,
-        telefono: form.telefono,
-        contrasena: form.contrasena,
-        imagen_perfil_id: imagenPerfilId,
-      };
-
-      setUser(registerPayload);
-      navigate("/cuestionario");
+      // Redirigir al cuestionario
+      navigate("/home");
     } catch (err) {
       setErrores({ general: err.message });
     } finally {
@@ -143,7 +161,6 @@ const RegisterUser = () => {
           <h2 className="text-3xl font-bold text-center mb-6 text-black">
             Regístrate como Usuario
           </h2>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
@@ -151,6 +168,7 @@ const RegisterUser = () => {
               </label>
               <input
                 name="nombre"
+                autoComplete="given-name"
                 type="text"
                 value={form.nombre}
                 onChange={handleChange}
@@ -167,6 +185,7 @@ const RegisterUser = () => {
               </label>
               <input
                 name="apellido"
+                autoComplete="family-name"
                 type="text"
                 value={form.apellido}
                 onChange={handleChange}
@@ -202,7 +221,9 @@ const RegisterUser = () => {
                 Correo electrónico <span className="text-red-500">*</span>
               </label>
               <input
+                id="correo"
                 name="correo"
+                autoComplete="username"
                 type="email"
                 value={form.correo}
                 onChange={handleChange}
@@ -219,6 +240,7 @@ const RegisterUser = () => {
               </label>
               <input
                 name="telefono"
+                autoComplete="off"
                 type="text"
                 value={form.telefono}
                 onChange={(e) => {
@@ -240,6 +262,7 @@ const RegisterUser = () => {
               <div className="relative">
                 <input
                   name="contrasena"
+                  autoComplete="new-password"
                   type={mostrarContrasena ? "text" : "password"}
                   value={form.contrasena}
                   onChange={handleChange}
@@ -318,21 +341,19 @@ const RegisterUser = () => {
             >
               {loading ? "Registrando..." : "Registrar"}
             </button>
-
             {errores.general && (
               <p className="text-sm text-red-600 text-center mt-2">{errores.general}</p>
             )}
           </form>
 
           <p className="mt-4 text-sm text-center text-gray-600">
-            ¿Eres Albergue?{' '}
+            ¿Eres Albergue?{" "}
             <Link to="/register/company" className="text-orange-500 hover:underline">
               Regístrate
             </Link>
           </p>
-
           <p className="mt-2 text-sm text-center text-gray-600">
-            ¿Ya tienes cuenta?{' '}
+            ¿Ya tienes cuenta?{" "}
             <Link to="/login" className="text-orange-500 hover:underline">
               Inicia sesión
             </Link>
