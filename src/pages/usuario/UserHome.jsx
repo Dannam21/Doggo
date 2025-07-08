@@ -67,7 +67,12 @@ export default function UserHome() {
           id: m.mascota.id,
           nombre: m.mascota.nombre,
           imagen: `http://34.195.195.173:8000/imagenes/${m.mascota.imagen_id}`,
-          fecha: new Date(m.fecha),
+          // 🔧 FIX: Convertir la fecha a string formateada
+          fecha: new Date(m.fecha).toLocaleDateString("es-PE", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+          }),
         })),
     [matches]
   );
@@ -99,25 +104,25 @@ export default function UserHome() {
         {/* ---------- tarjetas métricas ---------- */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
           {/* adoptados */}
-          <div className="bg-white p-6 rounded-2xl shadow text-center">
-            <div className="text-3xl mb-2">🐶</div>
-            <p className="text-xl font-bold">{adoptedCount}</p>
-            <p className="text-sm text-gray-600">Doggos adoptados</p>
-          </div>
+          <MetricCard
+            emoji="🐶"
+            value={adoptedCount}
+            label="Doggos adoptados"
+          />
 
           {/* en proceso */}
-          <div className="bg-white p-6 rounded-2xl shadow text-center">
-            <div className="text-3xl mb-2">🔄</div>
-            <p className="text-xl font-bold">{inProcessCount}</p>
-            <p className="text-sm text-gray-600">Adopciones en proceso</p>
-          </div>
+          <MetricCard
+            emoji="🔄"
+            value={inProcessCount}
+            label="Adopciones en proceso"
+          />
 
           {/* mensajes */}
-          <div className="bg-white p-6 rounded-2xl shadow text-center">
-            <div className="text-3xl mb-2">📩</div>
-            <p className="text-xl font-bold">0</p>
-            <p className="text-sm text-gray-600">Mensajes no leídos (próximamente)</p>
-          </div>
+          <MetricCard
+            emoji="📩"
+            value={0}
+            label="Mensajes no leídos (próximamente)"
+          />
         </div>
 
         {/* ---------- paneles (matches & calendario) ---------- */}
@@ -183,7 +188,7 @@ export default function UserHome() {
                       key={cita.id}
                       className="flex items-center gap-4 bg-orange-50 rounded-xl p-4 shadow-sm hover:shadow transition"
                     >
-                      {/* fecha “badge” */}
+                      {/* fecha "badge" */}
                       <div className="flex flex-col items-center justify-center bg-orange-500 text-white rounded-lg w-14 py-1">
                         <span className="text-lg font-bold leading-none">
                           {dia}
@@ -215,7 +220,7 @@ export default function UserHome() {
   );
 }
 
-/* --- pequeño componente para las tarjetas métricas --- */
+/* --- componente para las tarjetas métricas --- */
 function MetricCard({ emoji, value, label }) {
   return (
     <div className="relative overflow-hidden rounded-2xl shadow">
