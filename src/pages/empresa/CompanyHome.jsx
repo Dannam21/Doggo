@@ -59,7 +59,7 @@ export default function CompanyHome() {
     const fetchPublicados = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8000/mascotas/albergue/${user.albergue_id}`,
+          `http://34.195.195.173:8000/mascotas/albergue/${user.albergue_id}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -99,7 +99,7 @@ export default function CompanyHome() {
     const headers = { Authorization: `Bearer ${user.token}` };
 
     // pending matches
-    fetch(`http://localhost:8000/matches/albergue/${user.albergue_id}`, {
+    fetch(`http://34.195.195.173:8000/matches/albergue/${user.albergue_id}`, {
       headers,
     })
       .then((r) => (r.ok ? r.json() : []))
@@ -107,7 +107,7 @@ export default function CompanyHome() {
       .catch(() => setMatchesCount(0));
 
     // completed adoptions
-    fetch(`http://localhost:8000/adopciones/albergue/${user.albergue_id}`, {
+    fetch(`http://34.195.195.173:8000/adopciones/albergue/${user.albergue_id}`, {
       headers,
     })
       .then((r) => (r.ok ? r.json() : []))
@@ -203,7 +203,7 @@ export default function CompanyHome() {
               ultimasMascotas.map((m) => (
                 <div key={m.id} className="flex items-center gap-4 mb-3">
                   <img
-                    src={`http://localhost:8000/imagenes/${m.imagen_id}`}
+                    src={`http://34.195.195.173:8000/imagenes/${m.imagen_id}`}
                     alt={m.nombre}
                     className="rounded-full w-10 h-10 object-cover"
                   />

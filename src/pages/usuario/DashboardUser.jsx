@@ -29,7 +29,7 @@ export default function DashboardUser() {
       return;
     }
 
-    fetch("http://localhost:8000/adoptante/me", {
+    fetch("http://34.195.195.173:8000/adoptante/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => {
@@ -39,7 +39,7 @@ export default function DashboardUser() {
       .then(async perfil => {
         // Recomendaciones
         const recRes = await fetch(
-          `http://localhost:8000/recomendaciones/${perfil.id}`,
+          `http://34.195.195.173:8000/recomendaciones/${perfil.id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const recomendaciones = await recRes.json();
@@ -48,7 +48,7 @@ export default function DashboardUser() {
         // Citas de hoy
         const today = new Date().toISOString().split("T")[0];
         const citasRes = await fetch(
-          `http://localhost:8000/calendario/dia/${today}`
+          `http://34.195.195.173:8000/calendario/dia/${today}`
         );
         const todas = await citasRes.json();
         setCitas(todas.filter(c => c.adoptante_id === perfil.id));
@@ -167,7 +167,7 @@ export default function DashboardUser() {
               )}`}
             >
               <img
-                src={`http://localhost:8000/imagenes/${nextDog.imagen_id}`}
+                src={`http://34.195.195.173:8000/imagenes/${nextDog.imagen_id}`}
                 alt={nextDog.nombre}
                 className="max-h-60 mx-auto mb-4"
               />
@@ -185,7 +185,7 @@ export default function DashboardUser() {
             )}`}
           >
             <img
-              src={`http://localhost:8000/imagenes/${currentDog.imagen_id}`}
+              src={`http://34.195.195.173:8000/imagenes/${currentDog.imagen_id}`}
               alt={currentDog.nombre}
               className="max-h-60 mx-auto mb-4"
             />

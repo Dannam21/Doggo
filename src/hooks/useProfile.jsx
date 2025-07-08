@@ -11,7 +11,7 @@ export function useProfile() {
       setLoading(false);
       return;
     }
-    fetch("http://localhost:8000/adoptante/me", {
+    fetch("http://34.195.195.173:8000/adoptante/me", {
       headers: { Authorization: `Bearer ${user.token}` }
     })
       .then(res => {

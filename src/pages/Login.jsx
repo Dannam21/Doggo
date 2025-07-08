@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import Navbar from "../layout/Navbar";
 
-const API_URL = "http://localhost:8000"; // ajusta si tu backend está en otro host
+const API_URL = "http://34.195.195.173:8000"; // ajusta si tu backend está en otro host
 
 export default function Login() {
   const navigate = useNavigate();

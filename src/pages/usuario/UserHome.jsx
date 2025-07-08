@@ -25,17 +25,17 @@ export default function UserHome() {
 
     Promise.all([
       fetch(
-        `http://localhost:8000/matches/adoptante/${user.adoptante_id}`,
+        `http://34.195.195.173:8000/matches/adoptante/${user.adoptante_id}`,
         { headers }
       ).then((r) => (r.ok ? r.json() : [])),
 
       fetch(
-        `http://localhost:8000/adopciones/adoptante/${user.adoptante_id}`,
+        `http://34.195.195.173:8000/adopciones/adoptante/${user.adoptante_id}`,
         { headers }
       ).then((r) => (r.ok ? r.json() : [])),
 
       fetch(
-        `http://localhost:8000/calendario/adoptante/${user.adoptante_id}`,
+        `http://34.195.195.173:8000/calendario/adoptante/${user.adoptante_id}`,
         { headers }
       ).then((r) => (r.ok ? r.json() : [])), // ← citas
     ])
@@ -66,7 +66,7 @@ export default function UserHome() {
         .map((m) => ({
           id: m.mascota.id,
           nombre: m.mascota.nombre,
-          imagen: `http://localhost:8000/imagenes/${m.mascota.imagen_id}`,
+          imagen: `http://34.195.195.173:8000/imagenes/${m.mascota.imagen_id}`,
           fecha: new Date(m.fecha),
         })),
     [matches]
