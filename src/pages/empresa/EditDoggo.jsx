@@ -60,7 +60,7 @@ export default function EditDoggo() {
     setLoading(true);
     setError(null);
 
-    fetch(`http://34.195.195.173:8000/mascotas/albergue/${albergueId}`, {
+    fetch(`http://localhost:8000/mascotas/albergue/${albergueId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -73,11 +73,12 @@ export default function EditDoggo() {
         const enriched = data.map((m) => ({
           id: m.id,
           nombre: m.nombre,
-          edad: m.edad,
+          edad_valor: m.edad_valor,
+          edad_unidad: m.edad_unidad,
           especie: m.especie,
           descripcion: m.descripcion || "",
           etiquetas: m.etiquetas || [],
-          imageUrl: `http://34.195.195.173:8000/imagenes/${m.imagen_id}`,
+          imageUrl: `http://localhost:8000/imagenes/${m.imagen_id}`,
         }));
         setDogs(enriched);
       })
@@ -102,7 +103,7 @@ export default function EditDoggo() {
     e.preventDefault();
     if (!editDog || !token) return;
 
-    fetch(`http://34.195.195.173:8000/mascotas/${editDog.id}`, {
+    fetch(`http://localhost:8000/mascotas/${editDog.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -110,11 +111,12 @@ export default function EditDoggo() {
       },
       body: JSON.stringify({
         nombre: editDog.nombre,
-        edad: editDog.edad,
+        edad_valor: editDog.edad_valor,
+        edad_unidad: editDog.edad_unidad,
         especie: editDog.especie,
         descripcion: editDog.descripcion || "",
         etiquetas: editDog.etiquetas || [],
-      }),
+      }),      
     })
       .then((res) => {
         if (!res.ok) throw new Error("Error al actualizar mascota");
@@ -127,7 +129,8 @@ export default function EditDoggo() {
               ? {
                   ...dog,
                   nombre: updatedDog.nombre,
-                  edad: updatedDog.edad,
+                  edad_valor: updatedDog.edad_valor,
+                  edad_unidad: updatedDog.edad_unidad,
                   especie: updatedDog.especie,
                   descripcion: updatedDog.descripcion,
                   etiquetas: updatedDog.etiquetas || [],
@@ -181,7 +184,9 @@ export default function EditDoggo() {
                 />
                 <div className="p-6">
                   <h3 className="text-xl font-semibold text-[#333]">{dog.nombre}</h3>
-                  <p className="text-sm text-gray-600">Edad: {dog.edad} años</p>
+                  <p className="text-sm text-gray-600">
+                    Edad: {dog.edad_valor} {dog.edad_unidad}
+                  </p>
                   <p className="text-sm text-gray-600">Especie: {dog.especie}</p>
                   <Tags
                     etiquetas={dog.etiquetas || []}
@@ -219,15 +224,30 @@ export default function EditDoggo() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium">Edad</label>
-                <input
-                  type="number"
-                  value={editDog.edad}
-                  onChange={(e) => setEditDog({ ...editDog, edad: Number(e.target.value) })}
-                  className="w-full border-2 border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f77534]"
-                  required
-                />
-              </div>
+  <label className="block text-sm font-medium">Edad</label>
+  <div className="flex gap-4">
+    <input
+      type="number"
+      value={editDog.edad_valor || ""}
+      onChange={(e) =>
+        setEditDog({ ...editDog, edad_valor: Number(e.target.value) })
+      }
+      className="w-1/2 border-2 border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f77534]"
+      required
+    />
+    <select
+      value={editDog.edad_unidad || "meses"}
+      onChange={(e) =>
+        setEditDog({ ...editDog, edad_unidad: e.target.value })
+      }
+      className="w-1/2 border-2 border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f77534]"
+    >
+      <option value="meses">Meses</option>
+      <option value="años">Años</option>
+    </select>
+  </div>
+</div>
+
               <div>
                 <label className="block text-sm font-medium">Especie</label>
                 <input

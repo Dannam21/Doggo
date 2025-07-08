@@ -30,7 +30,7 @@ export default function CompanyMessages() {
   const fetchChatList = async () => {
     try {
       const res = await fetch(
-        `http://34.195.195.173:8000/mensajes3/contactos?emisor_id=${emisorId}&emisor_tipo=albergue`,
+        `http://localhost:8000/mensajes3/contactos?emisor_id=${emisorId}&emisor_tipo=albergue`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -68,9 +68,9 @@ export default function CompanyMessages() {
     try {
       let url = "";
       if (userType === "adoptante") {
-        url = `http://34.195.195.173:8000/adoptante/${userId}`;
+        url = `http://localhost:8000/adoptante/${userId}`;
       } else if (userType === "albergue") {
-        url = `http://34.195.195.173:8000/albergue/${userId}`;
+        url = `http://localhost:8000/albergue/${userId}`;
       }
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
@@ -79,7 +79,7 @@ export default function CompanyMessages() {
       const user = await res.json();
       const imagenId = user.imagen_perfil_id;
       const avatarUrl = imagenId
-        ? `http://34.195.195.173:8000/imagenesProfile/${imagenId}`
+        ? `http://localhost:8000/imagenesProfile/${imagenId}`
         : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nombre)}`;
       return { name: user.nombre, avatar: avatarUrl };
     } catch (error) {
@@ -99,7 +99,7 @@ export default function CompanyMessages() {
     }
 
     try {
-      const url = `http://34.195.195.173:8000/mensajes3/conversacion?id1=${emisorId}&tipo1=albergue&id2=${userId}&tipo2=${userType}&mascota_id=${mascotaId}`;
+      const url = `http://localhost:8000/mensajes3/conversacion?id1=${emisorId}&tipo1=albergue&id2=${userId}&tipo2=${userType}&mascota_id=${mascotaId}`;
       const res = await fetch(url,
         { headers: { Authorization: `Bearer ${token}` }, 
       });
@@ -161,13 +161,20 @@ export default function CompanyMessages() {
       }));
 
       setNewMessage("");
+      // Resetear altura del textarea después de enviar
+      setTimeout(() => {
+        const textarea = document.querySelector('textarea');
+        if (textarea) {
+          textarea.style.height = '48px';
+        }
+      }, 0);
     } else {
       console.warn("⚠️ WebSocket no está abierto");
     }
   };
 
   const setupWebSocket = () => {
-    const ws = new WebSocket(`ws://34.195.195.173:8000/ws/chat/${rolEmisor}/${emisorId}`);
+    const ws = new WebSocket(`ws://localhost:8000/ws/chat/${rolEmisor}/${emisorId}`);
 
     ws.onopen = () => {
       console.log("✅ WebSocket conectado");
@@ -232,13 +239,26 @@ export default function CompanyMessages() {
     }
   };
 
+  const adjustTextareaHeight = (textarea) => {
+    textarea.style.height = 'auto';
+    const scrollHeight = textarea.scrollHeight;
+    const maxHeight = 120; // máximo ~5 líneas
+    const newHeight = Math.min(scrollHeight, maxHeight);
+    textarea.style.height = newHeight + 'px';
+  };
+
+  const handleTextareaChange = (e) => {
+    setNewMessage(e.target.value);
+    adjustTextareaHeight(e.target);
+  };
+
   const handleCompletarAdopcion = async () => {
     const [userType, adoptanteId, mascotaIdStr] = selectedUser.split("-");
     const mascotaId = parseInt(mascotaIdStr);
   
     try {
       // 1. Confirmar adopción
-      const matchRes = await fetch(`http://34.195.195.173:8000/matches/${adoptanteId}/${mascotaId}/complete`, {
+      const matchRes = await fetch(`http://localhost:8000/matches/${adoptanteId}/${mascotaId}/complete`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -248,7 +268,7 @@ export default function CompanyMessages() {
       }
   
       // 2. Cambiar estado a Adoptado
-      const patchRes = await fetch(`http://34.195.195.173:8000/mascotas/${mascotaId}/adoptar`, {
+      const patchRes = await fetch(`http://localhost:8000/mascotas/${mascotaId}/adoptar`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -351,11 +371,11 @@ export default function CompanyMessages() {
       </div>
 
       {/* Chat Area */}
-      <main className="flex-1 flex flex-col min-w-0 lg:ml-0">
+      <main className="flex-1 flex flex-col min-w-0 lg:ml-0 h-screen">
         {selectedUserInfo ? (
           <>
-            {/* Header del chat */}
-            <div className="bg-white shadow-sm border-b border-gray-200">
+            {/* Header del chat - FIJO */}
+            <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
               <div className="flex items-center gap-3 sm:gap-4 px-4 py-3">
                 {/* Botón hamburguesa para móvil */}
                 <button
@@ -383,8 +403,8 @@ export default function CompanyMessages() {
               </div>
             </div>
 
-            {/* Área de mensajes */}
-            <div className="flex flex-col bg-white flex-1 overflow-hidden">
+            {/* Área de mensajes - SCROLLABLE */}
+            <div className="flex-1 flex flex-col bg-white min-h-0">
               <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 space-y-3">
                 {(messagesByUser[selectedUser] || []).map((msg) => {
                   let content;
@@ -433,16 +453,17 @@ export default function CompanyMessages() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input de mensaje */}
-              <div className="px-4 py-3 bg-white border-t border-gray-200">
+              {/* Input de mensaje - FIJO */}
+              <div className="px-4 py-3 bg-white border-t border-gray-200 sticky bottom-0">
                 <div className="flex items-end gap-2 max-w-4xl mx-auto">
                   <textarea
                     value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
+                    onChange={handleTextareaChange}
                     onKeyDown={handleKeyDown}
                     placeholder="Escribe tu mensaje..."
-                    className="flex-1 resize-none p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 h-12 text-sm"
+                    className="flex-1 resize-none p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 min-h-12 max-h-30 text-sm overflow-y-auto"
                     rows="1"
+                    style={{ height: '48px' }} // altura inicial
                   />
                   <button
                     onClick={handleSend}

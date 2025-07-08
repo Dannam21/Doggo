@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import Navbar from "../layout/Navbar";
 
-const API_URL = "http://34.195.195.173:8000"; // ajusta si tu backend está en otro host
+const API_URL = "http://localhost:8000"; // ajusta si tu backend está en otro host
 
 export default function Login() {
   const navigate = useNavigate();
@@ -28,10 +28,14 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
+    console.log("Iniciando login con rol:", form.role); // Debug
+
     const loginUrl =
       form.role === "user"
         ? `${API_URL}/login/adoptante`
         : `${API_URL}/login/albergue`;
+
+    console.log("URL de login:", loginUrl); // Debug
 
     const payload = { correo: form.email, contrasena: form.password };
 
@@ -86,6 +90,7 @@ export default function Login() {
           adoptante_id: p.id,
           etiquetas: p.etiquetas,
           pesos: p.pesos,
+          role: "user" // Agregar rol para claridad
         };
       } else {
         const pRes = await fetch(`${API_URL}/albergue/me`, {
@@ -102,26 +107,81 @@ export default function Login() {
           email: p.correo,
           token,
           albergue_id: p.id,
+          role: "company" // Agregar rol para claridad
         };
       }
 
-      /* 4️⃣  guarda en contexto + localStorage (reemplaza cualquier valor anterior) */
+      /* 4️⃣  guarda en contexto + localStorage */
       localStorage.setItem("user", JSON.stringify(userObj));
       setUser(userObj);
 
-      /* 5️⃣  redirección inteligente */
+      /* 5️⃣  redirección mejorada */
+      console.log("Usuario logueado exitosamente:", userObj); // Debug
+      
+      // Primero intentar obtener la ruta guardada
       const fromSaved = sessionStorage.getItem("postAuthRedirect");
-      let redirect = null;
+      let redirectPath = null;
+      let redirectState = null;
+
       if (fromSaved) {
-        redirect = JSON.parse(fromSaved);
-        sessionStorage.removeItem("postAuthRedirect");
+        try {
+          const parsed = JSON.parse(fromSaved);
+          const savedPath = parsed.pathname;
+          console.log("Ruta guardada encontrada:", savedPath); // Debug
+          
+          // Validar que la ruta guardada sea compatible con el rol del usuario
+          const isUserPath = savedPath.startsWith('/home') || savedPath === '/';
+          const isCompanyPath = savedPath.startsWith('/company');
+          
+          if (form.role === "user" && isUserPath) {
+            // Usuario adoptante con ruta de usuario - OK
+            redirectPath = savedPath;
+            redirectState = parsed.state;
+          } else if (form.role === "company" && isCompanyPath) {
+            // Empresa con ruta de empresa - OK
+            redirectPath = savedPath;
+            redirectState = parsed.state;
+          } else {
+            // Incompatibilidad: usar ruta por defecto
+            console.log("Ruta guardada incompatible con el rol, usando por defecto"); // Debug
+            redirectPath = null;
+          }
+          
+          sessionStorage.removeItem("postAuthRedirect");
+        } catch (e) {
+          console.warn("Error parsing saved redirect:", e);
+        }
       }
-      const fallback = form.role === "user" ? "/home" : "/company/home";
-      navigate(redirect?.pathname || fallback, {
-        replace: true,
-        state: redirect?.state,
-      });
+
+      // Si no hay ruta guardada o es incompatible, usar la ruta por defecto según el rol
+      if (!redirectPath) {
+        redirectPath = form.role === "user" ? "/home" : "/company/home";
+        console.log("Usando ruta por defecto:", redirectPath, "para rol:", form.role); // Debug
+      }
+
+      console.log("Navegando a:", redirectPath); // Debug
+
+      // Forzar la navegación de forma más robusta
+      const performNavigation = () => {
+        try {
+          navigate(redirectPath, {
+            replace: true,
+            state: redirectState,
+          });
+          console.log("Navegación ejecutada"); // Debug
+        } catch (navError) {
+          console.error("Error en navegación:", navError);
+          // Fallback: usar window.location si navigate falla
+          window.location.href = redirectPath;
+        }
+      };
+
+      // Intentar navegación inmediata y con timeout como respaldo
+      performNavigation();
+      setTimeout(performNavigation, 50);
+
     } catch (err) {
+      console.error("Login error:", err); // Debug
       setError(err.message || "Ha ocurrido un error inesperado");
     }
   };

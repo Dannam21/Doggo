@@ -57,7 +57,7 @@ const Donations = () => {
       console.log("🚀 Iniciando fetch para albergue ID:", albergueId);
       
       try {
-        const albergueUrl = `http://34.195.195.173:8000/albergue/${albergueId}`;
+        const albergueUrl = `http://localhost:8000/albergue/${albergueId}`;
         console.log("📡 Fetching:", albergueUrl);
         
         const res = await fetch(albergueUrl);
@@ -68,7 +68,7 @@ const Donations = () => {
           console.log("📊 Datos del albergue:", data);
 
           if (data.qr_imagen_id) {
-            const imageUrl = `http://34.195.195.173:8000/imagenes/${data.qr_imagen_id}`;
+            const imageUrl = `http://localhost:8000/imagenes/${data.qr_imagen_id}`;
             console.log("🖼️ URL de imagen QR:", imageUrl);
             
             // 🔥 NO hacer fetch de verificación, usar directamente la URL

@@ -21,7 +21,7 @@ export default function UserProfile() {
     if (!user?.token) return;
     (async () => {
       try {
-        const res = await fetch("http://34.195.195.173:8000/adoptante/me", {
+        const res = await fetch("http://localhost:8000/adoptante/me", {
           headers: { Authorization: `Bearer ${user.token}` },
         });
         const data = await res.json();
@@ -34,7 +34,7 @@ export default function UserProfile() {
         });
         setImagenUrl(
           data.imagen_perfil_id
-            ? `http://34.195.195.173:8000/imagenesProfile/${data.imagen_perfil_id}`
+            ? `http://localhost:8000/imagenesProfile/${data.imagen_perfil_id}`
             : null
         );
       } catch (err) {
@@ -53,7 +53,7 @@ export default function UserProfile() {
     setSaving(true);
     try {
       const res = await fetch(
-        `http://34.195.195.173:8000/adoptante/${adoptante.id}`,
+        `http://localhost:8000/adoptante/${adoptante.id}`,
         {
           method: "PUT",
           headers: {

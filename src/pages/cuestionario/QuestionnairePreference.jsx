@@ -102,7 +102,7 @@ const QuestionnairePreferences = () => {
     };
 
     // 2) Haces el PATCH
-    const res = await fetch(`http://34.195.195.173:8000/adoptante/${user.adoptante_id}`, {
+    const res = await fetch(`http://localhost:8000/adoptante/${user.adoptante_id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",

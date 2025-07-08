@@ -5,7 +5,7 @@ import Navbar from "../../layout/Navbar";
 import { UserContext } from "../../context/UserContext";
 
 // 👉  Si ya tienes un archivo de configuración de tu API, reemplaza la URL fija.
-const API_URL = "http://34.195.195.173:8000";
+const API_URL = "http://localhost:8000";
 
 export default function MatchUser() {
   const navigate = useNavigate();
@@ -80,7 +80,7 @@ export default function MatchUser() {
 
       /* 4️⃣  WebSocket para enviar mensajes */
       const socket = new WebSocket(
-        `ws://34.195.195.173:8000/ws/chat/adoptante/${user.adoptante_id}`
+        `ws://localhost:8000/ws/chat/adoptante/${user.adoptante_id}`
       );
 
       socket.onopen = () => {

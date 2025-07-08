@@ -79,7 +79,7 @@ const RegisterUser = () => {
       // subir perfil
       const imagePayload = new FormData();
       imagePayload.append("image", form.imagenFile);
-      const imgRes = await fetch("http://34.195.195.173:8000/imagenesProfile", {
+      const imgRes = await fetch("http://localhost:8000/imagenesProfile", {
         method: "POST",
         body: imagePayload,
       });
@@ -91,7 +91,7 @@ const RegisterUser = () => {
       const archivo = new File([blob], "avatar-default.png", { type: blob.type });
       const imagePayload = new FormData();
       imagePayload.append("image", archivo);
-      const imgRes = await fetch("http://34.195.195.173:8000/imagenesProfile", {
+      const imgRes = await fetch("http://localhost:8000/imagenesProfile", {
         method: "POST",
         body: imagePayload,
       });
@@ -111,7 +111,7 @@ const RegisterUser = () => {
       etiquetas: null,
       pesos: null,
     };
-    const res = await fetch("http://34.195.195.173:8000/register/adoptante", {
+    const res = await fetch("http://localhost:8000/register/adoptante", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(registerPayload),
@@ -123,7 +123,7 @@ const RegisterUser = () => {
     const { access_token, id } = await res.json();
 
     // 3) Obtener perfil completo
-    const perfilRes = await fetch("http://34.195.195.173:8000/adoptante/me", {
+    const perfilRes = await fetch("http://localhost:8000/adoptante/me", {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${access_token}`,

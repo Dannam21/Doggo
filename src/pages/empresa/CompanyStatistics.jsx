@@ -44,7 +44,7 @@ export default function CompanyStatistics() {
     const headers = { Authorization: `Bearer ${user.token}` };
 
     // 1) fetch de match_totales
-    fetch(`http://34.195.195.173:8000/match_totales/albergue/${user.albergue_id}`, { headers })
+    fetch(`http://localhost:8000/match_totales/albergue/${user.albergue_id}`, { headers })
       .then((r) => (r.ok ? r.json() : []))
       .then(async (data) => {
         const arr = Array.isArray(data) ? data : [];
@@ -59,7 +59,7 @@ export default function CompanyStatistics() {
         const map = {};
         await Promise.all(
           allIds.map(async (id) => {
-            const resp = await fetch(`http://34.195.195.173:8000/usuario/mascotas/${id}`, { headers });
+            const resp = await fetch(`http://localhost:8000/usuario/mascotas/${id}`, { headers });
             if (!resp.ok) return;
             map[id] = await resp.json();
           })
@@ -71,7 +71,7 @@ export default function CompanyStatistics() {
       });
 
     // 2) fetch de adopciones
-    fetch(`http://34.195.195.173:8000/adopciones/albergue/${user.albergue_id}`, { headers })
+    fetch(`http://localhost:8000/adopciones/albergue/${user.albergue_id}`, { headers })
       .then((r) => (r.ok ? r.json() : []))
       .then(async (data) => {
         setAdoptions(data);
@@ -85,7 +85,7 @@ export default function CompanyStatistics() {
         await Promise.all(
           adoptionIds.map(async (id) => {
             if (map[id]) return;
-            const resp = await fetch(`http://34.195.195.173:8000/usuario/mascotas/${id}`, { headers });
+            const resp = await fetch(`http://localhost:8000/usuario/mascotas/${id}`, { headers });
             if (!resp.ok) return;
             map[id] = await resp.json();
           })

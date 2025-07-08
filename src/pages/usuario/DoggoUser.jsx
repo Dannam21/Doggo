@@ -14,7 +14,7 @@ export default function DoggoUser() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    fetch(`http://34.195.195.173:8000/usuario/mascotas/${dogId}`, {
+    fetch(`http://localhost:8000/usuario/mascotas/${dogId}`, {
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     })
       .then(res => {
@@ -53,7 +53,7 @@ export default function DoggoUser() {
           {/* Imagen */}
           <div className="md:w-1/2 w-full h-64 md:h-auto">
             <img
-              src={`http://34.195.195.173:8000/imagenes/${dog.imagen_id}`}
+              src={`http://localhost:8000/imagenes/${dog.imagen_id}`}
               alt={dog.nombre}
               className="w-full h-full object-cover object-center"
             />
@@ -101,12 +101,18 @@ export default function DoggoUser() {
                 Regresar
               </button>
               <button
-                onClick={() => navigate("/donations", { state: { restoreIndex: fromIndex } })}
+                onClick={() =>
+                  navigate("/donations", {
+                    state: {
+                      restoreIndex: fromIndex,
+                      albergueId: dog.albergue_id,
+                    },
+                  })
+                }
                 className="w-full sm:w-1/2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-lg transition"
               >
                 Donar
               </button>
-
             </div>
           </div>
         </div>
