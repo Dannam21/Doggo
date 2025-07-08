@@ -208,16 +208,6 @@ JWT_SECRET=your-secret-key
 JWT_ALGORITHM=HS256
 ```
 
-## 🧪 Testing
-
-```bash
-# Frontend tests
-npm run test
-
-# Backend tests
-pytest
-```
-
 ## 🚀 Despliegue
 
 ### Frontend (Netlify/Vercel)
@@ -225,46 +215,6 @@ pytest
 npm run build
 # Subir carpeta dist/
 ```
-
-### Backend (Railway/Heroku)
-```bash
-# Configurar variables de entorno en la plataforma
-# Hacer push al repositorio conectado
-```
-
-## 🤝 Contribución
-
-1. **Fork** el proyecto
-2. **Crea** una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. **Commit** tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. **Push** a la rama (`git push origin feature/AmazingFeature`)
-5. **Abre** un Pull Request
-
-### Convenciones de Código
-- Usar **ESLint** y **Prettier** para formateo
-- Seguir convenciones de **React Hooks**
-- Comentarios en español para funcionalidades
-- Nombres de variables y funciones en **camelCase**
-
-## 📝 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
-
-## 👥 Equipo
-
-- **Desarrollador Full Stack** - [Tu Nombre](https://github.com/tu-usuario)
-
-## 📞 Contacto
-
-- **Email**: tu-email@ejemplo.com
-- **LinkedIn**: [Tu Perfil](https://linkedin.com/in/tu-perfil)
-- **GitHub**: [Tu Usuario](https://github.com/tu-usuario)
-
-## 🙏 Agradecimientos
-
-- Iconos por [Lucide React](https://lucide.dev)
-- Diseño inspirado en aplicaciones modernas de matching
-- Comunidad de React y FastAPI por su excelente documentación
 
 ---
 
